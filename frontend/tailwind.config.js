@@ -8,14 +8,16 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#e94560',
-          dark: '#c73a52',
-          light: '#ff6b84',
+          DEFAULT: '#6366f1',
+          dark: '#4f46e5',
+          light: '#818cf8',
         },
+        secondary: '#f472b6',
         dark: {
-          DEFAULT: '#1a1a2e',
-          lighter: '#16213e',
-          darker: '#0f0f1a',
+          DEFAULT: '#0f172a',
+          card: '#1e293b',
+          lighter: '#334155',
+          darker: '#020617',
         }
       },
       fontFamily: {
