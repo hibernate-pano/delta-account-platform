@@ -48,6 +48,6 @@ public class ReviewController {
         review.setContent(content);
         
         reviewMapper.insert(review);
-        return Result.success("评价成功");
+        return Result.success("评价成功", (Void) null);
     }
 }

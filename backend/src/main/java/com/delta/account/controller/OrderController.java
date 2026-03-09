@@ -40,7 +40,7 @@ public class OrderController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         orderService.payOrder(id, user);
-        return Result.success("支付成功");
+        return Result.success("支付成功", (Void) null);
     }
     
     @PutMapping("/{id}/complete")
@@ -49,7 +49,7 @@ public class OrderController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         orderService.completeOrder(id, user);
-        return Result.success("订单已完成");
+        return Result.success("订单已完成", (Void) null);
     }
     
     @PutMapping("/{id}/cancel")
@@ -58,6 +58,6 @@ public class OrderController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         orderService.cancelOrder(id, user);
-        return Result.success("订单已取消");
+        return Result.success("订单已取消", (Void) null);
     }
 }

@@ -26,6 +26,6 @@ public class HealthController {
     @GetMapping("/ping")
     @Operation(summary = "简单Ping")
     public Result<String> ping() {
-        return Result.success("pong");
+        return Result.success("pong", "pong");
     }
 }
