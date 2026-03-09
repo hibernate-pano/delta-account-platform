@@ -57,6 +57,59 @@ export const orderApi = {
   pay: (id: number) => api.put(`/api/orders/${id}/pay`),
   complete: (id: number) => api.put(`/api/orders/${id}/complete`),
   cancel: (id: number) => api.put(`/api/orders/${id}/cancel`),
+  getMyOrders: () => api.get('/api/orders/my'),
+};
+
+// Wallet API
+export const walletApi = {
+  getBalance: () => api.get('/api/wallet/balance'),
+  recharge: (data: { amount: number; paymentMethod?: string }) =>
+    api.post('/api/wallet/recharge', data),
+  withdraw: (data: { amount: number; accountType?: string; accountNo: string; accountName: string }) =>
+    api.post('/api/wallet/withdraw', data),
+  getTransactions: (params?: { page?: number; size?: number }) =>
+    api.get('/api/wallet/transactions', { params }),
+  getRecharges: (params?: { page?: number; size?: number }) =>
+    api.get('/api/wallet/recharges', { params }),
+  getWithdrawals: (params?: { page?: number; size?: number }) =>
+    api.get('/api/wallet/withdrawals', { params }),
+};
+
+// Message API
+export const messageApi = {
+  getSessions: () => api.get('/api/messages/sessions'),
+  getSessionMessages: (sessionId: number) => api.get(`/api/messages/sessions/${sessionId}`),
+  sendMessage: (sessionId: number, data: { content: string }) =>
+    api.post(`/api/messages/sessions/${sessionId}`, data),
+  markAsRead: (sessionId: number) => api.put(`/api/messages/sessions/${sessionId}/read`),
+  getUnreadCount: () => api.get('/api/messages/unread-count'),
+  createSession: (data: { accountId: number; sellerId: number }) =>
+    api.post('/api/messages/sessions', data),
+};
+
+// Refund API
+export const refundApi = {
+  apply: (data: { orderId: number; amount: number; reason: string; evidenceImages?: string[] }) =>
+    api.post('/api/refunds', data),
+  getMy: () => api.get('/api/refunds/my'),
+  getById: (id: number) => api.get(`/api/refunds/${id}`),
+  cancel: (id: number) => api.put(`/api/refunds/${id}/cancel`),
+};
+
+// Notification API
+export const notificationApi = {
+  getList: () => api.get('/api/notifications'),
+  markAsRead: (id: number) => api.put(`/api/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/api/notifications/read-all'),
+  getUnreadCount: () => api.get('/api/notifications/unread-count'),
+};
+
+// Review API
+export const reviewApi = {
+  create: (data: { orderId: number; revieweeId: number; rating: number; content: string }) =>
+    api.post('/api/reviews', data),
+  getByAccount: (accountId: number) => api.get(`/api/reviews/account/${accountId}`),
+  getByUser: (userId: number) => api.get(`/api/reviews/user/${userId}`),
 };
 
 export default api;

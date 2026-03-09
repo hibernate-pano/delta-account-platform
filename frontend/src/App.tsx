@@ -9,6 +9,9 @@ import RegisterPage from './pages/RegisterPage';
 import SellPage from './pages/SellPage';
 import ProfilePage from './pages/ProfilePage';
 import OrdersPage from './pages/OrdersPage';
+import WalletPage from './pages/WalletPage';
+import MessagesPage from './pages/MessagesPage';
+import NotificationsPage from './pages/NotificationsPage';
 import AdminPage from './pages/AdminPage';
 
 const App: React.FC = () => {
@@ -24,6 +27,10 @@ const App: React.FC = () => {
           <Route path="/sell" element={<SellPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/messages/:sessionId" element={<MessagesPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </Layout>

@@ -1,14 +1,24 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
-import { Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X, Wallet, MessageCircle, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { notificationApi } from '../../api';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (token) {
+      notificationApi.getUnreadCount().then(res => {
+        setUnreadCount(res.data.data || 0);
+      }).catch(() => {});
+    }
+  }, [token]);
 
   const handleLogout = () => {
     logout();
@@ -18,11 +28,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const NavLink = ({ to, children, icon: Icon }: { to: string; children: React.ReactNode; icon?: React.ElementType }) => (
+  const NavLink = ({ to, children, icon: Icon, badge }: { to: string; children: React.ReactNode; icon?: React.ElementType; badge?: number }) => (
     <Link
       to={to}
       onClick={() => setMobileMenuOpen(false)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all relative ${
         isActive(to) 
           ? 'text-primary bg-primary/10' 
           : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -30,6 +40,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     >
       {Icon && <Icon className="w-4 h-4" />}
       {children}
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+          {badge > 9 ? '9+' : badge}
+        </span>
+      )}
     </Link>
   );
 
@@ -55,6 +70,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <NavLink to="/accounts">账号市场</NavLink>
               {token && <NavLink to="/sell" icon={Plus}>发布账号</NavLink>}
               {token && <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>}
+              {token && <NavLink to="/wallet" icon={Wallet}>钱包</NavLink>}
+              {token && <NavLink to="/messages" icon={MessageCircle} badge={unreadCount}>消息</NavLink>}
             </nav>
 
             {/* User Section */}
@@ -107,6 +124,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <NavLink to="/accounts">账号市场</NavLink>
                 {token && <NavLink to="/sell" icon={Plus}>发布账号</NavLink>}
                 {token && <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>}
+                {token && <NavLink to="/wallet" icon={Wallet}>钱包</NavLink>}
+                {token && <NavLink to="/messages" icon={MessageCircle} badge={unreadCount}>消息</NavLink>}
                 
                 {token ? (
                   <>

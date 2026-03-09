@@ -1,5 +1,8 @@
 package com.delta.account.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.delta.account.common.BusinessException;
 import com.delta.account.mapper.AccountMapper;
 import com.delta.account.mapper.OrderMapper;
@@ -87,21 +90,17 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException("订单状态不正确");
         }
         
-        // 检查余额
         User buyer = userMapper.selectById(user.getId());
         if (buyer.getBalance().compareTo(order.getAmount()) < 0) {
             throw new BusinessException("余额不足");
         }
         
-        // 扣款
         buyer.setBalance(buyer.getBalance().subtract(order.getAmount()));
         userMapper.updateById(buyer);
         
-        // 更新订单状态
         order.setStatus("PAID");
         orderMapper.updateById(order);
         
-        // 如果是购买，更新账号状态
         if ("BUY".equals(order.getType())) {
             Account account = accountMapper.selectById(order.getAccountId());
             account.setStatus("SOLD");
@@ -117,7 +116,6 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException("订单不存在");
         }
         
-        // 买家或卖家都可以确认完成
         if (!order.getBuyerId().equals(user.getId()) && !order.getSellerId().equals(user.getId())) {
             throw new BusinessException("无权限操作");
         }
@@ -126,23 +124,19 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException("订单状态不正确");
         }
         
-        // 如果是租赁，释放账号
         if ("RENT".equals(order.getType())) {
             if (order.getRentEnd() != null && LocalDateTime.now().isBefore(order.getRentEnd())) {
                 throw new BusinessException("租赁尚未到期");
             }
         }
         
-        // 结算给卖家
         User seller = userMapper.selectById(order.getSellerId());
         seller.setBalance(seller.getBalance().add(order.getAmount()));
         userMapper.updateById(seller);
         
-        // 更新订单状态
         order.setStatus("COMPLETED");
         orderMapper.updateById(order);
         
-        // 如果是购买，转移账号
         if ("BUY".equals(order.getType())) {
             Account account = accountMapper.selectById(order.getAccountId());
             account.setSellerId(order.getBuyerId());
@@ -169,5 +163,15 @@ public class OrderServiceImpl implements OrderService {
         
         order.setStatus("CANCELLED");
         orderMapper.updateById(order);
+    }
+    
+    @Override
+    public IPage<Order> getMyOrders(User user) {
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Order::getBuyerId, user.getId())
+               .or()
+               .eq(Order::getSellerId, user.getId())
+               .orderByDesc(Order::getCreatedAt);
+        return orderMapper.selectPage(new Page<>(1, 50), wrapper);
     }
 }

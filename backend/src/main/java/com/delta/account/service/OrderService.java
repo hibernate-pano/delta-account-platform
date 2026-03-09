@@ -3,6 +3,7 @@ package com.delta.account.service;
 import com.delta.account.model.dto.OrderCreateRequest;
 import com.delta.account.model.entity.Order;
 import com.delta.account.model.entity.User;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public interface OrderService {
     Order createOrder(OrderCreateRequest request, User user);
@@ -10,4 +11,5 @@ public interface OrderService {
     void payOrder(Long id, User user);
     void completeOrder(Long id, User user);
     void cancelOrder(Long id, User user);
+    IPage<Order> getMyOrders(User user);
 }

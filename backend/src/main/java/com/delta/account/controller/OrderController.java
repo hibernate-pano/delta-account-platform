@@ -5,6 +5,7 @@ import com.delta.account.model.dto.OrderCreateRequest;
 import com.delta.account.model.entity.Order;
 import com.delta.account.model.entity.User;
 import com.delta.account.service.OrderService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +27,12 @@ public class OrderController {
             @Valid @RequestBody OrderCreateRequest request,
             @AuthenticationPrincipal User user) {
         return Result.success("订单创建成功", orderService.createOrder(request, user));
+    }
+    
+    @GetMapping("/my")
+    @Operation(summary = "我的订单")
+    public Result<IPage<Order>> getMyOrders(@AuthenticationPrincipal User user) {
+        return Result.success("获取成功", orderService.getMyOrders(user));
     }
     
     @GetMapping("/{id}")
