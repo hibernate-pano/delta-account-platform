@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: delta-account-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerCommand: java -jar app.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://10.60.169.139:3306/delta_account
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: root
+      - key: JWT_SECRET
+        value: delta-account-platform-jwt-secret-key-2026
+    region: oregon
+    plan: free
