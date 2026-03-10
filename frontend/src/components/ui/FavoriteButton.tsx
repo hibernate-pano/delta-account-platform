@@ -1,38 +1,51 @@
 import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
+import { favoriteApi } from '../../api';
+import { useAuthStore } from '../../store/auth';
 
 interface FavoriteButtonProps {
   accountId: number;
-  initialFavorite?: boolean;
+  isFavorited?: boolean;
+  onToggle?: (isFav: boolean) => void;
 }
 
-export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ accountId, initialFavorite = false }) => {
-  const [isFavorite, setIsFavorite] = useState(initialFavorite);
+export const FavoriteButton: React.FC<FavoriteButtonProps> = ({ accountId, isFavorited = false, onToggle }) => {
+  const [favorited, setFavorited] = useState(isFavorited);
   const [loading, setLoading] = useState(false);
+  const { token } = useAuthStore();
 
-  const handleToggle = async () => {
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!token || loading) return;
+
     setLoading(true);
     try {
-      // In real app, call API
-      setIsFavorite(!isFavorite);
-    } catch (error) {
-      console.error('Failed to toggle favorite:', error);
+      const res = await favoriteApi.toggle(accountId);
+      const newState = res.data.data;
+      setFavorited(newState);
+      onToggle?.(newState);
+    } catch (e) {
+      // Silently fail - favorite toggle is not critical
     } finally {
       setLoading(false);
     }
   };
 
+  if (!token) return null;
+
   return (
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`p-2 rounded-full transition-colors ${
-        isFavorite 
-          ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' 
-          : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+      className={`p-2 rounded-full transition-all ${
+        favorited
+          ? 'text-red-500 bg-red-500/20 hover:bg-red-500/30'
+          : 'text-gray-400 bg-dark-lighter hover:text-red-500 hover:bg-red-500/10'
       }`}
     >
-      <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+      <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
     </button>
   );
 };

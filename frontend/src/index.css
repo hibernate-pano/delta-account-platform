@@ -176,6 +176,11 @@ body {
   50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
 }
 
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out forwards;
 }
@@ -186,6 +191,10 @@ body {
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
 }
 
 /* Stagger children */
@@ -253,4 +262,63 @@ body {
   height: 2px;
   background: var(--color-primary);
   border-radius: 2px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Disable hover transforms on mobile to prevent sticky hover */
+  .btn-primary:hover {
+    transform: none;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-dark-card);
+    border-color: var(--color-dark-border);
+  }
+
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Better scrolling on mobile */
+  body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Prevent text size adjustment on orientation change */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Larger touch targets for small screens */
+  .btn-primary, .btn-secondary {
+    min-height: 48px;
+    padding: 0.875rem 1.5rem;
+  }
+
+  /* Input improvements */
+  input, select, textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Safe area padding for notched devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* PWA support */
+@media (display-mode: standalone) {
+  body {
+    background-color: var(--color-dark);
+  }
 }

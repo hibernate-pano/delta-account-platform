@@ -5,13 +5,21 @@ services:
     dockerfilePath: backend/Dockerfile
     dockerCommand: java -jar app.jar
     envVars:
-      - key: SPRING_DATASOURCE_URL
-        value: jdbc:mysql://10.60.169.139:3306/delta_account
-      - key: SPRING_DATASOURCE_USERNAME
-        value: root
-      - key: SPRING_DATASOURCE_PASSWORD
-        value: root
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        value: delta_account
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
       - key: JWT_SECRET
-        value: delta-account-platform-jwt-secret-key-2026
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: LOG_LEVEL
+        value: info
     region: oregon
     plan: free

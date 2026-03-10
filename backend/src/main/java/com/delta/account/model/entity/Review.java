@@ -9,13 +9,23 @@ import java.time.LocalDateTime;
 public class Review {
     @TableId(type = IdType.AUTO)
     private Long id;
-    
+
     private Long orderId;
     private Long reviewerId;
     private Long revieweeId;
     private Integer rating;
     private String content;
-    
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
+
+    @TableField(exist = false)
+    private User reviewer;
+
+    // 扩展字段
+    @TableField(exist = false)
+    private String reply; // 商家回复
+
+    @TableField(exist = false)
+    private LocalDateTime repliedAt; // 回复时间
 }

@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { accountApi } from '../api';
-import { useAuthStore } from '../store/auth';
-import { Gamepad2, Image, Plus, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
+import { useToast } from '../components/ui/Toast';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const SellPage: React.FC = () => {
+  usePageTitle('发布账号');
   const navigate = useNavigate();
-  const { token } = useAuthStore();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -20,11 +22,6 @@ const SellPage: React.FC = () => {
     images: [] as string[]
   });
   const [newImage, setNewImage] = useState('');
-
-  if (!token) {
-    navigate('/login');
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +39,8 @@ const SellPage: React.FC = () => {
         description: formData.description,
         images: formData.images
       });
-      alert('发布成功！等待审核');
-      navigate('/accounts');
+      toast('success', '发布成功！等待管理员审核');
+      navigate('/profile');
     } catch (err: any) {
       setError(err.response?.data?.message || '发布失败');
     } finally {

@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { Gamepad2, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const LoginPage: React.FC = () => {
+  usePageTitle('登录');
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -80,13 +82,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-slate-400">
-                <input type="checkbox" className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary" />
-                记住我
-              </label>
-              <a href="#" className="text-primary hover:text-primary-light transition-colors">
-                忘记密码？
-              </a>
+              {/* 记住我功能暂未实现 */}
             </div>
 
             <button

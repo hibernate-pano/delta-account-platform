@@ -1,7 +1,7 @@
-# Build
-target/
-dist/
-build/
+# Build outputs
+backend/target/
+frontend/dist/
+frontend/node_modules/
 
 # IDE
 .idea/
@@ -22,3 +22,7 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+
+# Temp
+*.tmp
+*.temp

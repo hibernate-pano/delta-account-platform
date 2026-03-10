@@ -3,18 +3,24 @@ import { Link } from 'react-router-dom';
 import { accountApi } from '../api';
 import { Account } from '../types';
 import { Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle';
+import { useToast } from '../components/ui/Toast';
 
 const HomePage: React.FC = () => {
+  usePageTitle();
+  const { toast } = useToast();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalAccounts, setTotalAccounts] = useState(0);
 
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         const res = await accountApi.getList({ size: 6 });
         setAccounts(res.data.data.records || []);
-      } catch (error) {
-        console.error('Failed to fetch accounts:', error);
+        setTotalAccounts(res.data.data.total || 0);
+      } catch (error: any) {
+        toast('error', error.response?.data?.message || '加载失败，请稍后重试');
       } finally {
         setLoading(false);
       }
@@ -100,16 +106,16 @@ const HomePage: React.FC = () => {
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-8 mt-16 animate-fade-in" style={{animationDelay: '0.6s'}}>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">10,000+</div>
-              <div className="text-slate-500 text-sm">注册用户</div>
+              <div className="text-3xl font-bold text-white">{totalAccounts}</div>
+              <div className="text-slate-500 text-sm">在售账号</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">5,000+</div>
-              <div className="text-slate-500 text-sm">交易账号</div>
+              <div className="text-3xl font-bold text-white">24/7</div>
+              <div className="text-slate-500 text-sm">全天在线</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">99.5%</div>
-              <div className="text-slate-500 text-sm">满意度</div>
+              <div className="text-3xl font-bold text-white">100%</div>
+              <div className="text-slate-500 text-sm">官方担保</div>
             </div>
           </div>
         </div>
@@ -241,21 +247,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t border-slate-800">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-500 rounded-lg flex items-center justify-center">
-                <Gamepad2 className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-lg">DeltaHub</span>
-            </div>
-            <p className="text-slate-500 text-sm">© 2026 DeltaHub. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

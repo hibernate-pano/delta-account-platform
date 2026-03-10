@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { Gamepad2, Mail, Lock, User, ArrowRight, AlertCircle, Check } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const RegisterPage: React.FC = () => {
+  usePageTitle('注册');
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [formData, setFormData] = useState({
@@ -138,7 +140,7 @@ const RegisterPage: React.FC = () => {
             <div className="flex items-start gap-3 text-sm text-slate-400">
               <input type="checkbox" required className="w-4 h-4 mt-0.5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary" />
               <span>
-                我已阅读并同意 <a href="#" className="text-primary hover:underline">服务条款</a> 和 <a href="#" className="text-primary hover:underline">隐私政策</a>
+                我已阅读并同意 <Link to="/terms" className="text-primary hover:underline">服务条款</Link> 和 <Link to="/privacy" className="text-primary hover:underline">隐私政策</Link>
               </span>
             </div>
 
