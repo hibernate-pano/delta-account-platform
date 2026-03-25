@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
 import { useAuthProfile, useMyOrders, useSellerAccounts } from '../hooks/useQueries';
+import { WishlistButton } from '../components/ui/WishlistButton';
 import {
   User, Package, FileText, LogOut, ChevronRight,
-  Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock
+  Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { token, user, logout } = useAuthStore();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats'>('accounts');
+  const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist'>('accounts');
 
   const { data: profileData, isLoading: profileLoading } = useAuthProfile();
   const { data: ordersData, isLoading: ordersLoading } = useMyOrders();
@@ -23,6 +25,9 @@ const ProfilePage: React.FC = () => {
 
   const accounts = sellerAccounts || [];
   const orders = ordersData?.data?.data?.records || [];
+
+  const { items: wishlistItems, removeItem } = useWishlistStore();
+  const wishlistCount = wishlistItems.length;
 
   const handleLogout = () => {
     logout();
@@ -105,6 +110,7 @@ const ProfilePage: React.FC = () => {
           { key: 'accounts', label: '我的账号', icon: Package, count: stats.totalAccounts },
           { key: 'orders', label: '订单记录', icon: FileText, count: stats.totalOrders },
           { key: 'stats', label: '数据统计', icon: TrendingUp, count: null },
+          { key: 'wishlist', label: '我的收藏', icon: Heart, count: wishlistCount },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -327,6 +333,82 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+          {/* Wishlist Tab */}
+          {activeTab === 'wishlist' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">我的收藏</h3>
+                <button
+                  onClick={() => {
+                    if (wishlistCount > 0 && confirm(`确定清空全部 ${wishlistCount} 个收藏？`)) {
+                      useWishlistStore.getState().clearAll();
+                      showToast('已清空全部收藏', 'success');
+                    }
+                  }}
+                  className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                >
+                  {wishlistCount > 0 ? `清空全部 (${wishlistCount})` : ''}
+                </button>
+              </div>
+
+              {wishlistCount === 0 ? (
+                <div className="card text-center py-16">
+                  <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Heart className="w-10 h-10 text-slate-700" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2 text-slate-400">暂无收藏</h3>
+                  <p className="text-slate-600 mb-6">浏览账号市场，收藏心仪的账号</p>
+                  <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
+                    去逛逛
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {wishlistItems.map((account) => (
+                    <div key={account.id} className="card hover:border-primary/50 transition-all group relative">
+                      {/* Remove button */}
+                      <button
+                        onClick={() => {
+                          removeItem(account.id);
+                          showToast('已取消收藏', 'info');
+                        }}
+                        className="absolute top-2 right-2 z-10 w-7 h-7 bg-black/50 hover:bg-red-500/80 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                        title="取消收藏"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/accounts/${account.id}`)}
+                      >
+                        <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden">
+                          {account.images?.[0] ? (
+                            <img
+                              src={account.images[0]}
+                              alt=""
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Gamepad2 className="w-8 h-8 text-slate-700" />
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="font-medium mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                          {account.title}
+                        </h4>
+                        <div className="flex justify-between items-center">
+                          <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                          <span className="text-xs text-slate-500">👑 {account.skinCount} 皮肤</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </>

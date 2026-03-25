@@ -5,10 +5,11 @@ import { Account } from '../types';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
+import { WishlistButton } from '../components/ui/WishlistButton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession } from '../hooks/useQueries';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
-  ShoppingCart, ArrowLeft, Share2, Heart, Copy, Check, Clock, RefreshCw
+  ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -133,9 +134,7 @@ const AccountDetailPage: React.FC = () => {
           <button onClick={handleShare} className="btn-ghost p-2" title="分享">
             {copied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5" />}
           </button>
-          <button className="btn-ghost p-2" title="收藏">
-            <Heart className="w-5 h-5" />
-          </button>
+          {account && <WishlistButton account={account} size="md" className="!relative" />}
         </div>
       </div>
 

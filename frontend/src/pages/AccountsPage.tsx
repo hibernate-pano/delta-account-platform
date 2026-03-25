@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Account } from '../types';
 import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
+import { WishlistButton } from '../components/ui/WishlistButton';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAccounts } from '../hooks/useQueries';
 
@@ -254,6 +255,9 @@ const AccountsPage: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                   <span className="text-sm font-medium">查看详情 →</span>
                 </div>
+                <div className="absolute top-2 right-2">
+                  <WishlistButton account={account} size="sm" />
+                </div>
               </div>
               <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-1">
                 {account.title}
@@ -279,7 +283,7 @@ const AccountsPage: React.FC = () => {
               to={`/accounts/${account.id}`}
               className="card flex gap-4 hover:border-primary transition-all group"
             >
-              <div className="w-40 h-28 bg-dark rounded-lg overflow-hidden flex-shrink-0">
+              <div className="w-40 h-28 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative">
                 {account.images && account.images.length > 0 ? (
                   <img
                     src={account.images[0]}
@@ -291,6 +295,9 @@ const AccountsPage: React.FC = () => {
                     <Gamepad2 className="w-8 h-8 text-gray-700" />
                   </div>
                 )}
+                <div className="absolute top-2 right-2">
+                  <WishlistButton account={account} size="sm" />
+                </div>
               </div>
               <div className="flex-1 py-1">
                 <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
