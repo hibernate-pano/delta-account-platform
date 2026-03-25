@@ -108,6 +108,21 @@ export const notificationApi = {
   getUnreadCount: () => api.get('/api/notifications/unread-count'),
 };
 
+// Admin API
+export const adminApi = {
+  getStats: () => api.get('/api/admin/stats'),
+  getAccounts: (params?: { page?: number; size?: number; status?: string }) =>
+    api.get('/api/admin/accounts', { params }),
+  getUsers: (params?: { page?: number; size?: number }) =>
+    api.get('/api/admin/users', { params }),
+  getOrders: (params?: { page?: number; size?: number }) =>
+    api.get('/api/admin/orders', { params }),
+  verifyAccount: (id: number, approved: boolean) =>
+    api.put(`/api/admin/accounts/${id}/verify`, { approved }),
+  banUser: (id: number, banned: boolean) =>
+    api.put(`/api/admin/users/${id}/ban`, { banned }),
+};
+
 // Review API
 export const reviewApi = {
   create: (data: { orderId: number; revieweeId: number; rating: number; content: string }) =>

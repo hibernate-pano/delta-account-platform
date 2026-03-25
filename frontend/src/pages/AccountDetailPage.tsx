@@ -1,56 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { accountApi, orderApi, messageApi } from '../api';
+import { messageApi } from '../api';
 import { Account } from '../types';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
-import { Gamepad2, Shield, Clock, User, Star, AlertCircle, MessageCircle, ChevronRight, ShoppingCart, ArrowLeft, Share2, Heart, Copy, Check } from 'lucide-react';
+import { useAccount, useBuyAccount, useRentAccount, useCreateSession } from '../hooks/useQueries';
+import {
+  Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
+  ShoppingCart, ArrowLeft, Share2, Heart, Copy, Check, Clock, RefreshCw
+} from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { token, user } = useAuthStore();
   const { showToast } = useToast();
-  const [account, setAccount] = useState<Account | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [buying, setBuying] = useState(false);
-  const [renting, setRenting] = useState(false);
+
+  const accountId = id ? parseInt(id) : 0;
+  const { data, isLoading } = useAccount(accountId);
+  const buyMutation = useBuyAccount();
+  const rentMutation = useRentAccount();
+  const createSessionMutation = useCreateSession();
+
+  const account: Account | undefined = data?.data?.data;
+
   const [rentHours, setRentHours] = useState(1);
   const [activeTab, setActiveTab] = useState<'info' | 'details'>('info');
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    const fetchAccount = async () => {
-      try {
-        const res = await accountApi.getById(Number(id));
-        setAccount(res.data.data);
-      } catch (error) {
-        console.error('Failed to fetch account:', error);
-        showToast('加载账号详情失败', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAccount();
-  }, [id]);
 
   const handleBuy = async () => {
     if (!token) {
       navigate('/login');
       return;
     }
-    setBuying(true);
     try {
-      const res = await orderApi.create({ accountId: Number(id), type: 'BUY' });
-      const orderId = res.data.data.id;
-      await orderApi.pay(orderId);
+      await buyMutation.mutateAsync(accountId);
       showToast('购买成功！正在跳转订单页...', 'success');
       setTimeout(() => navigate('/orders'), 1500);
-    } catch (error: any) {
-      showToast(error.response?.data?.message || '购买失败，请重试', 'error');
-    } finally {
-      setBuying(false);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '购买失败，请重试', 'error');
     }
   };
 
@@ -59,21 +48,12 @@ const AccountDetailPage: React.FC = () => {
       navigate('/login');
       return;
     }
-    setRenting(true);
     try {
-      const res = await orderApi.create({
-        accountId: Number(id),
-        type: 'RENT',
-        rentHours
-      });
-      const orderId = res.data.data.id;
-      await orderApi.pay(orderId);
+      await rentMutation.mutateAsync({ accountId, rentHours });
       showToast(`租赁成功！租期 ${rentHours} 小时，正在跳转订单页...`, 'success');
       setTimeout(() => navigate('/orders'), 1500);
-    } catch (error: any) {
-      showToast(error.response?.data?.message || '租赁失败，请重试', 'error');
-    } finally {
-      setRenting(false);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '租赁失败，请重试', 'error');
     }
   };
 
@@ -84,14 +64,14 @@ const AccountDetailPage: React.FC = () => {
     }
     if (!account?.seller) return;
     try {
-      const res = await messageApi.createSession({
-        accountId: Number(id),
-        sellerId: account.seller.id
+      const res = await createSessionMutation.mutateAsync({
+        accountId,
+        sellerId: account.seller.id,
       });
       showToast('正在打开聊天窗口...', 'info');
       setTimeout(() => navigate(`/messages/${res.data.data.id}`), 500);
-    } catch (error: any) {
-      showToast(error.response?.data?.message || '创建会话失败', 'error');
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '创建会话失败', 'error');
     }
   };
 
@@ -104,8 +84,9 @@ const AccountDetailPage: React.FC = () => {
 
   const isOwner = user?.id === account?.seller?.id;
   const isOnSale = account?.status === 'ON_SALE';
+  const isPending = buyMutation.isPending || rentMutation.isPending;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
@@ -166,7 +147,6 @@ const AccountDetailPage: React.FC = () => {
 
         {/* Right: Info */}
         <div>
-          {/* Title & Badges */}
           <h1 className="text-2xl font-bold mb-4">{account.title}</h1>
           <div className="flex flex-wrap gap-2 mb-6">
             <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">
@@ -175,11 +155,13 @@ const AccountDetailPage: React.FC = () => {
             <span className="px-3 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm">
               🎨 {account.skinCount} 皮肤
             </span>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              account.verificationStatus === 'VERIFIED'
-                ? 'bg-green-500/20 text-green-400'
-                : 'bg-yellow-500/20 text-yellow-400'
-            }`}>
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                account.verificationStatus === 'VERIFIED'
+                  ? 'bg-green-500/20 text-green-400'
+                  : 'bg-yellow-500/20 text-yellow-400'
+              }`}
+            >
               {account.verificationStatus === 'VERIFIED' ? '✅ 已认证' : '⏳ 待审核'}
             </span>
             {account.status === 'ON_SALE' && (
@@ -213,7 +195,7 @@ const AccountDetailPage: React.FC = () => {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
+                onClick={() => setActiveTab(tab.key as typeof activeTab)}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.key
                     ? 'bg-primary text-white'
@@ -234,7 +216,10 @@ const AccountDetailPage: React.FC = () => {
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
                   { label: '所属英雄', value: account.weapons || '未填写' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-dark-border last:border-0">
+                  <div
+                    key={i}
+                    className="flex items-center justify-between py-2 border-b border-dark-border last:border-0"
+                  >
                     <span className="text-slate-500">{item.label}</span>
                     <span className="font-medium">{item.value}</span>
                   </div>
@@ -250,18 +235,16 @@ const AccountDetailPage: React.FC = () => {
           {/* Actions */}
           <div className="space-y-3">
             {isOwner ? (
-              <div className="text-center py-3 text-slate-500">
-                这是您发布的账号
-              </div>
+              <div className="text-center py-3 text-slate-500">这是您发布的账号</div>
             ) : isOnSale ? (
               <>
                 <button
                   onClick={handleBuy}
-                  disabled={buying}
+                  disabled={isPending}
                   className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {buying ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {buyMutation.isPending ? (
+                    <RefreshCw className="w-5 h-5 animate-spin" />
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5" />
@@ -284,11 +267,11 @@ const AccountDetailPage: React.FC = () => {
                     </select>
                     <button
                       onClick={handleRent}
-                      disabled={renting}
+                      disabled={isPending}
                       className="btn-secondary flex-1 py-3 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {renting ? (
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      {rentMutation.isPending ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
                       ) : (
                         <>
                           <Clock className="w-4 h-4" />
@@ -300,19 +283,23 @@ const AccountDetailPage: React.FC = () => {
                 )}
               </>
             ) : (
-              <div className="text-center py-3 text-slate-500">
-                该账号暂不可购买
-              </div>
+              <div className="text-center py-3 text-slate-500">该账号暂不可购买</div>
             )}
 
-            {/* Contact Seller */}
             {account.seller && !isOwner && (
               <button
                 onClick={handleContactSeller}
-                className="btn-secondary w-full py-3 flex items-center justify-center gap-2"
+                disabled={createSessionMutation.isPending}
+                className="btn-secondary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <MessageCircle className="w-5 h-5" />
-                联系卖家
+                {createSessionMutation.isPending ? (
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <MessageCircle className="w-5 h-5" />
+                    联系卖家
+                  </>
+                )}
               </button>
             )}
           </div>

@@ -1,15 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { accountApi } from '../api';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Sparkles } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { useDebounce } from '../hooks/useDebounce';
+import { useAccounts } from '../hooks/useQueries';
 
 const AccountsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || '');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -18,14 +16,11 @@ const AccountsPage: React.FC = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced keyword for auto-search
   const debouncedKeyword = useDebounce(keyword, 400);
 
-  // Auto-search when debounced keyword changes
-  useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+  // Auto-sync debounced keyword to URL
+  React.useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
       if (debouncedKeyword !== searchParams.get('keyword')) {
         if (debouncedKeyword) {
@@ -37,29 +32,17 @@ const AccountsPage: React.FC = () => {
     }, 100);
   }, [debouncedKeyword, sort]);
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      setLoading(true);
-      try {
-        const res = await accountApi.getList({ keyword: debouncedKeyword, sort });
-        let data = res.data.data.records || [];
-        // Client-side price range filter
-        if (selectedPriceRange) {
-          const [min, max] = selectedPriceRange.split('-').map(Number);
-          data = data.filter((acc: Account) => {
-            if (max) return acc.price >= min && acc.price <= max;
-            return acc.price >= min;
-          });
-        }
-        setAccounts(data);
-      } catch (error) {
-        console.error('Failed to fetch accounts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAccounts();
-  }, [debouncedKeyword, sort, selectedPriceRange]);
+  const { data, isLoading } = useAccounts({ keyword: debouncedKeyword, sort });
+
+  const allAccounts: Account[] = data?.data?.data?.records || [];
+
+  // Client-side price range filter
+  const accounts = selectedPriceRange
+    ? allAccounts.filter((acc) => {
+        const [min, max] = selectedPriceRange.split('-').map(Number);
+        return max ? acc.price >= min && acc.price <= max : acc.price >= min;
+      })
+    : allAccounts;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +70,7 @@ const AccountsPage: React.FC = () => {
   };
 
   const hasActiveFilters = keyword || sort || selectedPriceRange;
+  const isSearching = keyword !== debouncedKeyword;
 
   const sortOptions = [
     { key: '', label: '最新', icon: '✨' },
@@ -103,8 +87,6 @@ const AccountsPage: React.FC = () => {
     { key: '500-1000', label: '¥500 - ¥1000' },
     { key: '1000-', label: '¥1000+' },
   ];
-
-  const isSearching = keyword !== debouncedKeyword;
 
   return (
     <div>
@@ -190,7 +172,7 @@ const AccountsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Filter Pills */}
+        {/* Sort Pills */}
         <div className="flex flex-wrap gap-2 mt-4 items-center">
           <span className="text-sm text-gray-500">排序:</span>
           {sortOptions.map((option) => (
@@ -219,14 +201,14 @@ const AccountsPage: React.FC = () => {
       </div>
 
       {/* Results Count */}
-      {!loading && accounts.length > 0 && (
+      {!isLoading && accounts.length > 0 && (
         <p className="text-sm text-gray-500 mb-4">
           共找到 <span className="text-primary font-medium">{accounts.length}</span> 个账号
         </p>
       )}
 
       {/* Loading Skeletons */}
-      {loading ? (
+      {isLoading ? (
         <div className={viewMode === 'grid'
           ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
           : 'flex flex-col gap-4'
@@ -269,7 +251,6 @@ const AccountsPage: React.FC = () => {
                     <Gamepad2 className="w-10 h-10 text-gray-700" />
                   </div>
                 )}
-                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                   <span className="text-sm font-medium">查看详情 →</span>
                 </div>
@@ -284,9 +265,7 @@ const AccountsPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-primary">¥{account.price}</span>
                 {account.rentalPrice && (
-                  <span className="text-xs text-gray-500">
-                    租 ¥{account.rentalPrice}/时
-                  </span>
+                  <span className="text-xs text-gray-500">租 ¥{account.rentalPrice}/时</span>
                 )}
               </div>
             </Link>

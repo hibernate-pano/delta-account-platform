@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi } from '../api';
+import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi } from '../api';
 import { useAuthStore } from '../store/auth';
 
 // Query keys factory
@@ -67,6 +67,102 @@ export const useSellerAccounts = (sellerId: number | undefined) => {
     enabled: !!sellerId,
     select: (res) => (res.data.data.records || []).filter((a: any) => a.sellerId === sellerId),
     ...defaultQueryOptions,
+  });
+};
+
+export const useCreateAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      title: string;
+      gameRank?: string;
+      skinCount?: number;
+      weapons?: string;
+      price: number;
+      rentalPrice?: number | null;
+      description?: string;
+      images?: string[];
+    }) => accountApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+    },
+  });
+};
+
+export const useBuyAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (accountId: number) =>
+      orderApi.create({ accountId, type: 'BUY' }).then((res) => {
+        const orderId = res.data.data.id;
+        return orderApi.pay(orderId);
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance });
+    },
+  });
+};
+
+export const useRentAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ accountId, rentHours }: { accountId: number; rentHours: number }) =>
+      orderApi.create({ accountId, type: 'RENT', rentHours }).then((res) => {
+        const orderId = res.data.data.id;
+        return orderApi.pay(orderId);
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance });
+    },
+  });
+};
+
+// ==================== Admin Hooks ====================
+
+export const useAdminStats = () => {
+  return useQuery({
+    queryKey: ['admin', 'stats'],
+    queryFn: () => adminApi.getStats(),
+    enabled: false, // only fetch when admin page is visited
+    ...defaultQueryOptions,
+  });
+};
+
+export const useAdminAccounts = (params?: { page?: number; size?: number; status?: string }) => {
+  return useQuery({
+    queryKey: ['admin', 'accounts', params],
+    queryFn: () => adminApi.getAccounts(params),
+    ...defaultQueryOptions,
+  });
+};
+
+export const useVerifyAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, approved }: { id: number; approved: boolean }) =>
+      adminApi.verifyAccount(id, approved),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+};
+
+export const useBanUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, banned }: { id: number; banned: boolean }) =>
+      adminApi.banUser(id, banned),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
   });
 };
 
