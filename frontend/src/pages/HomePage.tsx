@@ -1,8 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { accountApi } from '../api';
 import { Account } from '../types';
-import { Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock } from 'lucide-react';
+import { AccountCardSkeleton } from '../components/ui/Skeleton';
+import { Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap, Sparkles } from 'lucide-react';
+
+interface AnimatedCounterProps {
+  end: number;
+  suffix?: string;
+  duration?: number;
+}
+
+const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, suffix = '', duration = 2000 }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          let start = 0;
+          const increment = end / (duration / 16);
+          const timer = setInterval(() => {
+            start += increment;
+            if (start >= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(start));
+            }
+          }, 16);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [end, duration, hasAnimated]);
+
+  return (
+    <div ref={ref} className="text-3xl font-bold text-white">
+      {count.toLocaleString()}{suffix}
+    </div>
+  );
+};
 
 const HomePage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -49,47 +93,57 @@ const HomePage: React.FC = () => {
     }
   ];
 
+  const steps = [
+    { num: '01', title: '浏览账号', desc: '搜索感兴趣的账号，了解详情和价格', icon: Search },
+    { num: '02', title: '联系卖家', desc: '在线沟通，确认账号信息和交易细节', icon: Users },
+    { num: '03', title: '下单支付', desc: '安全支付，资金由平台托管', icon: Shield },
+    { num: '04', title: '完成交易', desc: '获取账号，立即开始游戏', icon: Zap },
+  ];
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background */}
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+        {/* Background Effects */}
         <div className="absolute inset-0 bg-dark">
           <div className="absolute inset-0 opacity-30" style={{
             backgroundImage: `radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
                              radial-gradient(circle at 80% 20%, rgba(244, 114, 182, 0.1) 0%, transparent 40%),
                              radial-gradient(circle at 40% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%)`
           }} />
-          {/* Grid pattern */}
           <div className="absolute inset-0 opacity-5" style={{
             backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
                              linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
             backgroundSize: '60px 60px'
           }} />
+          {/* Floating orbs */}
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
           <div className="animate-fade-in">
-            <span className="badge badge-primary mb-6">
-              <Lock className="w-3 h-3 mr-1" />
-              安全可靠的账号交易平台
+            <span className="badge badge-primary mb-6 inline-flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              专业游戏账号交易平台
             </span>
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 animate-slide-up">
-            <span className="gradient-text">三角洲行动</span>
+            <span className="gradient-text">DeltaHub</span>
             <br />
             <span className="text-white">账号交易平台</span>
           </h1>
-          
-          <p className="text-xl md:text-2xl text-slate-400 mb-10 max-w-2xl mx-auto animate-fade-in" style={{animationDelay: '0.2s'}}>
+
+          <p className="text-xl md:text-2xl text-slate-400 mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
             买卖租赁 · 官方担保 · 快速交付
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{animationDelay: '0.4s'}}>
-            <Link to="/accounts" className="btn-primary text-lg px-10 py-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <Link to="/accounts" className="btn-primary text-lg px-10 py-4 group">
               <Search className="w-5 h-5 inline-block mr-2" />
               浏览账号
+              <ArrowRight className="w-4 h-4 inline-block ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link to="/register" className="btn-secondary text-lg px-10 py-4">
               立即注册
@@ -97,26 +151,53 @@ const HomePage: React.FC = () => {
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-8 mt-16 animate-fade-in" style={{animationDelay: '0.6s'}}>
+          {/* Animated Stats */}
+          <div className="flex flex-wrap justify-center gap-12 mt-20 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">10,000+</div>
-              <div className="text-slate-500 text-sm">注册用户</div>
+              <AnimatedCounter end={12847} suffix="+" />
+              <div className="text-slate-500 text-sm mt-1">注册用户</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">5,000+</div>
-              <div className="text-slate-500 text-sm">交易账号</div>
+              <AnimatedCounter end={5632} suffix="+" />
+              <div className="text-slate-500 text-sm mt-1">交易账号</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">99.5%</div>
-              <div className="text-slate-500 text-sm">满意度</div>
+              <AnimatedCounter end={99} suffix="%" />
+              <div className="text-slate-500 text-sm mt-1">满意度</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* How It Works */}
       <section className="py-24 bg-dark-darker">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              如何 <span className="gradient-text">交易</span>
+            </h2>
+            <p className="text-slate-400 text-lg">简单四步，完成交易</p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6 stagger-children">
+            {steps.map((step, idx) => (
+              <div key={idx} className="card-static text-center group relative">
+                <div className="absolute top-4 right-4 text-5xl font-bold text-dark-border select-none">
+                  {step.num}
+                </div>
+                <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/30 transition-colors">
+                  <step.icon className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                <p className="text-slate-500 text-sm">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -127,7 +208,7 @@ const HomePage: React.FC = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
             {features.map((feature, idx) => (
-              <div key={idx} className="card-static text-center group">
+              <div key={idx} className="card-static text-center group hover:border-primary/50 transition-all">
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
@@ -140,22 +221,24 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Account List */}
-      <section className="py-24">
+      <section className="py-24 bg-dark-darker">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex justify-between items-center mb-12">
             <div>
               <h2 className="text-3xl font-bold mb-2">热门账号</h2>
               <p className="text-slate-400">精选优质账号，等你来选</p>
             </div>
-            <Link to="/accounts" className="btn-ghost flex items-center gap-2">
-              查看更多 <ArrowRight className="w-4 h-4" />
+            <Link to="/accounts" className="btn-ghost flex items-center gap-2 group">
+              查看更多
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
           {loading ? (
-            <div className="text-center py-20">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-slate-500">加载中...</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <AccountCardSkeleton key={i} />
+              ))}
             </div>
           ) : accounts.length === 0 ? (
             <div className="card-static text-center py-20">
@@ -189,20 +272,19 @@ const HomePage: React.FC = () => {
                         <Gamepad2 className="w-16 h-16 text-slate-700" />
                       </div>
                     )}
-                    {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       {account.gameRank && (
                         <span className="badge badge-primary">{account.gameRank}</span>
                       )}
-                      <span className="text-sm text-slate-300">{account.skinCount} 皮肤</span>
+                      <span className="text-sm text-slate-300">🎨 {account.skinCount} 皮肤</span>
                     </div>
                   </div>
-                  
+
                   <h3 className="font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-1 text-lg">
                     {account.title}
                   </h3>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-2xl font-bold text-primary">
@@ -224,12 +306,14 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-dark-darker">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="card-static p-12 relative overflow-hidden">
+      <section className="py-24">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="card-static p-12 relative overflow-hidden text-center">
             <div className="absolute inset-0 opacity-20" style={{
               backgroundImage: `radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.5) 0%, transparent 60%)`
             }} />
+            <div className="absolute -top-20 -left-20 w-40 h-40 bg-primary/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />
             <div className="relative z-10">
               <h2 className="text-3xl font-bold mb-4">拥有账号想要出售？</h2>
               <p className="text-slate-400 mb-8 text-lg">快速发布，即刻变现，安全收款</p>
