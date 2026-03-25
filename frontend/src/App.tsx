@@ -14,6 +14,7 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AdminPage from './pages/AdminPage';
 import { ToastProvider } from './components/ui/Toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const KeyboardShortcuts: React.FC = () => {
   const navigate = useNavigate();
@@ -81,7 +82,9 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <AppContent />
+        <ErrorBoundary>
+          <AppContent />
+        </ErrorBoundary>
       </ToastProvider>
     </BrowserRouter>
   );

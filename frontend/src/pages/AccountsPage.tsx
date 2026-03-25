@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { accountApi } from '../api';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Sparkles } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
+import { useDebounce } from '../hooks/useDebounce';
 
 const AccountsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,12 +15,33 @@ const AccountsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced keyword for auto-search
+  const debouncedKeyword = useDebounce(keyword, 400);
+
+  // Auto-search when debounced keyword changes
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      if (debouncedKeyword !== searchParams.get('keyword')) {
+        if (debouncedKeyword) {
+          setSearchParams({ keyword: debouncedKeyword, ...(sort && { sort }) });
+        } else {
+          setSearchParams(sort ? { sort } : {});
+        }
+      }
+    }, 100);
+  }, [debouncedKeyword, sort]);
 
   useEffect(() => {
     const fetchAccounts = async () => {
       setLoading(true);
       try {
-        const res = await accountApi.getList({ keyword, sort });
+        const res = await accountApi.getList({ keyword: debouncedKeyword, sort });
         let data = res.data.data.records || [];
         // Client-side price range filter
         if (selectedPriceRange) {
@@ -37,7 +59,7 @@ const AccountsPage: React.FC = () => {
       }
     };
     fetchAccounts();
-  }, [keyword, sort, selectedPriceRange]);
+  }, [debouncedKeyword, sort, selectedPriceRange]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +104,8 @@ const AccountsPage: React.FC = () => {
     { key: '1000-', label: '¥1000+' },
   ];
 
+  const isSearching = keyword !== debouncedKeyword;
+
   return (
     <div>
       {/* Search Bar */}
@@ -94,16 +118,26 @@ const AccountsPage: React.FC = () => {
               placeholder="搜索账号标题、段位..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              className="input w-full pl-12"
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className={`input w-full pl-12 pr-10 transition-all ${isSearchFocused ? 'ring-2 ring-primary/50' : ''}`}
             />
-            {keyword && (
+            {keyword ? (
               <button
                 type="button"
                 onClick={() => setKeyword('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
+            ) : isSearching ? (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-600 bg-dark-lighter px-1.5 py-0.5 rounded">
+                ⌘K
+              </div>
             )}
           </div>
           <button type="submit" className="btn-primary px-6">
