@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
   Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X, Wallet,
-  MessageCircle, Bell, ChevronDown, Shield, BarChart3
+  MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { notificationApi } from '../../api';
@@ -117,6 +117,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {token && <NavLink to="/sell" icon={Plus}>发布账号</NavLink>}
               {token && <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>}
               {token && <NavLink to="/wallet" icon={Wallet}>钱包</NavLink>}
+              {token && <NavLink to="/refunds" icon={RefreshCw}>退款</NavLink>}
               {token && <NavLink to="/messages" icon={MessageCircle} badge={msgUnreadCount}>消息</NavLink>}
               {isAdmin && (
                 <NavLink to="/admin" icon={Shield}>管理</NavLink>
@@ -250,6 +251,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <NavLink to="/sell" icon={Plus}>发布账号</NavLink>
                   <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>
                   <NavLink to="/wallet" icon={Wallet}>钱包</NavLink>
+                  <NavLink to="/refunds" icon={RefreshCw}>退款</NavLink>
                   <NavLink to="/messages" icon={MessageCircle} badge={msgUnreadCount}>消息</NavLink>
                   <NavLink to="/notifications" icon={Bell} badge={unreadCount}>通知</NavLink>
                   {isAdmin && <NavLink to="/admin" icon={Shield}>管理</NavLink>}

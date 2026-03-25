@@ -13,6 +13,7 @@ import OrdersPage from './pages/OrdersPage';
 import WalletPage from './pages/WalletPage';
 import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
+import RefundsPage from './pages/RefundsPage';
 import AdminPage from './pages/AdminPage';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -102,6 +103,7 @@ const App: React.FC = () => {
                   <Route path="/messages" element={<MessagesPage />} />
                   <Route path="/messages/:sessionId" element={<MessagesPage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
+                  <Route path="/refunds" element={<RefundsPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                 </Routes>
               </Layout>

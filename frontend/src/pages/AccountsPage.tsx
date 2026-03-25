@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAccounts } from '../hooks/useQueries';
+import { useRecentStore } from '../store/recent';
 
 const AccountsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,6 +35,8 @@ const AccountsPage: React.FC = () => {
   }, [debouncedKeyword, sort]);
 
   const { data, isLoading } = useAccounts({ keyword: debouncedKeyword, sort });
+  const { items: recentItems } = useRecentStore();
+  const recentAccounts = recentItems.slice(0, 6); // Show max 6 recent
 
   const allAccounts: Account[] = data?.data?.data?.records || [];
 
@@ -91,6 +94,40 @@ const AccountsPage: React.FC = () => {
 
   return (
     <div>
+      {/* Recently Viewed */}
+      {!isLoading && !keyword && recentAccounts.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-slate-500" />
+            <h3 className="text-sm font-medium text-slate-500">最近浏览</h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {recentAccounts.map((account) => (
+              <Link
+                key={account.id}
+                to={`/accounts/${account.id}`}
+                className="flex-shrink-0 w-36 group"
+              >
+                <div className="w-36 h-20 bg-dark rounded-lg overflow-hidden mb-2 relative">
+                  {account.images?.[0] ? (
+                    <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Gamepad2 className="w-6 h-6 text-gray-700" />
+                    </div>
+                  )}
+                  <div className="absolute top-1 right-1">
+                    <WishlistButton account={account} size="sm" />
+                  </div>
+                </div>
+                <p className="text-xs text-slate-300 truncate group-hover:text-primary transition-colors">¥{account.price}</p>
+                <p className="text-xs text-slate-500 truncate">{account.title}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="mb-6">
         <form onSubmit={handleSearch} className="flex gap-3">

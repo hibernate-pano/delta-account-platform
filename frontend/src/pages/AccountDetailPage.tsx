@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { messageApi } from '../api';
 import { Account } from '../types';
 import { useAuthStore } from '../store/auth';
+import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
@@ -17,6 +18,7 @@ const AccountDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { token, user } = useAuthStore();
   const { showToast } = useToast();
+  const addToRecent = useRecentStore((s) => s.addItem);
 
   const accountId = id ? parseInt(id) : 0;
   const { data, isLoading } = useAccount(accountId);
@@ -25,6 +27,13 @@ const AccountDetailPage: React.FC = () => {
   const createSessionMutation = useCreateSession();
 
   const account: Account | undefined = data?.data?.data;
+
+  // Track recently viewed
+  React.useEffect(() => {
+    if (account) {
+      addToRecent(account);
+    }
+  }, [account?.id]);
 
   const [rentHours, setRentHours] = useState(1);
   const [activeTab, setActiveTab] = useState<'info' | 'details'>('info');

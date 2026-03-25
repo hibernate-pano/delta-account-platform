@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi } from '../api';
+import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi, refundApi } from '../api';
 import { useAuthStore } from '../store/auth';
 
 // Query keys factory
@@ -31,6 +31,11 @@ export const queryKeys = {
   },
   auth: {
     profile: ['auth', 'profile'] as const,
+  },
+  refunds: {
+    all: ['refunds'] as const,
+    my: ['refunds', 'my'] as const,
+    detail: (id: number) => ['refunds', 'detail', id] as const,
   },
 };
 
@@ -349,6 +354,48 @@ export const useAuthProfile = () => {
     queryFn: () => authApi.getProfile(),
     enabled: !!token,
     staleTime: 1000 * 60 * 10, // 10 minutes for profile
+  });
+};
+
+// ==================== Refund Hooks ====================
+
+export const useMyRefunds = () => {
+  return useQuery({
+    queryKey: queryKeys.refunds.my,
+    queryFn: () => refundApi.getMy(),
+    ...defaultQueryOptions,
+  });
+};
+
+export const useRefundDetail = (id: number) => {
+  return useQuery({
+    queryKey: queryKeys.refunds.detail(id),
+    queryFn: () => refundApi.getById(id),
+    enabled: !!id,
+    ...defaultQueryOptions,
+  });
+};
+
+export const useApplyRefund = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { orderId: number; amount: number; reason: string; evidenceImages?: string[] }) =>
+      refundApi.apply(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.refunds.all });
+    },
+  });
+};
+
+export const useCancelRefund = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => refundApi.cancel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.refunds.all });
+    },
   });
 };
 
