@@ -6,7 +6,8 @@ import {
   MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
-import { notificationApi } from '../../api';
+import { notificationApi, messageApi } from '../../api';
+import MobileTabBar from './MobileTabBar';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, user, logout } = useAuthStore();
@@ -17,7 +18,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [msgUnreadCount, setMsgUnreadCount] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Poll for notifications
+  // Poll for notifications + messages
   useEffect(() => {
     if (!token) return;
 
@@ -25,9 +26,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       try {
         const [notifRes, msgRes] = await Promise.all([
           notificationApi.getUnreadCount(),
-          notificationApi.getUnreadCount().catch(() => ({ data: { data: 0 } }))
+          messageApi.getUnreadCount(),
         ]);
         setUnreadCount(notifRes.data.data || 0);
+        setMsgUnreadCount(msgRes.data.data || 0);
       } catch {
         // Silently fail
       }
@@ -287,12 +289,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         {children}
       </main>
 
+      {/* Mobile Bottom Tab Bar */}
+      <MobileTabBar msgUnreadCount={msgUnreadCount} />
+
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-8 mt-auto">
+      <footer className="border-t border-slate-800 py-8 mt-auto hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-slate-500">
