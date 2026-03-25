@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
-import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, Clock } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setAuth } = useAuthStore();
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(searchParams.get('expired') === '1' ? '登录已过期，请重新登录' : '');
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
