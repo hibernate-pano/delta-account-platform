@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { messageApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
+import { useMessageSessions, useSessionMessages, useSendMessage, useCreateSession } from '../hooks/useQueries';
 import { MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare } from 'lucide-react';
 
 interface Session {
@@ -51,29 +51,29 @@ const MessagesPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { token, user } = useAuthStore();
   const { showToast } = useToast();
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [newMessage, setNewMessage] = useState('');
-  const [sendingSessionId, setSendingSessionId] = useState<number | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const accountId = searchParams.get('accountId');
   const sellerId = searchParams.get('sellerId');
 
+  const { data: sessionsData, isLoading: sessionsLoading } = useMessageSessions();
+  const sessions: Session[] = sessionsData?.data?.data || [];
+
+  const currentSessionId = sessionId ? parseInt(sessionId) : null;
+  const { data: messagesData, isLoading: messagesLoading } = useSessionMessages(currentSessionId!);
+  const messages: Message[] = messagesData?.data?.data || [];
+
+  const sendMessageMutation = useSendMessage();
+  const createSessionMutation = useCreateSession();
+
+  const [newMessage, setNewMessage] = React.useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (!token) {
       navigate('/login');
-      return;
     }
-    if (sessionId) {
-      fetchMessages(parseInt(sessionId));
-    } else {
-      fetchSessions();
-    }
-  }, [token, sessionId]);
+  }, [token, navigate]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -81,95 +81,39 @@ const MessagesPage: React.FC = () => {
     }
   }, [messages]);
 
-  // Poll for new messages when in chat
-  useEffect(() => {
-    if (!sessionId) return;
-    const interval = setInterval(() => {
-      fetchMessages(parseInt(sessionId));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [sessionId]);
-
-  const fetchSessions = async () => {
-    try {
-      const res = await messageApi.getSessions();
-      setSessions(res.data.data || []);
-    } catch (error) {
-      console.error('Failed to fetch sessions:', error);
-      showToast('加载消息列表失败', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMessages = async (id: number) => {
-    try {
-      setLoading(true);
-      const res = await messageApi.getSessionMessages(id);
-      setMessages(res.data.data || []);
-      await messageApi.markAsRead(id);
-    } catch (error) {
-      console.error('Failed to fetch messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !sessionId) return;
 
-    setSending(true);
     try {
-      await messageApi.sendMessage(parseInt(sessionId), { content: newMessage });
+      await sendMessageMutation.mutateAsync({
+        sessionId: parseInt(sessionId),
+        content: newMessage,
+      });
       setNewMessage('');
-      await fetchMessages(parseInt(sessionId));
       inputRef.current?.focus();
-    } catch (error) {
+    } catch {
       showToast('发送消息失败', 'error');
-    } finally {
-      setSending(false);
     }
   };
 
   const handleStartChat = async () => {
     if (!accountId || !sellerId) return;
-    setSendingSessionId(parseInt(accountId));
     try {
-      const res = await messageApi.createSession({
+      const res = await createSessionMutation.mutateAsync({
         accountId: parseInt(accountId),
-        sellerId: parseInt(sellerId)
+        sellerId: parseInt(sellerId),
       });
       showToast('会话已创建，正在跳转...', 'success');
       navigate(`/messages/${res.data.data.id}`);
-    } catch (error: any) {
-      showToast(error.response?.data?.message || '创建会话失败', 'error');
-    } finally {
-      setSendingSessionId(null);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '创建会话失败', 'error');
     }
   };
 
-  if (loading && !sessionId) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">消息中心</h1>
-        <div className="card">
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center gap-4 p-4">
-                <div className="w-12 h-12 skeleton rounded-full" />
-                <div className="flex-1">
-                  <div className="h-4 w-24 skeleton rounded mb-2" />
-                  <div className="h-3 w-40 skeleton rounded" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!token) return null;
 
+  // Chat view
   if (sessionId) {
     const currentSession = sessions.find((s) => s.id === parseInt(sessionId));
 
@@ -188,7 +132,9 @@ const MessagesPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold">
-                {currentSession?.otherUser?.nickname || currentSession?.otherUser?.username || '聊天'}
+                {currentSession?.otherUser?.nickname ||
+                  currentSession?.otherUser?.username ||
+                  '聊天'}
               </h1>
             </div>
           </div>
@@ -197,7 +143,7 @@ const MessagesPage: React.FC = () => {
         <div className="card h-[600px] flex flex-col bg-dark-darker border-dark-border">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {loading ? (
+            {messagesLoading ? (
               <div className="flex justify-center py-8">
                 <RefreshCw className="w-6 h-6 animate-spin text-slate-500" />
               </div>
@@ -215,7 +161,7 @@ const MessagesPage: React.FC = () => {
                     idx === 0 ||
                     new Date(msg.createdAt).getTime() -
                       new Date(messages[idx - 1].createdAt).getTime() >
-                      300000; // 5 min
+                      300000;
                   return (
                     <React.Fragment key={msg.id}>
                       {showTime && (
@@ -230,11 +176,13 @@ const MessagesPage: React.FC = () => {
                           </div>
                         )}
                         <div className={`max-w-[70%] ${isMe ? 'text-right' : 'text-left'}`}>
-                          <div className={`inline-block px-4 py-3 rounded-2xl ${
-                            isMe
-                              ? 'bg-primary text-white rounded-br-md'
-                              : 'bg-dark-lighter text-white rounded-bl-md'
-                          }`}>
+                          <div
+                            className={`inline-block px-4 py-3 rounded-2xl ${
+                              isMe
+                                ? 'bg-primary text-white rounded-br-md'
+                                : 'bg-dark-lighter text-white rounded-bl-md'
+                            }`}
+                          >
                             <p className="text-sm leading-relaxed">{msg.content}</p>
                           </div>
                         </div>
@@ -266,10 +214,10 @@ const MessagesPage: React.FC = () => {
               />
               <button
                 type="submit"
-                disabled={sending || !newMessage.trim()}
+                disabled={sendMessageMutation.isPending || !newMessage.trim()}
                 className="btn-primary px-6 disabled:opacity-50 flex items-center gap-2"
               >
-                {sending ? (
+                {sendMessageMutation.isPending ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
@@ -285,7 +233,7 @@ const MessagesPage: React.FC = () => {
     );
   }
 
-  // Session List
+  // Session list view
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">消息中心</h1>
@@ -299,10 +247,10 @@ const MessagesPage: React.FC = () => {
             </div>
             <button
               onClick={handleStartChat}
-              disabled={!!sendingSessionId}
+              disabled={createSessionMutation.isPending}
               className="btn-primary flex items-center gap-2 disabled:opacity-50"
             >
-              {sendingSessionId ? (
+              {createSessionMutation.isPending ? (
                 <RefreshCw className="w-5 h-5 animate-spin" />
               ) : (
                 <MessageCircle className="w-5 h-5" />
@@ -314,7 +262,19 @@ const MessagesPage: React.FC = () => {
       )}
 
       <div className="card p-0 overflow-hidden">
-        {sessions.length === 0 ? (
+        {sessionsLoading ? (
+          <div className="space-y-4 p-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-4 p-4">
+                <div className="w-12 h-12 skeleton rounded-full" />
+                <div className="flex-1">
+                  <div className="h-4 w-24 skeleton rounded mb-2" />
+                  <div className="h-3 w-40 skeleton rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : sessions.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageCircle className="w-10 h-10 text-slate-700" />
@@ -345,14 +305,22 @@ const MessagesPage: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <p className={`font-medium truncate ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
+                    <p
+                      className={`font-medium truncate ${
+                        session.unreadCount ? 'text-white' : 'text-slate-300'
+                      }`}
+                    >
                       {session.otherUser?.nickname || session.otherUser?.username || '用户'}
                     </p>
                     <p className="text-xs text-slate-600 flex-shrink-0">
                       {session.lastMessageAt ? formatRelativeTime(session.lastMessageAt) : ''}
                     </p>
                   </div>
-                  <p className={`text-sm truncate ${session.unreadCount ? 'text-slate-300' : 'text-slate-500'}`}>
+                  <p
+                    className={`text-sm truncate ${
+                      session.unreadCount ? 'text-slate-300' : 'text-slate-500'
+                    }`}
+                  >
                     {session.lastMessage || '暂无消息'}
                   </p>
                 </div>

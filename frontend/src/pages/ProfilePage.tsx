@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authApi, accountApi, orderApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
-import { Skeleton } from '../components/ui/Skeleton';
+import { useAuthProfile, useMyOrders, useSellerAccounts } from '../hooks/useQueries';
 import {
-  User, Package, FileText, LogOut, Settings, ChevronRight,
+  User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock
 } from 'lucide-react';
 
@@ -13,37 +12,17 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { token, user, logout } = useAuthStore();
   const { showToast } = useToast();
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats'>('accounts');
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    fetchData();
-  }, [token]);
+  const { data: profileData, isLoading: profileLoading } = useAuthProfile();
+  const { data: ordersData, isLoading: ordersLoading } = useMyOrders();
 
-  const fetchData = async () => {
-    try {
-      const [profileRes, accountsRes, ordersRes] = await Promise.all([
-        authApi.getProfile().catch(() => ({ data: { data: null } })),
-        accountApi.getList({ size: 100 }),
-        orderApi.getMyOrders()
-      ]);
-      setProfile(profileRes.data.data);
-      const allAccounts = accountsRes.data.data.records || [];
-      setAccounts(allAccounts.filter((a: any) => a.sellerId === profileRes.data.data?.id));
-      setOrders(ordersRes.data.data.records || []);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const profile = profileData?.data?.data;
+  const profileId = profile?.id ?? user?.id;
+  const { data: sellerAccounts, isLoading: accountsLoading } = useSellerAccounts(profileId);
+
+  const accounts = sellerAccounts || [];
+  const orders = ordersData?.data?.data?.records || [];
 
   const handleLogout = () => {
     logout();
@@ -53,11 +32,11 @@ const ProfilePage: React.FC = () => {
 
   const stats = {
     totalAccounts: accounts.length,
-    onSale: accounts.filter((a) => a.status === 'ON_SALE').length,
-    sold: accounts.filter((a) => a.status === 'SOLD').length,
+    onSale: accounts.filter((a: any) => a.status === 'ON_SALE').length,
+    sold: accounts.filter((a: any) => a.status === 'SOLD').length,
     totalOrders: orders.length,
-    completedOrders: orders.filter((o) => o.status === 'COMPLETED').length,
-    creditScore: profile?.creditScore || user?.creditScore || 100,
+    completedOrders: orders.filter((o: any) => o.status === 'COMPLETED').length,
+    creditScore: profile?.creditScore ?? user?.creditScore ?? 100,
   };
 
   const getCreditLevel = (score: number) => {
@@ -69,6 +48,13 @@ const ProfilePage: React.FC = () => {
 
   const creditLevel = getCreditLevel(stats.creditScore);
   const CreditIcon = creditLevel.icon;
+
+  const isLoading = profileLoading || ordersLoading || accountsLoading;
+
+  if (!token) {
+    navigate('/login');
+    return null;
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -96,7 +82,6 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {/* Credit Score */}
             <div className="card-static p-3 text-center">
               <div className={`flex items-center justify-center gap-1 mb-1 ${creditLevel.color}`}>
                 <CreditIcon className="w-4 h-4" />
@@ -104,10 +89,10 @@ const ProfilePage: React.FC = () => {
               </div>
               <p className="text-xs text-slate-500">信誉分 · {creditLevel.label}</p>
             </div>
-
-            {/* Balance */}
             <div className="card-static p-3 text-center">
-              <p className="text-xl font-bold text-primary">¥{(profile?.balance || user?.balance || 0).toFixed(2)}</p>
+              <p className="text-xl font-bold text-primary">
+                ¥{(profile?.balance ?? user?.balance ?? 0).toFixed(2)}
+              </p>
               <p className="text-xs text-slate-500">账户余额</p>
             </div>
           </div>
@@ -123,7 +108,7 @@ const ProfilePage: React.FC = () => {
         ].map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
+            onClick={() => setActiveTab(tab.key as typeof activeTab)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === tab.key
                 ? 'bg-primary text-white'
@@ -133,9 +118,11 @@ const ProfilePage: React.FC = () => {
             <tab.icon className="w-4 h-4" />
             {tab.label}
             {tab.count !== null && (
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                activeTab === tab.key ? 'bg-white/20' : 'bg-dark'
-              }`}>
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  activeTab === tab.key ? 'bg-white/20' : 'bg-dark'
+                }`}
+              >
                 {tab.count}
               </span>
             )}
@@ -144,7 +131,7 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* Content */}
-      {loading ? (
+      {isLoading ? (
         <div className="card">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -185,7 +172,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {accounts.map((account) => (
+                  {accounts.map((account: any) => (
                     <div
                       key={account.id}
                       className="card hover:border-primary/50 transition-all cursor-pointer group"
@@ -209,13 +196,20 @@ const ProfilePage: React.FC = () => {
                       </h4>
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-primary">¥{account.price}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs ${
-                          account.status === 'ON_SALE' ? 'bg-green-500/20 text-green-400' :
-                          account.status === 'SOLD' ? 'bg-slate-500/20 text-slate-400' :
-                          'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                          {account.status === 'ON_SALE' ? '🔥 出售中' :
-                           account.status === 'SOLD' ? '✓ 已出售' : account.status}
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs ${
+                            account.status === 'ON_SALE'
+                              ? 'bg-green-500/20 text-green-400'
+                              : account.status === 'SOLD'
+                              ? 'bg-slate-500/20 text-slate-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                          }`}
+                        >
+                          {account.status === 'ON_SALE'
+                            ? '🔥 出售中'
+                            : account.status === 'SOLD'
+                            ? '✓ 已出售'
+                            : account.status}
                         </span>
                       </div>
                     </div>
@@ -242,7 +236,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {orders.map((order) => (
+                  {orders.map((order: any) => (
                     <div
                       key={order.id}
                       className="card flex items-center gap-4 hover:border-primary/50 transition-all cursor-pointer group"
@@ -261,13 +255,20 @@ const ProfilePage: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-bold">¥{order.amount.toFixed(2)}</p>
-                        <span className={`px-2 py-0.5 rounded text-xs ${
-                          order.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
-                          order.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-slate-500/20 text-slate-400'
-                        }`}>
-                          {order.status === 'COMPLETED' ? '已完成' :
-                           order.status === 'PENDING' ? '待支付' : order.status}
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs ${
+                            order.status === 'COMPLETED'
+                              ? 'bg-green-500/20 text-green-400'
+                              : order.status === 'PENDING'
+                              ? 'bg-yellow-500/20 text-yellow-400'
+                              : 'bg-slate-500/20 text-slate-400'
+                          }`}
+                        >
+                          {order.status === 'COMPLETED'
+                            ? '已完成'
+                            : order.status === 'PENDING'
+                            ? '待支付'
+                            : order.status}
                         </span>
                       </div>
                       <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-primary transition-colors" />

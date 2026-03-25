@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { walletApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
-import { WalletSkeleton, TransactionSkeleton } from '../components/ui/Skeleton';
-import { Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, RefreshCw, BarChart3, ArrowRight } from 'lucide-react';
+import { WalletSkeleton } from '../components/ui/Skeleton';
+import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } from '../hooks/useQueries';
+import { Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3, RefreshCw } from 'lucide-react';
 
 interface Transaction {
   id: number;
@@ -19,11 +19,8 @@ interface Transaction {
 
 const WalletPage: React.FC = () => {
   const navigate = useNavigate();
-  const { token, user } = useAuthStore();
+  const { token } = useAuthStore();
   const { showToast } = useToast();
-  const [balance, setBalance] = useState<number>(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'balance' | 'recharges' | 'withdrawals' | 'transactions'>('balance');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -31,31 +28,20 @@ const WalletPage: React.FC = () => {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [accountNo, setAccountNo] = useState('');
   const [accountName, setAccountName] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    fetchData();
-  }, [token]);
+  const { data: balanceData, isLoading: balanceLoading } = useWalletBalance();
+  const { data: transactionsData, isLoading: txLoading } = useWalletTransactions({ page: 1, size: 50 });
 
-  const fetchData = async () => {
-    try {
-      const [balanceRes, transRes] = await Promise.all([
-        walletApi.getBalance(),
-        walletApi.getTransactions({ page: 1, size: 50 })
-      ]);
-      setBalance(balanceRes.data.data.balance || 0);
-      setTransactions(transRes.data.data.records || []);
-    } catch (error) {
-      console.error('Failed to fetch wallet data:', error);
-      showToast('加载钱包数据失败', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const rechargeMutation = useRecharge();
+  const withdrawMutation = useWithdraw();
+
+  const balance = balanceData?.data?.data?.balance ?? 0;
+  const transactions: Transaction[] = transactionsData?.data?.data?.records ?? [];
+
+  if (!token) {
+    navigate('/login');
+    return null;
+  }
 
   const handleRecharge = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,17 +50,13 @@ const WalletPage: React.FC = () => {
       return;
     }
 
-    setSubmitting(true);
     try {
-      await walletApi.recharge({ amount: parseFloat(rechargeAmount) });
+      await rechargeMutation.mutateAsync({ amount: parseFloat(rechargeAmount) });
       showToast(`充值成功！¥${rechargeAmount}已到账`, 'success');
       setShowRechargeModal(false);
       setRechargeAmount('');
-      fetchData();
-    } catch (error: any) {
-      showToast(error.response?.data?.message || '充值失败，请重试', 'error');
-    } finally {
-      setSubmitting(false);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '充值失败，请重试', 'error');
     }
   };
 
@@ -93,28 +75,23 @@ const WalletPage: React.FC = () => {
       return;
     }
 
-    setSubmitting(true);
     try {
-      await walletApi.withdraw({
+      await withdrawMutation.mutateAsync({
         amount: parseFloat(withdrawAmount),
         accountNo,
         accountName,
-        accountType: 'ALIPAY'
+        accountType: 'ALIPAY',
       });
       showToast(`提现申请已提交！¥${withdrawAmount}将在1-3个工作日到账`, 'success');
       setShowWithdrawModal(false);
       setWithdrawAmount('');
       setAccountNo('');
       setAccountName('');
-      fetchData();
-    } catch (error: any) {
-      showToast(error.response?.data?.message || '提现失败，请重试', 'error');
-    } finally {
-      setSubmitting(false);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '提现失败，请重试', 'error');
     }
   };
 
-  // Calculate stats
   const stats = useMemo(() => {
     const income = transactions
       .filter((t) => ['RECHARGE', 'SELL', 'REFUND'].includes(t.type))
@@ -136,7 +113,6 @@ const WalletPage: React.FC = () => {
     return { income, expense, monthlyIncome, monthlyExpense };
   }, [transactions]);
 
-  // Simple balance chart
   const BalanceChart: React.FC = () => {
     const chartData = useMemo(() => {
       if (transactions.length === 0) return [];
@@ -146,7 +122,7 @@ const WalletPage: React.FC = () => {
         runningBalance = t.balanceAfter;
         return {
           date: new Date(t.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }),
-          balance: runningBalance
+          balance: runningBalance,
         };
       });
     }, [transactions]);
@@ -197,7 +173,7 @@ const WalletPage: React.FC = () => {
       BUY: '购买账号',
       SELL: '出售账号',
       RENT: '租赁',
-      REFUND: '退款'
+      REFUND: '退款',
     };
     return labels[type] || type;
   };
@@ -205,13 +181,14 @@ const WalletPage: React.FC = () => {
   const filteredTransactions = transactions.filter((tx) => {
     if (activeTab === 'recharges') return tx.type === 'RECHARGE';
     if (activeTab === 'withdrawals') return tx.type === 'WITHDRAW';
-    if (activeTab === 'transactions') return true;
     return true;
   });
 
-  if (loading) {
+  if (balanceLoading && txLoading) {
     return <WalletSkeleton />;
   }
+
+  const isSubmitting = rechargeMutation.isPending || withdrawMutation.isPending;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -231,7 +208,6 @@ const WalletPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-dark/50 rounded-xl p-3">
             <div className="flex items-center gap-2 text-green-400 mb-1">
@@ -293,7 +269,7 @@ const WalletPage: React.FC = () => {
         ].map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
+            onClick={() => setActiveTab(tab.key as typeof activeTab)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
               activeTab === tab.key
                 ? 'bg-primary text-white'
@@ -308,7 +284,13 @@ const WalletPage: React.FC = () => {
 
       {/* Transaction List */}
       <div className="card">
-        {filteredTransactions.length === 0 ? (
+        {txLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-16 skeleton rounded-lg" />
+            ))}
+          </div>
+        ) : filteredTransactions.length === 0 ? (
           <div className="text-center py-12">
             <Wallet className="w-12 h-12 mx-auto mb-4 text-slate-700" />
             <p className="text-slate-500">暂无交易记录</p>
@@ -316,14 +298,19 @@ const WalletPage: React.FC = () => {
         ) : (
           <div className="divide-y divide-slate-800">
             {filteredTransactions.map((tx) => (
-              <div key={tx.id} className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors rounded-lg">
+              <div
+                key={tx.id}
+                className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors rounded-lg"
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                    tx.type === 'RECHARGE' || tx.type === 'SELL' || tx.type === 'REFUND'
-                      ? 'bg-green-500/20'
-                      : 'bg-red-500/20'
-                  }`}>
-                    {tx.type === 'RECHARGE' || tx.type === 'SELL' || tx.type === 'REFUND' ? (
+                  <div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+                      ['RECHARGE', 'SELL', 'REFUND'].includes(tx.type)
+                        ? 'bg-green-500/20'
+                        : 'bg-red-500/20'
+                    }`}
+                  >
+                    {['RECHARGE', 'SELL', 'REFUND'].includes(tx.type) ? (
                       <TrendingUp className="w-5 h-5 text-green-500" />
                     ) : (
                       <TrendingDown className="w-5 h-5 text-red-500" />
@@ -334,13 +321,15 @@ const WalletPage: React.FC = () => {
                     <p className="text-sm text-slate-500">{tx.createdAt}</p>
                   </div>
                 </div>
-                <div className={`text-right font-medium ${
-                  tx.type === 'RECHARGE' || tx.type === 'SELL' || tx.type === 'REFUND'
-                    ? 'text-green-400'
-                    : 'text-red-400'
-                }`}>
-                  {tx.type === 'RECHARGE' || tx.type === 'SELL' || tx.type === 'REFUND' ? '+' : '-'}
-                  ¥{tx.amount.toFixed(2)}
+                <div
+                  className={`text-right font-medium ${
+                    ['RECHARGE', 'SELL', 'REFUND'].includes(tx.type)
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }`}
+                >
+                  {['RECHARGE', 'SELL', 'REFUND'].includes(tx.type) ? '+' : '-'}¥
+                  {tx.amount.toFixed(2)}
                 </div>
               </div>
             ))}
@@ -350,7 +339,10 @@ const WalletPage: React.FC = () => {
 
       {/* Recharge Modal */}
       {showRechargeModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowRechargeModal(false)}>
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowRechargeModal(false)}
+        >
           <div className="card w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
               <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
@@ -406,11 +398,11 @@ const WalletPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || !rechargeAmount}
+                  disabled={isSubmitting || !rechargeAmount}
                   className="flex-1 btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {submitting && <RefreshCw className="w-4 h-4 animate-spin" />}
-                  {submitting ? '处理中...' : '确认充值'}
+                  {isSubmitting && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? '处理中...' : '确认充值'}
                 </button>
               </div>
             </form>
@@ -420,7 +412,10 @@ const WalletPage: React.FC = () => {
 
       {/* Withdraw Modal */}
       {showWithdrawModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowWithdrawModal(false)}>
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowWithdrawModal(false)}
+        >
           <div className="card w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
               <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
@@ -446,7 +441,9 @@ const WalletPage: React.FC = () => {
                     autoFocus
                   />
                 </div>
-                <p className="text-sm text-slate-500 mt-1">可用余额: <span className="text-primary font-medium">¥{balance.toFixed(2)}</span></p>
+                <p className="text-sm text-slate-500 mt-1">
+                  可用余额: <span className="text-primary font-medium">¥{balance.toFixed(2)}</span>
+                </p>
               </div>
               <div className="mb-4">
                 <label className="block text-sm text-slate-400 mb-2">支付宝账号</label>
@@ -483,11 +480,11 @@ const WalletPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || !withdrawAmount || !accountNo || !accountName}
+                  disabled={isSubmitting || !withdrawAmount || !accountNo || !accountName}
                   className="flex-1 btn-primary disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {submitting && <RefreshCw className="w-4 h-4 animate-spin" />}
-                  {submitting ? '处理中...' : '确认提现'}
+                  {isSubmitting && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? '处理中...' : '确认提现'}
                 </button>
               </div>
             </form>

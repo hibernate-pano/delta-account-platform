@@ -60,6 +60,16 @@ export const useAccount = (id: number) => {
   });
 };
 
+export const useSellerAccounts = (sellerId: number | undefined) => {
+  return useQuery({
+    queryKey: ['accounts', 'seller', sellerId],
+    queryFn: () => accountApi.getList({ size: 100 }),
+    enabled: !!sellerId,
+    select: (res) => (res.data.data.records || []).filter((a: any) => a.sellerId === sellerId),
+    ...defaultQueryOptions,
+  });
+};
+
 // ==================== Order Hooks ====================
 
 export const useMyOrders = () => {
@@ -174,6 +184,18 @@ export const useSendMessage = () => {
       messageApi.sendMessage(sessionId, { content }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.messages.messages(variables.sessionId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.messages.sessions });
+    },
+  });
+};
+
+export const useCreateSession = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ accountId, sellerId }: { accountId: number; sellerId: number }) =>
+      messageApi.createSession({ accountId, sellerId }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.messages.sessions });
     },
   });

@@ -1,9 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { notificationApi } from '../api';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
-import { Bell, CheckCheck, Trash2, RefreshCw, ShoppingCart, Wallet, MessageCircle, BellOff, Filter, Clock, ChevronRight, Package, User } from 'lucide-react';
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '../hooks/useQueries';
+import {
+  Bell,
+  CheckCheck,
+  RefreshCw,
+  ShoppingCart,
+  Wallet,
+  MessageCircle,
+  BellOff,
+  Clock,
+  ChevronRight,
+  Package,
+  User,
+} from 'lucide-react';
 
 interface Notification {
   id: number;
@@ -68,54 +80,27 @@ const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'UNREAD' | 'READ'>('all');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    fetchNotifications();
-  }, [token]);
+  const { data, isLoading, refetch } = useNotifications();
+  const markReadMutation = useMarkNotificationRead();
+  const markAllReadMutation = useMarkAllNotificationsRead();
 
-  // Auto-poll every 30s
-  useEffect(() => {
-    if (!token) return;
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [token]);
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await notificationApi.getList();
-      setNotifications(res.data.data || []);
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const notifications: Notification[] = data?.data?.data || [];
 
   const handleMarkAsRead = async (id: number) => {
     try {
-      await notificationApi.markAsRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, status: 'READ' } : n))
-      );
-    } catch (error) {
+      await markReadMutation.mutateAsync(id);
+    } catch {
       showToast('操作失败', 'error');
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      await notificationApi.markAllAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, status: 'READ' })));
+      await markAllReadMutation.mutateAsync();
       showToast('已全部标记为已读', 'success');
-    } catch (error) {
+    } catch {
       showToast('操作失败', 'error');
     }
   };
@@ -129,7 +114,7 @@ const NotificationsPage: React.FC = () => {
   const grouped = groupByDate(filteredNotifications);
   const unreadCount = notifications.filter((n) => n.status === 'UNREAD').length;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
@@ -167,14 +152,16 @@ const NotificationsPage: React.FC = () => {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllAsRead}
-              className="btn-secondary flex items-center gap-2 text-sm"
+              disabled={markAllReadMutation.isPending}
+              className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50"
             >
+              {markAllReadMutation.isPending && <RefreshCw className="w-4 h-4 animate-spin" />}
               <CheckCheck className="w-4 h-4" />
               全部已读
             </button>
           )}
           <button
-            onClick={fetchNotifications}
+            onClick={() => refetch()}
             className="btn-ghost p-2"
             title="刷新"
           >
@@ -192,7 +179,7 @@ const NotificationsPage: React.FC = () => {
         ].map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveFilter(tab.key as any)}
+            onClick={() => setActiveFilter(tab.key as typeof activeFilter)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeFilter === tab.key
                 ? 'bg-primary text-white'
@@ -200,9 +187,11 @@ const NotificationsPage: React.FC = () => {
             }`}
           >
             {tab.label}
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-              activeFilter === tab.key ? 'bg-white/20' : 'bg-dark'
-            }`}>
+            <span
+              className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeFilter === tab.key ? 'bg-white/20' : 'bg-dark'
+              }`}
+            >
               {tab.count}
             </span>
           </button>
@@ -224,9 +213,7 @@ const NotificationsPage: React.FC = () => {
                 : '暂无已读通知'}
             </h3>
             <p className="text-slate-600 text-sm mb-6">
-              {activeFilter === 'all'
-                ? '有新消息时会在这里显示'
-                : '试试切换到全部通知'}
+              {activeFilter === 'all' ? '有新消息时会在这里显示' : '试试切换到全部通知'}
             </p>
             <button
               onClick={() => setActiveFilter('all')}
@@ -260,21 +247,29 @@ const NotificationsPage: React.FC = () => {
                       >
                         <div className="px-4 py-4 flex items-start gap-3">
                           {/* Icon */}
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${config.bg}`}>
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${config.bg}`}
+                          >
                             <Icon className={`w-5 h-5 ${config.color}`} />
                           </div>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className={`text-xs px-1.5 py-0.5 rounded ${config.bg} ${config.color}`}>
+                              <span
+                                className={`text-xs px-1.5 py-0.5 rounded ${config.bg} ${config.color}`}
+                              >
                                 {config.label}
                               </span>
                               {notification.status === 'UNREAD' && (
                                 <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
                               )}
                             </div>
-                            <p className={`font-medium text-sm ${notification.status === 'UNREAD' ? 'text-white' : 'text-slate-300'}`}>
+                            <p
+                              className={`font-medium text-sm ${
+                                notification.status === 'UNREAD' ? 'text-white' : 'text-slate-300'
+                              }`}
+                            >
                               {notification.title}
                             </p>
                             <p className="text-sm text-slate-500 mt-1 line-clamp-2">
@@ -294,7 +289,8 @@ const NotificationsPage: React.FC = () => {
                                   e.stopPropagation();
                                   handleMarkAsRead(notification.id);
                                 }}
-                                className="p-2 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                disabled={markReadMutation.isPending}
+                                className="p-2 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
                                 title="标记已读"
                               >
                                 <CheckCheck className="w-4 h-4" />
@@ -303,7 +299,6 @@ const NotificationsPage: React.FC = () => {
                             {notification.relatedId && (
                               <button
                                 onClick={() => {
-                                  // Navigate based on type
                                   if (notification.type.includes('ORDER')) {
                                     navigate('/orders');
                                   } else if (notification.type.includes('MESSAGE')) {
