@@ -8,7 +8,7 @@ import {
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle
 } from 'lucide-react';
 
 interface Session {
@@ -91,7 +91,7 @@ const MessagesPage: React.FC = () => {
   const sellerId = searchParams.get('sellerId');
   const [sessionSearch, setSessionSearch] = useState('');
 
-  const { data: sessionsData, isLoading: sessionsLoading } = useMessageSessions();
+  const { data: sessionsData, isLoading: sessionsLoading, isError: sessionsError, refetch: refetchSessions } = useMessageSessions();
   const sessions: Session[] = sessionsData?.data?.data || [];
   const filteredSessions = sessions.filter((s) =>
     !sessionSearch.trim()
@@ -104,6 +104,15 @@ const MessagesPage: React.FC = () => {
 
   // Session list content
   const sessionListContent = useMemo(() => {
+    if (sessionsError) {
+      return (
+        <div className="text-center py-10">
+          <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+          <p className="text-slate-500 text-sm mb-3">加载会话列表失败</p>
+          <button onClick={() => refetchSessions()} className="text-primary text-sm hover:underline">重新加载</button>
+        </div>
+      );
+    }
     if (filteredSessions.length === 0 && sessionSearch) {
       return (
         <div className="text-center py-12">
