@@ -138,10 +138,10 @@ const HomePage: React.FC = () => {
   const maxSkins = accounts.length > 0 ? Math.max(...accounts.map(a => a.skinCount || 0)) : 0;
 
   const categories = [
-    { label: '🌟 新手入门', range: '0-50', desc: '低价优质入门号', count: accounts.filter(a => a.price < 50).length },
-    { label: '💎 钻石段位', range: '50-500', desc: '中端性价比之选', count: accounts.filter(a => a.price >= 50 && a.price < 500).length },
-    { label: '👑 星耀王者', range: '500-2000', desc: '高端实力账号', count: accounts.filter(a => a.price >= 500 && a.price < 2000).length },
-    { label: '🔥 满皮肤号', range: '2000+', desc: '限定皮肤收藏级', count: accounts.filter(a => a.price >= 2000).length },
+    { label: '新手入门', Icon: Sparkles, color: 'text-green-400', bg: 'bg-green-400/20', desc: '低价优质入门号', count: accounts.filter(a => a.price < 50).length },
+    { label: '钻石段位', Icon: Star, color: 'text-blue-400', bg: 'bg-blue-400/20', desc: '中端性价比之选', count: accounts.filter(a => a.price >= 50 && a.price < 500).length },
+    { label: '星耀王者', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-400/20', desc: '高端实力账号', count: accounts.filter(a => a.price >= 500 && a.price < 2000).length },
+    { label: '满皮肤号', Icon: Zap, color: 'text-red-400', bg: 'bg-red-400/20', desc: '限定皮肤收藏级', count: accounts.filter(a => a.price >= 2000).length },
   ];
 
   const handleQuickSearch = (e: React.FormEvent) => {
@@ -362,16 +362,18 @@ const HomePage: React.FC = () => {
               <button
                 key={cat.label}
                 onClick={() => {
-                  const label = cat.label.split(' ').slice(1).join(' ');
-                  navigate(`/accounts?keyword=${encodeURIComponent(label)}`);
+                  navigate(`/accounts?keyword=${encodeURIComponent(cat.label)}`);
                 }}
                 className="card-static p-5 group hover:border-primary/50 transition-all cursor-pointer text-left"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl">{cat.label.split(' ')[0]}</span>
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-xl ${cat.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <cat.Icon className={`w-5 h-5 ${cat.color}`} />
+                  </div>
+                  <span className="text-xs text-slate-500 bg-dark px-2 py-0.5 rounded-full">{cat.count} 个</span>
                   <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </div>
-                <p className="text-sm font-medium mb-1">{cat.label.split(' ').slice(1).join(' ')}</p>
+                <p className="text-sm font-semibold mb-0.5">{cat.label}</p>
                 <p className="text-xs text-slate-500">{cat.desc}</p>
               </button>
             ))}
