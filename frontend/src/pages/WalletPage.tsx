@@ -468,8 +468,9 @@ const WalletPage: React.FC = () => {
               {period === 'last-month' ? '上月' : period === 'this-month' ? '本月' : '总收入'}</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-red-400">¥{stats.monthlyExpense.toFixed(2)}</p>
-            <p className="text-xs text-slate-500">本月支出</p>
+            <p className="text-2xl font-bold text-red-400">¥{stats.periodExpense.toFixed(2)}</p>
+            <p className="text-xs text-slate-500">
+              {period === 'last-month' ? '上月' : period === 'this-month' ? '本月' : '总支出'}</p>
           </div>
         </div>
         <BalanceSparkline transactions={transactions} />

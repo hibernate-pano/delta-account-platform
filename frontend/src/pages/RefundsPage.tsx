@@ -174,7 +174,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
                   <p className="text-xs text-slate-500">{refund.order.type === 'BUY' ? '购买账号' : '租赁使用'}</p>
                 </div>
                 <Link
-                  to={`/orders`}
+                  to={`/orders${refund.orderId ? `?orderId=${refund.orderId}` : ''}`}
                   onClick={onClose}
                   className="p-2 text-slate-500 hover:text-white hover:bg-dark rounded-lg transition-colors"
                 >
@@ -187,7 +187,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
           {/* Actions */}
           <div className="flex gap-2">
             <Link
-              to={`/orders`}
+              to={`/orders${refund.orderId ? `?orderId=${refund.orderId}` : ''}`}
               onClick={onClose}
               className="btn-secondary flex-1 !py-2.5 text-sm flex items-center justify-center gap-2"
             >
