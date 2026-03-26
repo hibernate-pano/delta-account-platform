@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Bell, CheckCircle, AlertCircle, MessageSquare } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Bell, CheckCircle, AlertCircle, MessageSquare, Clock, ChevronRight } from 'lucide-react';
 import { notificationApi } from '../../api';
 
 interface Notification {
@@ -11,11 +12,22 @@ interface Notification {
   createdAt: string;
 }
 
+const formatTime = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  const h = Math.floor(diff / 3600000);
+  if (h < 24) return `${h}小时前`;
+  return `${Math.floor(h / 24)}天前`;
+};
+
 export const NotificationBell: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUnreadCount();
@@ -91,6 +103,25 @@ export const NotificationBell: React.FC = () => {
     }
   };
 
+  // Smart navigation per notification type
+  const getNavTarget = (n: Notification) => {
+    switch (n.type) {
+      case 'ORDER_PAID':
+      case 'ORDER_COMPLETED':
+      case 'ORDER_CANCELLED':
+      case 'REFUND':
+        return '/orders';
+      case 'NEW_MESSAGE':
+        return '/messages';
+      case 'WALLET':
+      case 'ACCOUNT_VERIFIED':
+      case 'ACCOUNT_REJECTED':
+        return '/wallet';
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -127,22 +158,37 @@ export const NotificationBell: React.FC = () => {
                   <div
                     key={n.id}
                     className={`p-3 rounded-lg cursor-pointer hover:bg-dark ${n.status === 'UNREAD' ? 'bg-primary/5' : ''}`}
-                    onClick={async () => {
+                    onClick={async (e) => {
+                      // Mark as read
                       if (n.status === 'UNREAD') {
                         await notificationApi.markAsRead(n.id);
                         setUnreadCount(prev => Math.max(0, prev - 1));
                         setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, status: 'READ' } : item));
                       }
+                      // Smart navigate
+                      const target = getNavTarget(n);
+                      if (target) {
+                        setShowDropdown(false);
+                        setTimeout(() => navigate(target!), 80);
+                      }
                     }}
                   >
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5">{getIcon(n.type)}</div>
+                    <div className="flex items-start space-x-2">
+                      <div className="mt-0.5 flex-shrink-0">{getIcon(n.type)}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{n.title}</p>
-                        <p className="text-xs text-gray-500 truncate">{n.content}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium truncate">{n.title}</p>
+                          <span className="text-[11px] text-slate-600 flex-shrink-0 flex items-center gap-0.5">
+                            <Clock className="w-2.5 h-2.5" />
+                            {formatTime(n.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 truncate mt-0.5">{n.content}</p>
                       </div>
-                      {n.status === 'UNREAD' && (
+                      {n.status === 'UNREAD' ? (
                         <div className="w-2 h-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />
+                      ) : (
+                        getNavTarget(n) && <ChevronRight className="w-3.5 h-3.5 text-slate-600 mt-1 flex-shrink-0" />
                       )}
                     </div>
                   </div>

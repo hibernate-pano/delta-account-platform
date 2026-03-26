@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -71,6 +72,18 @@ export const GlobalLoadingProvider: React.FC<GlobalLoadingProviderProps> = ({ ch
   return (
     <LoadingContext.Provider value={{ isLoading, startLoading, stopLoading, isRequestPending }}>
       {children}
+      {/* Global loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
+          <div className="relative flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
+            </div>
+            <p className="text-xs text-slate-400 font-medium">加载中...</p>
+          </div>
+        </div>
+      )}
     </LoadingContext.Provider>
   );
 };

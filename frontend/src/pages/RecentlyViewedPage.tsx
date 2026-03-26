@@ -1,14 +1,25 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import {
-  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle
+  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles
 } from 'lucide-react';
 
+const formatRelativeTime = (ts: number) => {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  const h = Math.floor(diff / 3600000);
+  if (h < 24) return `${h}小时前`;
+  const d = Math.floor(diff / 86400000);
+  if (d < 7) return `${d}天前`;
+  return new Date(ts).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+};
+
 const RecentlyViewedPage: React.FC = () => {
-  const navigate = useNavigate();
   const { items: recentItems, removeItem, clearAll } = useRecentStore();
   const { token } = useAuthStore();
 
@@ -82,20 +93,20 @@ const RecentlyViewedPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-          {recentItems.map((account, idx) => (
-            <div key={`${account.id}-${idx}`} className="card group relative hover:border-slate-700 transition-all">
+          {recentItems.map((item) => (
+            <div key={`${item.account.id}-${item.viewedAt}`} className="card group relative hover:border-slate-700 transition-all">
               {/* Wishlist */}
               <div className="absolute top-2 right-2 z-10">
-                <WishlistButton account={account} size="sm" />
+                <WishlistButton account={item.account} size="sm" />
               </div>
 
-              <Link to={`/accounts/${account.id}`} className="block">
+              <Link to={`/accounts/${item.account.id}`} className="block">
                 {/* Image */}
                 <div className="aspect-video bg-dark rounded-lg mb-4 overflow-hidden relative">
-                  {account.images?.[0] ? (
+                  {item.account.images?.[0] ? (
                     <img
-                      src={account.images[0]}
-                      alt={account.title}
+                      src={item.account.images[0]}
+                      alt={item.account.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
@@ -103,7 +114,7 @@ const RecentlyViewedPage: React.FC = () => {
                       <Gamepad2 className="w-10 h-10 text-slate-700" />
                     </div>
                   )}
-                  {account.verificationStatus === 'VERIFIED' && (
+                  {item.account.verificationStatus === 'VERIFIED' && (
                     <div className="absolute bottom-2 left-2">
                       <span className="px-2 py-0.5 bg-green-500/90 text-white text-xs rounded-full flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" /> 已认证
@@ -111,25 +122,31 @@ const RecentlyViewedPage: React.FC = () => {
                     </div>
                   )}
                   <div className="absolute bottom-2 right-2">
-                    <span className="text-lg font-bold text-white drop-shadow-lg">¥{account.price}</span>
+                    <span className="text-lg font-bold text-white drop-shadow-lg">¥{item.account.price}</span>
                   </div>
                 </div>
 
                 {/* Info */}
                 <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                  {account.title}
+                  {item.account.title}
                 </h3>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
-                  {account.gameRank && (
-                    <span className="badge badge-primary">{account.gameRank}</span>
+                  {item.account.gameRank && (
+                    <span className="badge badge-primary">{item.account.gameRank}</span>
                   )}
-                  <span>🎨 {account.skinCount} 皮肤</span>
+                  <span className="flex items-center gap-0.5"><Sparkles className="w-3 h-3" /> {item.account.skinCount} 皮肤</span>
                 </div>
+
+                {/* Viewed timestamp */}
+                <p className="text-[11px] text-slate-600 mt-2 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatRelativeTime(item.viewedAt)}
+                </p>
               </Link>
 
               {/* Remove */}
               <button
-                onClick={(e) => { e.preventDefault(); removeItem(account.id); }}
+                onClick={(e) => { e.preventDefault(); removeItem(item.account.id); }}
                 className="absolute bottom-4 right-4 p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 title="移除记录"
               >

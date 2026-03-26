@@ -55,7 +55,7 @@ const AccountsPage: React.FC = () => {
   const totalPages = data?.data?.data?.pages ?? 1;
   const totalRecords = data?.data?.data?.total ?? 0;
   const { items: recentItems } = useRecentStore();
-  const recentAccounts = recentItems.slice(0, 6); // Show max 6 recent
+  const recentAccounts = recentItems.slice(0, 6).map((item) => item.account); // Show max 6 recent
 
   const allAccounts: Account[] = data?.data?.data?.records || [];
 

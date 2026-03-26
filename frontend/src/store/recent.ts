@@ -4,8 +4,13 @@ import { Account } from '../types';
 
 const MAX_RECENT = 12;
 
+interface RecentItem {
+  account: Account;
+  viewedAt: number; // timestamp ms
+}
+
 interface RecentState {
-  items: Account[];
+  items: RecentItem[];
   addItem: (account: Account) => void;
   removeItem: (accountId: number) => void;
   clearAll: () => void;
@@ -18,14 +23,14 @@ export const useRecentStore = create<RecentState>()(
 
       addItem: (account) => {
         set((state) => {
-          const filtered = state.items.filter((a) => a.id !== account.id);
-          return { items: [account, ...filtered].slice(0, MAX_RECENT) };
+          const filtered = state.items.filter((item) => item.account.id !== account.id);
+          return { items: [{ account, viewedAt: Date.now() }, ...filtered].slice(0, MAX_RECENT) };
         });
       },
 
       removeItem: (accountId) => {
         set((state) => ({
-          items: state.items.filter((a) => a.id !== accountId),
+          items: state.items.filter((item) => item.account.id !== accountId),
         }));
       },
 

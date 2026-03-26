@@ -1,6 +1,8 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
 import { useWishlistStore } from '../../store/wishlist';
+import { useAuthStore } from '../../store/auth';
+import { useToast } from './Toast';
 import { Account } from '../../types';
 
 interface WishlistButtonProps {
@@ -15,6 +17,8 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   className = '',
 }) => {
   const { addItem, removeItem, isWishlisted } = useWishlistStore();
+  const { token } = useAuthStore();
+  const { showToast } = useToast();
   const wishlisted = isWishlisted(account.id);
 
   const sizeClasses = {
@@ -32,10 +36,16 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!token) {
+      showToast('请先登录后再收藏账号', 'warning');
+      return;
+    }
     if (wishlisted) {
       removeItem(account.id);
+      showToast('已取消收藏', 'info');
     } else {
       addItem(account);
+      showToast('已添加到收藏夹', 'success');
     }
   };
 
