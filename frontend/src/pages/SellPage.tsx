@@ -224,12 +224,18 @@ const SellPage: React.FC = () => {
           <div className="space-y-5 animate-fade-in">
             <div className="card space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  账号标题 <span className="text-red-400">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-300">
+                    账号标题 <span className="text-red-400">*</span>
+                  </label>
+                  <span className={`text-xs ${formData.title.length > 30 ? 'text-red-400' : 'text-slate-500'}`}>
+                    {formData.title.length}/30
+                  </span>
+                </div>
                 <input
                   type="text" value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value.slice(0, 30) })}
+                  maxLength={30}
                   className="input" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
                   required autoFocus
                 />
@@ -382,10 +388,16 @@ const SellPage: React.FC = () => {
           <div className="space-y-5 animate-fade-in">
             <div className="card space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">武器装备</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-slate-300">武器装备</label>
+                  <span className={`text-xs ${formData.weapons.length > 100 ? 'text-red-400' : 'text-slate-500'}`}>
+                    {formData.weapons.length}/100
+                  </span>
+                </div>
                 <input
                   type="text" value={formData.weapons}
-                  onChange={(e) => setFormData({ ...formData, weapons: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, weapons: e.target.value.slice(0, 100) })}
+                  maxLength={100}
                   className="input" placeholder="主要武器和装备，用逗号分隔"
                 />
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -403,10 +415,16 @@ const SellPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">账号描述</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-slate-300">账号描述</label>
+                  <span className={`text-xs ${formData.description.length > 500 ? 'text-red-400' : 'text-slate-500'}`}>
+                    {formData.description.length}/500
+                  </span>
+                </div>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value.slice(0, 500) })}
+                  maxLength={500}
                   className="input h-28 resize-none" placeholder="详细描述：绑定信息、历史充值、特殊角色..."
                 />
               </div>
