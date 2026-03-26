@@ -265,6 +265,22 @@ const AccountsPage: React.FC = () => {
           </button>
         </form>
 
+        {/* Popular searches */}
+        {accounts.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <span className="text-xs text-slate-600">热门:</span>
+            {['王者 段位', '满皮肤', '钻石', '星耀', '支持租赁'].map((chip) => (
+              <button
+                key={chip}
+                onClick={() => setKeyword(chip)}
+                className="px-2 py-0.5 bg-dark-lighter hover:bg-dark border border-dark-border hover:border-primary/40 rounded-full text-xs text-slate-500 hover:text-slate-300 transition-all"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Expanded Filters */}
         {showFilters && (
           <div className="mt-4 p-4 bg-dark-card rounded-xl border border-dark-border animate-fade-in">
