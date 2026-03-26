@@ -302,7 +302,26 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Verified */}
-      {featuredAccounts.length > 0 && (
+      {isLoading ? (
+        <section className="py-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-dark-lighter rounded-lg animate-pulse" />
+                <div>
+                  <div className="h-6 w-36 bg-dark-lighter rounded animate-pulse mb-1" />
+                  <div className="h-3 w-48 bg-dark-lighter rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <AccountCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : (featuredAccounts.length > 0 && (
         <section className="py-16">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex justify-between items-center mb-8">
@@ -355,7 +374,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </section>
-      )}
+      ))}
 
       {/* How It Works */}
       <section className="py-16 bg-dark-darker">

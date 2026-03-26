@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
 import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle } from 'lucide-react';
@@ -50,6 +50,14 @@ const AccountsPage: React.FC = () => {
 
   // Reset to page 1 when search or sort changes
   React.useEffect(() => { setCurrentPage(1); }, [debouncedKeyword, sort]);
+
+  // Keyboard dismiss for QuickView modal
+  React.useEffect(() => {
+    if (!quickViewAccount) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setQuickViewAccount(null); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [quickViewAccount]);
 
   const { data, isLoading } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
   const totalPages = data?.data?.data?.pages ?? 1;

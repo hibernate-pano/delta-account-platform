@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
@@ -506,6 +506,12 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const updateMutation = useUpdateProfile();
   const [nickname, setNickname] = useState(user?.nickname || '');
   const [avatar, setAvatar] = useState(user?.avatar || '');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   const handleSave = async () => {
     if (!nickname.trim()) { showToast('请输入昵称', 'error'); return; }

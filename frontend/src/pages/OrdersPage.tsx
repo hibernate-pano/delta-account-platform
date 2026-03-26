@@ -461,6 +461,12 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
   const [hoverRating, setHoverRating] = useState(0);
   const [content, setContent] = useState('');
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   const revieweeId = user?.id === order.buyerId ? order.sellerId : order.buyerId;
 
   const handleSubmit = async () => {

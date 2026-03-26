@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import { paymentApi, orderApi } from '../../api';
@@ -31,6 +31,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const { toast } = useToast();
   const [selectedMethod, setSelectedMethod] = useState('BALANCE');
   const [loading, setLoading] = useState(false);
+
+  // Keyboard dismiss
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   const balance = user?.balance ?? 0;
   const insufficientBalance = selectedMethod === 'BALANCE' && balance < amount;

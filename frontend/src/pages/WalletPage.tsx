@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -101,6 +101,12 @@ const TransactionDetailModal: React.FC<{ tx: Transaction; onClose: () => void }>
   const TypeIcon = cfg.icon;
   const StatusIcon = sCfg.icon;
   const isUp = cfg.positive;
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -246,6 +246,14 @@ const NotificationsPage: React.FC = () => {
     setDeletedIds((prev) => new Set([...prev, id]));
     showToast('通知已删除', 'info');
   };
+
+  // Keyboard dismiss for detail modal
+  useEffect(() => {
+    if (!selectedNotification) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedNotification(null); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [selectedNotification]);
 
   const filteredNotifications = notifications.filter((n) => {
     if (activeFilter === 'UNREAD') return n.status === 'UNREAD';
