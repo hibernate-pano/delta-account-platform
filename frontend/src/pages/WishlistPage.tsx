@@ -7,7 +7,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
-  ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc
+  ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
@@ -216,6 +216,29 @@ const WishlistPage: React.FC = () => {
                         <span className="text-slate-600 ml-auto">租 ¥{account.rentalPrice}/时</span>
                       )}
                     </div>
+                    {(account.sellerNickname || account.sellerUsername) && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        {account.sellerAvatar ? (
+                          <img src={account.sellerAvatar} alt="" className="w-4 h-4 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-dark-lighter flex items-center justify-center">
+                            <User className="w-2.5 h-2.5 text-slate-600" />
+                          </div>
+                        )}
+                        <span className="text-[10px] text-slate-600 truncate max-w-[100px]">
+                          {account.sellerNickname || account.sellerUsername}
+                        </span>
+                        {account.sellerCreditScore && (
+                          <span className="text-[10px] text-yellow-500/80 flex items-center gap-0.5">
+                            <Star className="w-2.5 h-2.5 fill-yellow-500/80 text-yellow-500/80" />
+                            {account.sellerCreditScore}
+                          </span>
+                        )}
+                        {account.verificationStatus === 'VERIFIED' && (
+                          <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0" />
+                        )}
+                      </div>
+                    )}
                   </Link>
 
                   {/* Actions */}
@@ -279,11 +302,26 @@ const WishlistPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Price */}
+                  {/* Price + Seller */}
                   <div className="text-right flex-shrink-0">
                     <p className="text-xl font-bold text-primary">¥{account.price}</p>
                     {account.rentalPrice && (
                       <p className="text-xs text-slate-500">租 ¥{account.rentalPrice}/时</p>
+                    )}
+                    {(account.sellerNickname || account.sellerUsername) && (
+                      <div className="flex items-center gap-1.5 mt-1.5 justify-end">
+                        {account.sellerAvatar ? (
+                          <img src={account.sellerAvatar} alt="" className="w-4 h-4 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-dark-lighter flex items-center justify-center">
+                            <User className="w-2.5 h-2.5 text-slate-600" />
+                          </div>
+                        )}
+                        <span className="text-[10px] text-slate-600">{account.sellerNickname || account.sellerUsername}</span>
+                        {account.verificationStatus === 'VERIFIED' && (
+                          <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0" />
+                        )}
+                      </div>
                     )}
                   </div>
 
