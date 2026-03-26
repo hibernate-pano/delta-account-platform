@@ -445,6 +445,7 @@ export const useAuthProfile = () => {
     queryKey: queryKeys.auth.profile,
     queryFn: () => authApi.getProfile(),
     enabled: !!token,
+    ...defaultQueryOptions,
     staleTime: 1000 * 60 * 10, // 10 minutes for profile
   });
 };

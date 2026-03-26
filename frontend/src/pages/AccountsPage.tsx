@@ -704,6 +704,7 @@ const AccountsPage: React.FC = () => {
                   { label: '游戏段位', value: quickViewAccount.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${quickViewAccount.skinCount} 个` },
                   { label: '装备描述', value: quickViewAccount.weapons || '未填写' },
+                  { label: '发布时间', value: quickViewAccount.createdAt ? new Date(quickViewAccount.createdAt).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) : '未知' },
                 ].map((item) => (
                   <div key={item.label} className="bg-dark rounded-lg px-3 py-2.5">
                     <p className="text-[10px] text-slate-500 mb-0.5">{item.label}</p>
@@ -723,8 +724,12 @@ const AccountsPage: React.FC = () => {
               {/* Seller info */}
               {quickViewAccount.sellerId && (
                 <div className="p-3 bg-dark rounded-xl border border-dark-border flex items-center gap-3">
-                  <div className="w-9 h-9 bg-gradient-to-br from-primary/30 to-purple-500/30 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary" />
+                  <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
+                    {quickViewAccount.sellerAvatar ? (
+                      <img src={quickViewAccount.sellerAvatar} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-4 h-4 text-primary" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-white">{quickViewAccount.sellerNickname || quickViewAccount.sellerUsername || '卖家'}</p>

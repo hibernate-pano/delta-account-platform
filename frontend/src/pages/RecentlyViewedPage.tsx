@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/auth';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
-  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles
+  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star
 } from 'lucide-react';
 
 const formatRelativeTime = (ts: number) => {
@@ -138,6 +138,23 @@ const RecentlyViewedPage: React.FC = () => {
                   )}
                   <span className="flex items-center gap-0.5"><Sparkles className="w-3 h-3" /> {item.account.skinCount} 皮肤</span>
                 </div>
+                {/* Seller info */}
+                {(item.account.sellerNickname || item.account.sellerUsername) && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[11px] text-slate-600">
+                      卖家: {item.account.sellerNickname || item.account.sellerUsername}
+                    </span>
+                    {item.account.sellerCreditScore != null && (
+                      <span className="flex items-center gap-0.5 text-[11px] text-yellow-400/80">
+                        <Star className="w-3 h-3 fill-yellow-400/80" />
+                        {item.account.sellerCreditScore}分
+                      </span>
+                    )}
+                    {item.account.verificationStatus === 'VERIFIED' && (
+                      <span className="text-[10px] text-emerald-400/70">已认证</span>
+                    )}
+                  </div>
+                )}
 
                 {/* Viewed timestamp */}
                 <p className="text-[11px] text-slate-600 mt-2 flex items-center gap-1">
