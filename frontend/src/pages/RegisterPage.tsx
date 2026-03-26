@@ -255,8 +255,8 @@ const RegisterPage: React.FC = () => {
               />
               <label htmlFor="agreement" className="text-slate-400 leading-relaxed">
                 我已阅读并同意{' '}
-                <a href="#" className="text-primary hover:underline">服务条款</a> 和{' '}
-                <a href="#" className="text-primary hover:underline">隐私政策</a>
+                <Link to="/terms" className="text-primary hover:underline">服务条款</Link> 和{' '}
+                <Link to="/privacy" className="text-primary hover:underline">隐私政策</Link>
               </label>
             </div>
 
