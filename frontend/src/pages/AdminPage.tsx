@@ -13,6 +13,7 @@ import {
 
 interface PendingAccount {
   id: number; title: string; price: number; createdAt: string;
+  gameType?: string;
   seller?: { username: string; nickname?: string };
 }
 
@@ -385,6 +386,9 @@ const AdminPage: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{account.title}</p>
                     <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
+                      {account.gameType && (
+                        <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-[10px]">{account.gameType}</span>
+                      )}
                       <span>卖家: {account.seller?.nickname || account.seller?.username || '-'}</span>
                       <span className="text-primary font-medium">¥{account.price}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{account.createdAt}</span>

@@ -97,6 +97,9 @@ const MessagesPage: React.FC = () => {
 
   const { data: sessionsData, isLoading: sessionsLoading, isError: sessionsError, refetch: refetchSessions } = useMessageSessions();
   const sessions: Session[] = sessionsData?.data?.data || [];
+  const currentSession = sessionId ? sessions.find((s) => s.id === parseInt(sessionId)) : undefined;
+  const { data: accountData } = useAccount(currentSession?.accountId ?? null);
+  const account = accountData?.data?.data;
   const filteredSessions = sessions.filter((s) =>
     !sessionSearch.trim()
       ? true
@@ -263,9 +266,6 @@ const MessagesPage: React.FC = () => {
 
   // --- Chat View ---
   if (sessionId) {
-    const currentSession = sessions.find((s) => s.id === parseInt(sessionId));
-    const { data: accountData } = useAccount(currentSession?.accountId);
-    const account = accountData?.data?.data;
 
     // Group messages by date
     const groupedMessages: { date: string; messages: Message[] }[] = [];
