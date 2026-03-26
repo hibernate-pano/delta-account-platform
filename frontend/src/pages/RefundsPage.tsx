@@ -229,7 +229,7 @@ const RefundsPage: React.FC = () => {
   const [newImage, setNewImage] = useState('');
 
   const { data: refundsData, isLoading, isError, refetch } = useMyRefunds();
-  const { data: ordersData, isError: ordersError, refetch: refetchOrders } = useMyOrders();
+  const { data: ordersData, isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useMyOrders();
   const applyMutation = useApplyRefund();
   const cancelMutation = useCancelRefund();
 
@@ -440,7 +440,20 @@ const RefundsPage: React.FC = () => {
       {/* Refundable Orders */}
       {activeTab === 'apply' && (
         <div className="card">
-          {ordersError ? (
+          {ordersLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-4 py-4 border-b border-dark-border last:border-0">
+                  <div className="w-12 h-12 rounded-lg skeleton flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-48 skeleton rounded" />
+                    <div className="h-3 w-32 skeleton rounded" />
+                  </div>
+                  <div className="h-6 w-20 skeleton rounded flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          ) : ordersError ? (
             <div className="text-center py-12">
               <AlertCircle className="w-12 h-12 mx-auto mb-3 text-red-400/60" />
               <p className="text-slate-400 mb-4">加载订单失败</p>

@@ -186,6 +186,11 @@ const isOwner = user?.id === account?.sellerId;
         <div>
           <h1 className="text-2xl font-bold mb-4">{account.title}</h1>
           <div className="flex flex-wrap gap-2 mb-6">
+            {account.gameType && (
+              <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium">
+                {account.gameType}
+              </span>
+            )}
             <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">
               {account.gameRank || '暂无段位'}
             </span>
@@ -249,6 +254,7 @@ const isOwner = user?.id === account?.sellerId;
             {activeTab === 'info' ? (
               <div className="space-y-3">
                 {[
+                  { label: '游戏类型', value: account.gameType || '王者荣耀' },
                   { label: '游戏段位', value: account.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
                   { label: '装备描述', value: account.weapons || '未填写' },
