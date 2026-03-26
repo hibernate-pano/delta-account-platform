@@ -1,13 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
 import { useDebounce } from '../hooks/useDebounce';
-import { useAccounts } from '../hooks/useQueries';
+import { useAccounts, useBuyAccount } from '../hooks/useQueries';
 import { useRecentStore } from '../store/recent';
+import { useToast } from '../components/ui/Toast';
+import { useAuthStore } from '../store/auth';
 
 const AccountsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +26,11 @@ const AccountsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 12;
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [quickViewAccount, setQuickViewAccount] = useState<Account | null>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { token } = useAuthStore();
+  const { showToast } = useToast();
+  const buyMutation = useBuyAccount();
 
   const debouncedKeyword = useDebounce(keyword, 400);
 
@@ -393,6 +399,14 @@ const AccountsPage: React.FC = () => {
                 >
                   {isCompareSelected(account.id) ? <Check className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
                 </button>
+                {/* Quick view button */}
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewAccount(account); }}
+                  className="absolute top-2 right-8 w-7 h-7 bg-black/40 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-primary"
+                  title="快速查看"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
               </div>
               <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-1">
                 {account.title}
@@ -547,6 +561,142 @@ const AccountsPage: React.FC = () => {
           onClose={() => setShowCompareModal(false)}
           onViewAccount={(id) => navigate(`/accounts/${id}`)}
         />
+      )}
+
+      {/* Quick View Modal */}
+      {quickViewAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setQuickViewAccount(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-dark-card border-b border-dark-border px-6 py-4 flex items-center justify-between">
+              <h2 className="font-bold text-white">快速预览</h2>
+              <button onClick={() => setQuickViewAccount(null)} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Images */}
+              <div className="aspect-video bg-dark rounded-xl overflow-hidden">
+                {quickViewAccount.images && quickViewAccount.images.length > 0 ? (
+                  <img src={quickViewAccount.images[0]} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Gamepad2 className="w-16 h-16 text-slate-700" />
+                  </div>
+                )}
+              </div>
+
+              {/* Title & Badges */}
+              <div>
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="text-xl font-bold text-white">{quickViewAccount.title}</h3>
+                  <WishlistButton account={quickViewAccount} size="md" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">{quickViewAccount.gameRank || '暂无段位'}</span>
+                  <span className="px-2.5 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm">🎨 {quickViewAccount.skinCount} 皮肤</span>
+                  {quickViewAccount.verificationStatus === 'VERIFIED' && (
+                    <span className="px-2.5 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">✓ 已认证</span>
+                  )}
+                  {quickViewAccount.status === 'ON_SALE' && (
+                    <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium">🔥 出售中</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="card bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">一口价</p>
+                    <p className="text-3xl font-bold text-primary">¥{quickViewAccount.price}</p>
+                  </div>
+                  {quickViewAccount.rentalPrice && (
+                    <div className="text-right">
+                      <p className="text-xs text-slate-500 mb-1">时租价</p>
+                      <p className="text-xl font-semibold text-purple-400">¥{quickViewAccount.rentalPrice}/时</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Account Info Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: '游戏段位', value: quickViewAccount.gameRank || '未填写' },
+                  { label: '皮肤数量', value: `${quickViewAccount.skinCount} 个` },
+                  { label: '装备描述', value: quickViewAccount.weapons || '未填写' },
+                ].map((item) => (
+                  <div key={item.label} className="bg-dark rounded-lg px-3 py-2.5">
+                    <p className="text-[10px] text-slate-500 mb-0.5">{item.label}</p>
+                    <p className="text-sm font-medium text-slate-200">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Description */}
+              {quickViewAccount.description && (
+                <div>
+                  <p className="text-xs text-slate-500 mb-2">详细描述</p>
+                  <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">{quickViewAccount.description}</p>
+                </div>
+              )}
+
+              {/* Seller info */}
+              {quickViewAccount.sellerId && (
+                <div className="p-3 bg-dark rounded-xl border border-dark-border flex items-center gap-3">
+                  <div className="w-9 h-9 bg-gradient-to-br from-primary/30 to-purple-500/30 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white">{quickViewAccount.sellerNickname || quickViewAccount.sellerUsername || '卖家'}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {[1,2,3,4,5].map((s) => (
+                        <Star key={s} className={`w-3 h-3 ${s <= Math.round((quickViewAccount.sellerCreditScore || 50) / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`} />
+                      ))}
+                      <span className="text-xs text-yellow-400 ml-1">{quickViewAccount.sellerCreditScore || '—'}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <Shield className="w-3 h-3 text-green-400" />平台托管
+                    <CheckCircle className="w-3 h-3 text-blue-400" />账号认证
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { if (!token) { navigate('/login'); return; } buyMutation.mutate(quickViewAccount.id); setQuickViewAccount(null); setTimeout(() => navigate('/orders'), 1000); showToast('购买成功！正在跳转...', 'success'); }}
+                  disabled={buyMutation.isPending || quickViewAccount.status !== 'ON_SALE'}
+                  className="btn-primary flex-1 !py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  立即购买
+                </button>
+                <button
+                  onClick={() => { setQuickViewAccount(null); navigate(`/accounts/${quickViewAccount.id}`); }}
+                  className="btn-secondary flex-1 !py-3 text-sm flex items-center justify-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  查看详情
+                </button>
+                <button
+                  onClick={() => { /* open chat - just show toast for now */ showToast('请先进入账号详情页联系卖家', 'info'); }}
+                  className="btn-secondary !py-3 !px-3"
+                  title="联系卖家"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
