@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense, useState } from 'react';
+import React, { useEffect, lazy, Suspense, useState, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
@@ -69,6 +69,8 @@ const LoadingProgressBar: React.FC = () => {
 const KeyboardShortcuts: React.FC<{ onShowShortcuts: () => void }> = ({ onShowShortcuts }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const onShowRef = useRef(onShowShortcuts);
+  useEffect(() => { onShowRef.current = onShowShortcuts; });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -88,12 +90,17 @@ const KeyboardShortcuts: React.FC<{ onShowShortcuts: () => void }> = ({ onShowSh
       }
       if (e.key === '?' && !(e.target instanceof HTMLInputElement)) {
         e.preventDefault();
-        onShowShortcuts();
+        onShowRef.current();
       }
     };
+    const handleCustom = () => onShowRef.current();
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate, location.pathname, onShowShortcuts]);
+    window.addEventListener('delta:show-shortcuts', handleCustom);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('delta:show-shortcuts', handleCustom);
+    };
+  }, [navigate, location.pathname]);
 
   return null;
 };
@@ -150,6 +157,31 @@ const KeyboardShortcutsHelp: React.FC<{ onClose: () => void }> = ({ onClose }) =
   );
 };
 
+// Back to top button
+const BackToTop: React.FC = () => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setVisible(window.scrollY > 400);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className={`fixed bottom-24 md:bottom-8 right-6 w-11 h-11 bg-dark-card border border-dark-border rounded-xl shadow-lg flex items-center justify-center text-slate-400 hover:text-white hover:border-primary/50 transition-all duration-300 z-40 ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+      }`}
+      title="回到顶部"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 12V4M4 7l4-4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </button>
+  );
+};
+
 const App: React.FC = () => {
   const [showShortcuts, setShowShortcuts] = useState(false);
   return (
@@ -183,6 +215,7 @@ const App: React.FC = () => {
                 </Suspense>
               </Layout>
               {showShortcuts && <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />}
+              <BackToTop />
             </BrowserRouter>
           </ErrorBoundary>
         </GlobalLoadingProvider>

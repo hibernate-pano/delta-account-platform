@@ -149,6 +149,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     )}
                   </Link>
 
+                  {/* Shortcuts hint */}
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('delta:show-shortcuts'))}
+                    className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-all"
+                    title="键盘快捷键 (?)"
+                  >
+                    <span className="text-xs font-mono">?</span>
+                  </button>
+
                   {/* User Menu */}
                   <div className="relative user-menu-container">
                     <button
