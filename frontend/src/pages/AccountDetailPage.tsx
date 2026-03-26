@@ -8,6 +8,7 @@ import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats } from '../hooks/useQueries';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
+  usePageTitle('账号详情');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { token, user } = useAuthStore();

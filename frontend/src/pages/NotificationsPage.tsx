@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '../hooks/useQueries';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X
@@ -218,6 +219,7 @@ const NotificationItem: React.FC<{
 };
 
 const NotificationsPage: React.FC = () => {
+  usePageTitle('消息通知');
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();

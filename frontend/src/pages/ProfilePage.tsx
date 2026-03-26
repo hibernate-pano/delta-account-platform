@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
 import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile } from '../hooks/useQueries';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
+  usePageTitle('个人中心');
   const navigate = useNavigate();
   const { token, user, logout, updateUser } = useAuthStore();
   const { showToast } = useToast();

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles
 } from 'lucide-react';
@@ -20,6 +21,7 @@ const formatRelativeTime = (ts: number) => {
 };
 
 const RecentlyViewedPage: React.FC = () => {
+  usePageTitle('最近浏览');
   const { items: recentItems, removeItem, clearAll } = useRecentStore();
   const { token } = useAuthStore();
 

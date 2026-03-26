@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useCreateAccount } from '../hooks/useQueries';
 import {
   Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
@@ -44,6 +45,7 @@ const gamePresets = [
 const weaponPresets = ['传说皮肤', '限定皮肤', '全英雄', '全皮肤', 'V10贵族', '稀有道具'];
 
 const SellPage: React.FC = () => {
+  usePageTitle('发布账号');
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();

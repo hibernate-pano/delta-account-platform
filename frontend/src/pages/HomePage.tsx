@@ -4,6 +4,7 @@ import { Account } from '../types';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { useAccounts } from '../hooks/useQueries';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
@@ -115,6 +116,7 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 };
 
 const HomePage: React.FC = () => {
+  usePageTitle();
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
 

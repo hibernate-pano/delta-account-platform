@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, Search, Gamepad2 } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const NotFoundPage: React.FC = () => {
+  usePageTitle('页面未找到');
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
 

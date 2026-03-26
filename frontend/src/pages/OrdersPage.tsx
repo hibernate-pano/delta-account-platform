@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { TransactionSkeleton } from '../components/ui/Skeleton';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder, useReviewOrder } from '../hooks/useQueries';
 import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
@@ -589,6 +590,7 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
 };
 
 const OrdersPage: React.FC = () => {
+  usePageTitle('我的订单');
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();

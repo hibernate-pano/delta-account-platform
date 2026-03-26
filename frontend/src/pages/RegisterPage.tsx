@@ -4,8 +4,10 @@ import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, Check, X, Sparkles } from 'lucide-react';
 import AuthBackground from '../components/ui/AuthBackground';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const RegisterPage: React.FC = () => {
+  usePageTitle('注册');
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [formData, setFormData] = useState({

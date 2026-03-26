@@ -4,10 +4,12 @@ import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, User, Lock, Shield, Zap, TrendingUp, MessageCircle } from 'lucide-react';
 import AuthBackground from '../components/ui/AuthBackground';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const REMEMBER_KEY = 'delta_remembered_username';
 
 const LoginPage: React.FC = () => {
+  usePageTitle('登录');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setAuth } = useAuthStore();

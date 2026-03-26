@@ -4,6 +4,7 @@ import { useWishlistStore } from '../store/wishlist';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
   ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc
@@ -13,6 +14,7 @@ type ViewMode = 'grid' | 'list';
 type SortMode = 'default' | 'price_asc' | 'price_desc' | 'recent';
 
 const WishlistPage: React.FC = () => {
+  usePageTitle('我的心愿单');
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();

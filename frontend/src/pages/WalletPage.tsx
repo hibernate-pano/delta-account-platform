@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WalletSkeleton } from '../components/ui/Skeleton';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } from '../hooks/useQueries';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
@@ -203,6 +204,7 @@ const TransactionDetailModal: React.FC<{ tx: Transaction; onClose: () => void }>
 };
 
 const WalletPage: React.FC = () => {
+  usePageTitle('我的钱包');
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useAdminStats, useAdminAccounts, useAdminOrders, useAdminUsers, useVerifyAccount, useBanUser } from '../hooks/useQueries';
 import {
   Users, Package, FileText, Shield, RefreshCw, DollarSign,
@@ -168,6 +169,7 @@ const TrendCard: React.FC<{
 );
 
 const AdminPage: React.FC = () => {
+  usePageTitle('管理后台');
   const navigate = useNavigate();
   const { token, user } = useAuthStore();
   const { showToast } = useToast();

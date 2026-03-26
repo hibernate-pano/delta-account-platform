@@ -6,12 +6,14 @@ import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
 import { useDebounce } from '../hooks/useDebounce';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useAccounts, useBuyAccount } from '../hooks/useQueries';
 import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { useAuthStore } from '../store/auth';
 
 const AccountsPage: React.FC = () => {
+  usePageTitle('账号市场');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');

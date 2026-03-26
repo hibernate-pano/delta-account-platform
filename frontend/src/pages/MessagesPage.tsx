@@ -5,6 +5,7 @@ import { useToast } from '../components/ui/Toast';
 import {
   useMessageSessions, useSessionMessages, useSendMessage, useCreateSession, useAccount
 } from '../hooks/useQueries';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
   Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star
@@ -79,6 +80,7 @@ const StatusIcon: React.FC<{ status?: string; isMe: boolean }> = ({ status, isMe
 };
 
 const MessagesPage: React.FC = () => {
+  usePageTitle('私信聊天');
   const navigate = useNavigate();
   const { sessionId } = useParams();
   const [searchParams] = useSearchParams();

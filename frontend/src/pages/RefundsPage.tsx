@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyRefunds, useApplyRefund, useCancelRefund, useMyOrders } from '../hooks/useQueries';
 import {
   ArrowLeft, Package, RefreshCw, CheckCircle, XCircle, Clock,
@@ -211,6 +212,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
 };
 
 const RefundsPage: React.FC = () => {
+  usePageTitle('退款记录');
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
