@@ -5,9 +5,9 @@ import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAdminStats, useAdminAccounts, useAdminOrders, useAdminUsers, useVerifyAccount, useBanUser } from '../hooks/useQueries';
 import {
-  Users, Package, FileText, Shield, RefreshCw, DollarSign,
+  Users, Package, FileText, Shield, RefreshCw, Star,
   CheckCircle, XCircle, Clock, BarChart3, ArrowRight, Eye,
-  TrendingUp, TrendingDown, AlertTriangle, Ban, ChevronDown,
+  TrendingDown, AlertTriangle, Ban, ChevronDown,
   Activity, Zap, ArrowUpRight
 } from 'lucide-react';
 
@@ -61,50 +61,6 @@ const DonutChart: React.FC<{ segments: { label: string; value: number; color: st
   );
 };
 
-// Revenue sparkline
-const RevenueSparkline: React.FC<{ data?: number[] }> = ({ data }) => {
-  const vals = data || [12, 19, 15, 22, 18, 25, 21, 28, 24, 32, 28, 35];
-  const max = Math.max(...vals), min = Math.min(...vals);
-  const range = max - min || 1;
-  const W = 240, H = 60, pad = 4;
-  const pts = vals.map((v, i) => ({
-    x: pad + (i / (vals.length - 1)) * (W - pad * 2),
-    y: H - pad - ((v - min) / range) * (H - pad * 2),
-  }));
-  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  const area = `${line} L ${pts[pts.length - 1].x} ${H} L ${pts[0].x} ${H} Z`;
-  const last = pts[pts.length - 1];
-  const prev = pts[pts.length - 2];
-  const trendUp = last.y < prev.y;
-
-  return (
-    <div className="bg-dark rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-slate-500">近12月趋势</span>
-        <span className={`text-xs font-medium flex items-center gap-1 ${trendUp ? 'text-green-400' : 'text-red-400'}`}>
-          {trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {Math.abs(((vals[vals.length - 1] - vals[0]) / vals[0] * 100)).toFixed(0)}%
-        </span>
-      </div>
-      <svg width={W} height={H} className="w-full">
-        <defs>
-          <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={area} fill="url(#revGrad)" />
-        <path d={line} fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinejoin="round" />
-        <circle cx={last.x} cy={last.y} r="4" fill="#8b5cf6" className="drop-shadow-lg" />
-        <circle cx={last.x} cy={last.y} r="2" fill="white" />
-      </svg>
-      <div className="flex justify-between mt-2 text-[10px] text-slate-600">
-        <span>1月</span><span>12月</span>
-      </div>
-    </div>
-  );
-};
-
 // Platform health indicator
 const HealthCard: React.FC<{ stats: any }> = ({ stats }) => {
   const issues = [];
@@ -147,21 +103,23 @@ const HealthCard: React.FC<{ stats: any }> = ({ stats }) => {
   );
 };
 
-// Quick stats with trend
+// Quick stats card
 const TrendCard: React.FC<{
-  label: string; value: number | string; change: number; icon: React.ElementType; color: string;
+  label: string; value: number | string; change?: number; icon: React.ElementType; color: string;
 }> = ({ label, value, change, icon: Icon, color }) => (
   <div className="card hover:border-primary/20 transition-all group">
     <div className="flex items-start justify-between mb-3">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
         <Icon className="w-5 h-5" />
       </div>
-      <div className={`text-xs flex items-center gap-0.5 px-1.5 py-0.5 rounded-full ${
-        change >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-      }`}>
-        {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-        {Math.abs(change)}%
-      </div>
+      {change !== undefined && (
+        <div className={`text-xs flex items-center gap-0.5 px-1.5 py-0.5 rounded-full ${
+          change >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+        }`}>
+          {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {Math.abs(change)}%
+        </div>
+      )}
     </div>
     <div className="text-2xl font-bold text-white mb-0.5">{value}</div>
     <div className="text-sm text-slate-500">{label}</div>
@@ -222,6 +180,11 @@ const AdminPage: React.FC = () => {
     { label: '已完成', value: stats?.completedOrders ?? 0, color: '#22c55e' },
     { label: '进行中', value: Math.max(0, (stats?.totalOrders ?? 0) - (stats?.completedOrders ?? 0) - (stats?.cancelledOrders ?? 0)), color: '#8b5cf6' },
     { label: '已取消', value: stats?.cancelledOrders ?? 0, color: '#64748b' },
+  ];
+
+  const orderTypeSegments = [
+    { label: '购买', value: stats?.ordersByType?.BUY ?? 0, color: '#3b82f6' },
+    { label: '租赁', value: stats?.ordersByType?.RENT ?? 0, color: '#8b5cf6' },
   ];
 
   const accountSegments = [
@@ -286,11 +249,12 @@ const AdminPage: React.FC = () => {
             </div>
           ) : stats && (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <TrendCard label="用户总数" value={stats.totalUsers ?? 0} change={12} icon={Users} color="bg-primary/20 text-primary" />
-                <TrendCard label="账号总数" value={stats.totalAccounts ?? 0} change={8} icon={Package} color="bg-blue-500/20 text-blue-400" />
-                <TrendCard label="订单总数" value={stats.totalOrders ?? 0} change={-3} icon={FileText} color="bg-green-500/20 text-green-400" />
-                <TrendCard label="总收入" value={`¥${((stats.totalRevenue ?? 0) / 1000).toFixed(1)}k`} change={24} icon={DollarSign} color="bg-emerald-500/20 text-emerald-400" />
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <TrendCard label="用户总数" value={stats.totalUsers ?? 0} icon={Users} color="bg-primary/20 text-primary" />
+                <TrendCard label="账号总数" value={stats.totalAccounts ?? 0} icon={Package} color="bg-blue-500/20 text-blue-400" />
+                <TrendCard label="待处理订单" value={stats.pendingOrders ?? 0} icon={Clock} color="bg-yellow-500/20 text-yellow-400" />
+                <TrendCard label="平均评分" value={(stats.averageRating ?? 0).toFixed(1)} icon={Star} color="bg-amber-500/20 text-amber-400" />
+                <TrendCard label="订单总数" value={stats.totalOrders ?? 0} icon={FileText} color="bg-green-500/20 text-green-400" />
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">
@@ -332,8 +296,28 @@ const AdminPage: React.FC = () => {
                 <HealthCard stats={stats} />
               </div>
 
-              {/* Revenue chart */}
-              <RevenueSparkline />
+              {/* Order type donut */}
+              <div className="card">
+                <h3 className="font-medium text-sm text-slate-300 mb-4">订单类型分布</h3>
+                <div className="flex items-center gap-4">
+                  <DonutChart segments={orderTypeSegments} size={140} />
+                  <div className="space-y-2">
+                    {orderTypeSegments.map((seg, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: seg.color }} />
+                        <span className="text-slate-400">{seg.label}</span>
+                        <span className="ml-auto text-slate-300 font-medium">{seg.value}</span>
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2 text-xs pt-2 border-t border-dark-border">
+                      <span className="text-slate-600">总计</span>
+                      <span className="ml-auto text-slate-400 font-medium">
+                        {orderTypeSegments.reduce((s, seg) => s + seg.value, 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Recent pending alerts */}
               {(stats.pendingAccounts ?? 0) > 0 && (
