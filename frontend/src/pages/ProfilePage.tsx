@@ -188,7 +188,22 @@ const ProfilePage: React.FC = () => {
                 </Link>
               </div>
 
-              {accounts.length === 0 ? (
+              {accountsLoading ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="card">
+                      <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden">
+                        <div className="w-full h-full bg-dark-lighter animate-pulse" />
+                      </div>
+                      <div className="h-5 w-3/4 bg-dark-lighter rounded mb-2 animate-pulse" />
+                      <div className="flex justify-between">
+                        <div className="h-6 w-16 bg-dark-lighter rounded animate-pulse" />
+                        <div className="h-4 w-16 bg-dark-lighter rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : accounts.length === 0 ? (
                 <div className="card text-center py-16">
                   <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
                     <Gamepad2 className="w-10 h-10 text-slate-700" />
@@ -266,7 +281,20 @@ const ProfilePage: React.FC = () => {
           {/* Orders Tab */}
           {activeTab === 'orders' && (
             <div>
-              {orders.length === 0 ? (
+              {ordersLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="card flex items-center gap-4">
+                      <div className="w-12 h-12 bg-dark-lighter rounded-lg animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-32 bg-dark-lighter rounded animate-pulse" />
+                        <div className="h-3 w-48 bg-dark-lighter rounded animate-pulse" />
+                      </div>
+                      <div className="h-5 w-20 bg-dark-lighter rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              ) : orders.length === 0 ? (
                 <div className="card text-center py-16">
                   <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
                     <FileText className="w-10 h-10 text-slate-700" />

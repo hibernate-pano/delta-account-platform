@@ -15,6 +15,7 @@ const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(searchParams.get('expired') === '1' ? '登录已过期，请重新登录' : '');
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -38,16 +39,16 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.username.trim()) {
-      setError('请输入用户名');
+    const errors: { username?: string; password?: string } = {};
+    if (!formData.username.trim()) errors.username = '请输入用户名';
+    if (!formData.password.trim()) errors.password = '请输入密码';
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError(errors.username || errors.password || '请填写完整信息');
       triggerShake();
       return;
     }
-    if (!formData.password.trim()) {
-      setError('请输入密码');
-      triggerShake();
-      return;
-    }
+    setFieldErrors({});
     setError('');
     setLoading(true);
 
@@ -149,14 +150,20 @@ const LoginPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, username: e.target.value }); setFieldErrors((f) => ({ ...f, username: undefined })); setError(''); }}
                     onFocus={() => setFocusedField('username')}
                     onBlur={() => setFocusedField(null)}
-                    className="input pl-11 pr-4"
+                    className={`input pl-11 pr-4 ${fieldErrors.username ? '!border-red-500/50 !ring-1 !ring-red-500/30' : ''}`}
                     placeholder="用户名 / 手机号 / 邮箱"
                     autoComplete="username"
                     autoFocus
                   />
+                  {fieldErrors.username && (
+                    <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {fieldErrors.username}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -167,10 +174,10 @@ const LoginPage: React.FC = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, password: e.target.value }); setFieldErrors((f) => ({ ...f, password: undefined })); setError(''); }}
                     onFocus={() => setFocusedField('password')}
                     onBlur={() => setFocusedField(null)}
-                    className="input pl-11 pr-12"
+                    className={`input pl-11 pr-12 ${fieldErrors.password ? '!border-red-500/50 !ring-1 !ring-red-500/30' : ''}`}
                     placeholder="请输入密码"
                     autoComplete="current-password"
                   />
@@ -181,6 +188,12 @@ const LoginPage: React.FC = () => {
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
+                  {fieldErrors.password && (
+                    <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
               </div>
 
