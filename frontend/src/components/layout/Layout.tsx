@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/auth';
 import {
   Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X, Wallet,
   MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw, Heart,
-  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle, History, Search
+  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle, History, Search, Star
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { notificationApi, messageApi } from '../../api';
@@ -227,8 +227,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {showUserMenu && (
                       <div className="absolute right-0 top-full mt-2 w-56 bg-dark-card border border-dark-border rounded-xl shadow-2xl py-2 animate-fade-in">
                         <div className="px-4 py-3 border-b border-dark-border">
-                          <p className="font-medium">{user?.nickname || user?.username}</p>
-                          <p className="text-sm text-slate-500">@{user?.username}</p>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className="font-medium">{user?.nickname || user?.username}</p>
+                            {user?.role === 'ADMIN' && (
+                              <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] rounded flex items-center gap-0.5">
+                                <Shield className="w-2.5 h-2.5" /> 管理员
+                              </span>
+                            )}
+                            {user?.role === 'USER' && (
+                              <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] rounded">用户</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500">@{user?.username}</p>
+                          {user?.creditScore !== undefined && (
+                            <div className="flex items-center gap-1 mt-1">
+                              {[1,2,3,4,5].map((s) => (
+                                <Star key={s} className={`w-2.5 h-2.5 ${s <= Math.round(user.creditScore / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`} />
+                              ))}
+                              <span className="text-[10px] text-yellow-400 ml-0.5">{user.creditScore}</span>
+                            </div>
+                          )}
                         </div>
                         <Link
                           to="/profile"
