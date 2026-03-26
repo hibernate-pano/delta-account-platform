@@ -176,10 +176,10 @@ const AdminPage: React.FC = () => {
   const [orderPage, setOrderPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
 
-  const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useAdminStats();
-  const { data: accountsData, isLoading: accountsLoading, refetch: refetchAccounts } = useAdminAccounts({ status: accountFilter, size: 50 });
-  const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useAdminOrders({ page: orderPage, size: 20 });
-  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers } = useAdminUsers({ page: userPage, size: 20 });
+  const { data: statsData, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminStats();
+  const { data: accountsData, isLoading: accountsLoading, isError: accountsError, refetch: refetchAccounts } = useAdminAccounts({ status: accountFilter, size: 50 });
+  const { data: ordersData, isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useAdminOrders({ page: orderPage, size: 20 });
+  const { data: usersData, isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useAdminUsers({ page: userPage, size: 20 });
   const verifyMutation = useVerifyAccount();
   const banMutation = useBanUser();
 
@@ -274,6 +274,14 @@ const AdminPage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map(i => <div key={i} className="card h-28 skeleton" />)}
             </div>
+          ) : statsError ? (
+            <div className="card p-8 text-center">
+              <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-red-500/60" />
+              <p className="text-slate-400 mb-4">数据加载失败</p>
+              <button onClick={() => refetchStats()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
+                <RefreshCw className="w-4 h-4" /> 重试
+              </button>
+            </div>
           ) : stats && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -366,6 +374,14 @@ const AdminPage: React.FC = () => {
 
           {accountsLoading ? (
             <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-20 skeleton rounded-xl" />)}</div>
+          ) : accountsError ? (
+            <div className="card p-8 text-center">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500/60" />
+              <p className="text-slate-400 mb-4">加载失败</p>
+              <button onClick={() => refetchAccounts()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
+                <RefreshCw className="w-4 h-4" /> 重试
+              </button>
+            </div>
           ) : pendingAccounts.length === 0 ? (
             <div className="card text-center py-16">
               <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500/50" />
@@ -436,6 +452,14 @@ const AdminPage: React.FC = () => {
 
           {ordersLoading ? (
             <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div>
+          ) : ordersError ? (
+            <div className="card p-8 text-center">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500/60" />
+              <p className="text-slate-400 mb-4">加载失败</p>
+              <button onClick={() => refetchOrders()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
+                <RefreshCw className="w-4 h-4" /> 重试
+              </button>
+            </div>
           ) : (
             <>
               <div className="card overflow-hidden p-0">
@@ -529,6 +553,14 @@ const AdminPage: React.FC = () => {
 
           {usersLoading ? (
             <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div>
+          ) : usersError ? (
+            <div className="card p-8 text-center">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500/60" />
+              <p className="text-slate-400 mb-4">加载失败</p>
+              <button onClick={() => refetchUsers()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
+                <RefreshCw className="w-4 h-4" /> 重试
+              </button>
+            </div>
           ) : (
             <>
               <div className="card overflow-hidden p-0">

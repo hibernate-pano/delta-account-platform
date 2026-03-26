@@ -255,6 +255,12 @@ const NotificationsPage: React.FC = () => {
     return () => document.removeEventListener('keydown', handler);
   }, [selectedNotification]);
 
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const interval = setInterval(() => { refetch(); }, 30000);
+    return () => clearInterval(interval);
+  }, [refetch]);
+
   const filteredNotifications = notifications.filter((n) => {
     if (activeFilter === 'UNREAD') return n.status === 'UNREAD';
     if (activeFilter === 'READ') return n.status === 'READ';
