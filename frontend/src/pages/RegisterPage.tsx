@@ -138,6 +138,7 @@ const RegisterPage: React.FC = () => {
                 className={`input transition-all ${focusedField === 'username' ? 'ring-2 ring-primary/50' : ''}`}
                 placeholder="3-20个字符"
                 autoComplete="username"
+                autoFocus
               />
             </div>
 

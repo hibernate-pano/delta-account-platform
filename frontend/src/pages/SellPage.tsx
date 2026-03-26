@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -11,6 +11,29 @@ import {
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
 const TAX_RATE = 0.01; // 1%
+
+// Rank → base price mapping (yuan)
+const RANK_BASE_PRICES: Record<string, number> = {
+  '百星王者': 2800, '荣耀王者': 1600, '王者': 900, '星耀': 500, '钻石': 280,
+  '铂金': 120, '黄金': 60, '白银': 30, '青铜': 15,
+  '王牌': 500, '无敌战神': 1800,
+  '大师': 600, '宗师': 900, '黑铁': 20,
+};
+
+const getSkinMultiplier = (count: number) => {
+  if (count >= 200) return 2.8;
+  if (count >= 100) return 1.8;
+  if (count >= 50) return 1.4;
+  if (count >= 20) return 1.15;
+  return 1;
+};
+
+const getPriceSuggestion = (rank: string, skinCount: number) => {
+  const base = RANK_BASE_PRICES[rank] ?? 50;
+  const mult = getSkinMultiplier(skinCount);
+  const mid = Math.round(base * mult);
+  return { min: Math.round(mid * 0.75), max: Math.round(mid * 1.25) };
+};
 
 const gamePresets = [
   { label: '王者荣耀', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '星耀', '王者', '荣耀王者', '百星王者'] },
@@ -43,6 +66,7 @@ const SellPage: React.FC = () => {
 
   // Derived values
   const price = parseFloat(formData.price) || 0;
+  const suggestion = useMemo(() => getPriceSuggestion(formData.gameRank, formData.skinCount), [formData.gameRank, formData.skinCount]);
   const platformFee = price * PLATFORM_FEE_RATE;
   const tax = price * TAX_RATE;
   const youGet = price - platformFee - tax;
@@ -260,6 +284,21 @@ const SellPage: React.FC = () => {
                       className="input pl-10 text-xl font-bold !text-white" placeholder="0.00" step="0.01" min="1" required
                     />
                   </div>
+                  {formData.price && (formData.gameRank || formData.skinCount > 0) && (
+                    <div className={`text-xs mt-1 px-2 py-1 rounded-lg ${
+                      price < suggestion.min
+                        ? 'text-yellow-400 bg-yellow-500/10'
+                        : price <= suggestion.max
+                        ? 'text-green-400 bg-green-500/10'
+                        : 'text-slate-500 bg-dark-lighter'
+                    }`}>
+                      {price < suggestion.min
+                        ? `低于市价（参考 ¥${suggestion.min}-${suggestion.max}）`
+                        : price <= suggestion.max
+                        ? '✓ 价格在合理区间'
+                        : '价格偏高，建议参考市场定价'}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">时租价格</label>
@@ -302,13 +341,31 @@ const SellPage: React.FC = () => {
               )}
             </div>
 
-            {/* Tips */}
+            {/* Dynamic pricing suggestion */}
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex gap-3">
-              <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-xs text-slate-400 space-y-1">
-                <p className="text-primary/80 font-medium">定价建议</p>
-                <p>段位越高价格越高，限定皮肤是加分项。建议参考同类账号定价。</p>
-                <p>支持同时设置购买价和时租价，一份账号两份收入。</p>
+                <p className="text-primary/80 font-medium">智能定价参考</p>
+                {formData.gameRank || formData.skinCount > 0 ? (
+                  <>
+                    <p>
+                      根据当前段位「{formData.gameRank || '未选择'}」
+                      {formData.skinCount > 0 && ` + ${formData.skinCount}皮肤`}，
+                      市场参考价约为
+                    </p>
+                    <p className="text-primary font-bold text-sm">
+                      ¥{suggestion.min} ~ ¥{suggestion.max}
+                    </p>
+                    <p>实际定价可参考同类账号，上下浮动 25% 属正常范围。</p>
+                    <p>支持同时设置购买价和时租价，一份账号两份收入。</p>
+                  </>
+                ) : (
+                  <>
+                    <p>选择段位和皮肤数量，系统将自动计算参考价格区间。</p>
+                    <p>段位越高、皮肤越多，价格越高。限定皮肤是重要加分项。</p>
+                    <p>支持同时设置购买价和时租价，一份账号两份收入。</p>
+                  </>
+                )}
               </div>
             </div>
 
