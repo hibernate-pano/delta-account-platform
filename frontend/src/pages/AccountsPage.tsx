@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -17,6 +17,7 @@ const AccountsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [compareItems, setCompareItems] = useState<Array<{ account: Account; addedAt: number }>>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,13 +52,16 @@ const AccountsPage: React.FC = () => {
 
   const allAccounts: Account[] = data?.data?.data?.records || [];
 
-  // Client-side price range filter
-  const accounts = selectedPriceRange
-    ? allAccounts.filter((acc) => {
-        const [min, max] = selectedPriceRange.split('-').map(Number);
-        return max ? acc.price >= min && acc.price <= max : acc.price >= min;
-      })
-    : allAccounts;
+  // Client-side price range + verified filter
+  const accounts = allAccounts.filter((acc) => {
+    if (verifiedOnly && acc.verificationStatus !== 'VERIFIED') return false;
+    if (selectedPriceRange) {
+      const [min, max] = selectedPriceRange.split('-').map(Number);
+      if (max) return acc.price >= min && acc.price <= max;
+      return acc.price >= min;
+    }
+    return true;
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +85,11 @@ const AccountsPage: React.FC = () => {
     setKeyword('');
     setSort('');
     setSelectedPriceRange('');
+    setVerifiedOnly(false);
     setSearchParams({});
   };
 
-  const hasActiveFilters = keyword || sort || selectedPriceRange;
+  const hasActiveFilters = keyword || sort || selectedPriceRange || verifiedOnly;
   const isSearching = keyword !== debouncedKeyword;
 
   const toggleCompare = (account: Account) => {
@@ -97,6 +102,11 @@ const AccountsPage: React.FC = () => {
   };
 
   const isCompareSelected = (id: number) => compareItems.some((i) => i.account.id === id);
+
+  const isNewAccount = (createdAt: string) => {
+    const diff = Date.now() - new Date(createdAt).getTime();
+    return diff < 86400000; // 24 hours
+  };
 
   const sortOptions = [
     { key: '', label: '最新', icon: '✨' },
@@ -259,6 +269,17 @@ const AccountsPage: React.FC = () => {
               {option.label}
             </button>
           ))}
+          <button
+            onClick={() => setVerifiedOnly(!verifiedOnly)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+              verifiedOnly
+                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                : 'bg-dark-lighter text-gray-400 hover:text-white'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 inline mr-1" />
+            认证卖家
+          </button>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -328,6 +349,18 @@ const AccountsPage: React.FC = () => {
                 <div className="absolute top-2 right-2">
                   <WishlistButton account={account} size="sm" />
                 </div>
+                {/* NEW badge */}
+                {isNewAccount(account.createdAt) && (
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-primary/90 text-white text-[10px] rounded flex items-center gap-0.5">
+                    <Zap className="w-3 h-3" /> NEW
+                  </span>
+                )}
+                {/* Verified badge */}
+                {account.verificationStatus === 'VERIFIED' && (
+                  <span className="absolute left-2 bottom-2 px-1.5 py-0.5 bg-emerald-500/90 text-white text-[10px] rounded flex items-center gap-0.5">
+                    <ShieldCheck className="w-3 h-3" /> 已认证
+                  </span>
+                )}
                 {/* Compare toggle */}
                 <button
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(account); }}
