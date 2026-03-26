@@ -228,7 +228,7 @@ const RefundsPage: React.FC = () => {
   const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState('');
 
-  const { data: refundsData, isLoading } = useMyRefunds();
+  const { data: refundsData, isLoading, isError, refetch } = useMyRefunds();
   const { data: ordersData } = useMyOrders();
   const applyMutation = useApplyRefund();
   const cancelMutation = useCancelRefund();
@@ -367,6 +367,18 @@ const RefundsPage: React.FC = () => {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-24 skeleton rounded-xl" />
               ))}
+            </div>
+          ) : isError ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-10 h-10 text-red-400" />
+              </div>
+              <h3 className="text-lg font-medium mb-2 text-slate-400">加载失败</h3>
+              <p className="text-slate-500 text-sm mb-4">无法获取退款记录</p>
+              <button onClick={() => refetch()} className="btn-primary text-sm inline-flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" />
+                重试
+              </button>
             </div>
           ) : refunds.length === 0 ? (
             <div className="text-center py-16">
