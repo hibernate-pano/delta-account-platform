@@ -28,7 +28,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { toast } = useToast();
+  const { showToast } = useToast();
   const [selectedMethod, setSelectedMethod] = useState('BALANCE');
   const [loading, setLoading] = useState(false);
 
@@ -56,14 +56,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       // 如果是余额支付，直接扣款
       if (selectedMethod === 'BALANCE') {
         await paymentApi.pay(paymentId);
-        toast('success', '支付成功');
+        showToast('支付成功', 'success');
         onSuccess();
       } else {
         // 第三方支付（模拟）
-        toast('info', '第三方支付功能待开通，请使用余额支付');
+        showToast('第三方支付功能待开通，请使用余额支付', 'info');
       }
     } catch (error: any) {
-      toast('error', error.response?.data?.message || '支付失败');
+      showToast(error.response?.data?.message || '支付失败', 'error');
     } finally {
       setLoading(false);
     }
@@ -72,14 +72,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" role="presentation" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-dark-card rounded-2xl w-full max-w-md border border-dark-border shadow-2xl animate-slide-up">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="payment-modal-title"
+        className="relative bg-dark-card rounded-2xl w-full max-w-md border border-dark-border shadow-2xl animate-slide-up"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-border">
-          <h2 className="text-xl font-bold text-white">确认支付</h2>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-dark-lighter">
+          <h2 id="payment-modal-title" className="text-xl font-bold text-white">确认支付</h2>
+          <button onClick={onClose} aria-label="关闭" className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-dark-lighter">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -88,7 +93,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="p-6">
           {/* Order Info */}
           <div className="mb-6 p-4 bg-dark rounded-xl">
-            <p className="text-sm text-gray-400 mb-1">商品信息</p>
+            <p className="text-sm text-slate-400 mb-1">商品信息</p>
             <p className="text-white font-medium mb-2 line-clamp-2">{orderTitle}</p>
             <p className="text-2xl font-bold text-primary">¥{amount}</p>
           </div>
@@ -96,7 +101,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           {/* Balance Info */}
           <div className="mb-4 p-4 bg-dark rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-gray-400">账户余额</span>
+              <span className="text-slate-400">账户余额</span>
               <span className={`font-medium ${insufficientBalance ? 'text-red-400' : 'text-white'}`}>
                 ¥{balance.toFixed(2)}
               </span>
@@ -127,7 +132,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
           {/* Payment Methods */}
           <div className="space-y-3 mb-5">
-            <p className="text-sm text-gray-400 mb-2">选择支付方式</p>
+            <p className="text-sm text-slate-400 mb-2">选择支付方式</p>
             {PAYMENT_METHODS.map((method) => (
               <button
                 key={method.id}
@@ -146,7 +151,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-white font-medium">{method.name}</p>
-                  <p className="text-xs text-gray-400">{method.desc}</p>
+                  <p className="text-xs text-slate-400">{method.desc}</p>
                 </div>
                 {selectedMethod === method.id && (
                   <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">

@@ -81,8 +81,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         // Handle both number and object response formats
         setUnreadCount(typeof notifData === 'number' ? notifData : (notifData?.notificationCount ?? 0));
         setMsgUnreadCount(typeof msgData === 'number' ? msgData : (msgData?.messageCount ?? 0));
-      } catch {
-        // Silently fail
+      } catch (err) {
+        // Badge counts are non-critical; stale counts are acceptable
+        console.warn('[Layout] Failed to refresh unread counts:', err);
       }
     };
 

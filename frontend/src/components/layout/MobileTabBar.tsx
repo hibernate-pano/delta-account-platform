@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
-  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus, Bell, Heart
+  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus, Bell
 } from 'lucide-react';
 
 interface TabBarItem {
@@ -42,23 +42,6 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
         { to: '/login', icon: User, label: '登录' },
       ];
 
-  // For logged-in users: Home | Market | Action | Orders | Wishlist | More
-  const displayTabs: TabBarItem[] = token
-    ? [
-        { to: '/', icon: Home, label: '首页' },
-        { to: '/accounts', icon: Gamepad2, label: '市场' },
-        { to: '/sell', icon: Plus, label: '发布', isAction: true },
-        { to: '/orders', icon: ShoppingCart, label: '订单' },
-        { to: '/messages', icon: MessageCircle, label: '消息', badge: msgUnreadCount },
-        { to: '/notifications', icon: Bell, label: '通知', badge: notifUnreadCount },
-        { to: '/profile', icon: User, label: '我的' },
-      ]
-    : [
-        { to: '/', icon: Home, label: '首页' },
-        { to: '/accounts', icon: Gamepad2, label: '市场' },
-        { to: '/login', icon: User, label: '登录' },
-      ];
-
   return (
     <>
       {/* Spacer for mobile so content isn't hidden behind tab bar */}
@@ -66,11 +49,13 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
 
       {/* Mobile Tab Bar */}
       <nav
+        role="tablist"
+        aria-label="主导航"
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div className="flex items-stretch h-16 bg-dark/95 backdrop-blur-xl">
-          {displayTabs.map((tab) => {
+          {tabs.map((tab) => {
             const active = isActive(tab.to);
             const Icon = tab.icon;
 
@@ -80,6 +65,9 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
                 <Link
                   key={tab.to}
                   to={tab.to}
+                  role="tab"
+                  aria-selected={false}
+                  aria-label="发布账号"
                   className="flex-1 flex flex-col items-center justify-center relative -mt-4"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/40 ring-4 ring-primary/20 hover:scale-105 active:scale-95 transition-transform">
@@ -94,6 +82,9 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
               <Link
                 key={tab.to}
                 to={tab.to}
+                role="tab"
+                aria-selected={active}
+                aria-current={active ? 'page' : undefined}
                 className={`flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
                   active ? 'text-primary' : 'text-slate-500'
                 }`}
