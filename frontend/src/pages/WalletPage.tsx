@@ -408,15 +408,39 @@ const WalletPage: React.FC = () => {
 
       {/* Balance Chart */}
       <div className="card mb-6">
-        <h3 className="font-medium mb-2">财务概览</h3>
-        <div className="grid grid-cols-2 gap-4 text-center">
+        <h3 className="font-medium mb-4">财务概览</h3>
+        {/* Net position bar */}
+        {(() => {
+          const net = stats.monthlyIncome - stats.monthlyExpense;
+          const total = stats.monthlyIncome + stats.monthlyExpense;
+          const incomePct = total > 0 ? (stats.monthlyIncome / total) * 100 : 50;
+          return (
+            <div className={`mb-4 p-3 rounded-xl border ${
+              net >= 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-slate-400">本月净变化</span>
+                <span className={`text-lg font-bold ${net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {net >= 0 ? '+' : ''}¥{net.toFixed(2)}
+                </span>
+              </div>
+              {total > 0 && (
+                <div className="w-full h-2 bg-dark rounded-full overflow-hidden flex">
+                  <div className="h-full bg-green-500 transition-all" style={{ width: `${incomePct}%` }} />
+                  <div className="h-full bg-red-400 transition-all" />
+                </div>
+              )}
+            </div>
+          );
+        })()}
+        <div className="grid grid-cols-2 gap-4 text-center mb-4">
           <div>
             <p className="text-2xl font-bold text-green-400">¥{stats.monthlyIncome.toFixed(2)}</p>
-            <p className="text-xs text-gray-500">本月收入</p>
+            <p className="text-xs text-slate-500">本月收入</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-red-400">¥{stats.monthlyExpense.toFixed(2)}</p>
-            <p className="text-xs text-gray-500">本月支出</p>
+            <p className="text-xs text-slate-500">本月支出</p>
           </div>
         </div>
         <BalanceSparkline transactions={transactions} />

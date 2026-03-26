@@ -49,6 +49,16 @@ const ProfilePage: React.FC = () => {
     totalOrders: orders.length,
     completedOrders: orders.filter((o: any) => o.status === 'COMPLETED').length,
     creditScore: profile?.creditScore ?? user?.creditScore ?? 100,
+    totalSpent: orders
+      .filter((o: any) => o.status === 'COMPLETED' && o.type === 'BUY')
+      .reduce((sum: number, o: any) => sum + (o.amount || 0), 0),
+    totalEarned: orders
+      .filter((o: any) => o.status === 'COMPLETED' && o.type === 'SELL')
+      .reduce((sum: number, o: any) => sum + (o.amount || 0), 0),
+    avgOrderValue: orders.filter((o: any) => o.status === 'COMPLETED').length > 0
+      ? orders.filter((o: any) => o.status === 'COMPLETED').reduce((sum: number, o: any) => sum + (o.amount || 0), 0) /
+        orders.filter((o: any) => o.status === 'COMPLETED').length
+      : 0,
   };
 
   const getCreditLevel = (score: number) => {
@@ -476,6 +486,36 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Spending / Earnings Card */}
+              {(stats.totalSpent > 0 || stats.totalEarned > 0) && (
+                <div className="card">
+                  <h3 className="font-medium mb-4 flex items-center gap-2">
+                    <Wallet className="w-5 h-5 text-primary" />
+                    交易统计
+                  </h3>
+                  <div className="space-y-3">
+                    {stats.totalSpent > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">累计消费</span>
+                        <span className="font-medium text-red-400">-¥{stats.totalSpent.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {stats.totalEarned > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">累计收入</span>
+                        <span className="font-medium text-green-400">+¥{stats.totalEarned.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {stats.avgOrderValue > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">平均客单价</span>
+                        <span className="font-medium">¥{stats.avgOrderValue.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {/* Wishlist Tab */}
