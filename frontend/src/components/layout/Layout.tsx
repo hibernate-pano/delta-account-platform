@@ -523,12 +523,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <Link to="/privacy" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   隐私政策
                 </Link>
-                <a href="#" onClick={(e) => { e.preventDefault(); showToast('退款政策页面即将上线', 'info'); }} className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/refunds" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   退款政策
-                </a>
-                <a href="#" onClick={(e) => { e.preventDefault(); showToast('联系我们页面即将上线', 'info'); }} className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                </Link>
+                <Link to="/messages" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   联系我们
-                </a>
+                </Link>
               </div>
             </div>
           </div>

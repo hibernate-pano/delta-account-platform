@@ -1,12 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { accountApi } from '../api';
 import { Account } from '../types';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, DollarSign, Info, Gamepad2, BarChart3 } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import SkeletonBase from '../components/ui/Skeleton';
+
+const PLATFORM_FEE_RATE = 0.05;
+const TAX_RATE = 0.01;
+
+const RANK_BASE_PRICES: Record<string, number> = {
+  '百星王者': 2800, '荣耀王者': 1600, '王者': 900, '星耀': 500, '钻石': 280,
+  '铂金': 120, '黄金': 60, '白银': 30, '青铜': 15,
+  '王牌': 500, '无敌战神': 1800,
+  '大师': 600, '宗师': 900, '黑铁': 20,
+};
+
+const getSkinMultiplier = (count: number) => {
+  if (count >= 200) return 2.8;
+  if (count >= 100) return 1.8;
+  if (count >= 50) return 1.4;
+  if (count >= 20) return 1.15;
+  return 1;
+};
+
+const gamePresets = [
+  { label: '王者荣耀', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '星耀', '王者', '荣耀王者', '百星王者'] },
+  { label: '英雄联盟', ranks: ['黑铁', '青铜', '白银', '黄金', '铂金', '钻石', '大师', '宗师', '王者'] },
+  { label: '和平精英', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '王牌', '无敌战神'] },
+];
+
+const skinPresets = [10, 50, 100, 200, 500];
+
+const weaponPresets = ['传说皮肤', '限定皮肤', '全英雄', '全皮肤', 'V10贵族', '稀有道具'];
 
 const AccountEditPage: React.FC = () => {
   usePageTitle('编辑账号');
@@ -51,6 +79,20 @@ const AccountEditPage: React.FC = () => {
     };
     fetchAccount();
   }, [id]);
+
+  // Live price suggestion
+  const priceSuggestion = useMemo(() => {
+    const base = RANK_BASE_PRICES[formData.gameRank] ?? 50;
+    const mult = getSkinMultiplier(formData.skinCount);
+    const mid = Math.round(base * mult);
+    return { min: Math.round(mid * 0.75), max: Math.round(mid * 1.25) };
+  }, [formData.gameRank, formData.skinCount]);
+
+  // Fee calculation
+  const priceNum = parseFloat(formData.price) || 0;
+  const platformFee = priceNum * PLATFORM_FEE_RATE;
+  const taxFee = priceNum * TAX_RATE;
+  const youGet = priceNum - platformFee - taxFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +148,7 @@ const AccountEditPage: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="card space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">账号标题 *</label>
+            <label className="block text-sm text-slate-400 mb-2">账号标题 *</label>
             <input
               type="text"
               value={formData.title}
@@ -118,16 +160,49 @@ const AccountEditPage: React.FC = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">游戏段位</label>
+              <label className="block text-sm text-slate-400 mb-2">游戏段位</label>
+              {/* Preset ranks by game */}
+              <div className="flex flex-wrap gap-1 mb-2">
+                {gamePresets.map((g) => (
+                  <button
+                    key={g.label}
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        gameRank: g.ranks[Math.floor(g.ranks.length / 2)],
+                      }));
+                    }}
+                    className="text-[11px] px-2 py-0.5 bg-dark rounded text-slate-500 hover:text-white hover:bg-dark-lighter transition-all"
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
               <input
                 type="text"
                 value={formData.gameRank}
                 onChange={(e) => setFormData({ ...formData, gameRank: e.target.value })}
+                placeholder="手动输入或从上方选择"
                 className="input w-full"
+                list="rank-suggestions"
               />
+              <datalist id="rank-suggestions">
+                {gamePresets.flatMap((g) => g.ranks).map((r) => (
+                  <option key={r} value={r} />
+                ))}
+              </datalist>
+              {/* Price suggestion */}
+              {(formData.gameRank || formData.skinCount > 0) && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                  <Info className="w-3 h-3 text-primary" />
+                  建议定价区间:{' '}
+                  <span className="text-primary font-medium">¥{priceSuggestion.min} ~ ¥{priceSuggestion.max}</span>
+                </div>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">皮肤数量</label>
+              <label className="block text-sm text-slate-400 mb-2">皮肤数量</label>
               <input
                 type="number"
                 value={formData.skinCount}
@@ -135,24 +210,49 @@ const AccountEditPage: React.FC = () => {
                 className="input w-full"
                 min="0"
               />
+              <div className="flex flex-wrap gap-1 mt-2">
+                {skinPresets.map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, skinCount: n })}
+                    className="text-[11px] px-2 py-0.5 bg-dark rounded text-slate-500 hover:text-white hover:bg-dark-lighter transition-all"
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">武器装备</label>
+            <label className="block text-sm text-slate-400 mb-2">武器装备</label>
             <input
               type="text"
               value={formData.weapons}
               onChange={(e) => setFormData({ ...formData, weapons: e.target.value })}
+              placeholder="主要武器和装备"
               className="input w-full"
             />
+            <div className="flex flex-wrap gap-1 mt-2">
+              {weaponPresets.map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, weapons: prev.weapons ? `${prev.weapons}, ${w}` : w }))}
+                  className="text-[11px] px-2 py-0.5 bg-dark rounded text-slate-500 hover:text-white hover:bg-dark-lighter transition-all"
+                >
+                  {w}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">售价 *</label>
+              <label className="block text-sm text-slate-400 mb-2">售价 *</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">¥</span>
                 <input
                   type="number"
                   value={formData.price}
@@ -164,7 +264,7 @@ const AccountEditPage: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">时租价格</label>
+              <label className="block text-sm text-slate-400 mb-2">时租价格</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
                 <input
@@ -178,8 +278,35 @@ const AccountEditPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Fee calculation */}
+          {priceNum > 0 && (
+            <div className="card bg-gradient-to-br from-primary/8 to-purple-500/5 border-primary/20">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-slate-300">收益预估</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-dark rounded-lg px-3 py-2">
+                  <p className="text-[10px] text-slate-500 mb-1">标价</p>
+                  <p className="text-sm font-bold text-white">¥{priceNum.toFixed(0)}</p>
+                </div>
+                <div className="bg-dark rounded-lg px-3 py-2">
+                  <p className="text-[10px] text-slate-500 mb-1">平台+税费</p>
+                  <p className="text-sm font-medium text-red-400">-¥{(platformFee + taxFee).toFixed(2)}</p>
+                </div>
+                <div className="bg-dark rounded-lg px-3 py-2">
+                  <p className="text-[10px] text-slate-500 mb-1">你将获得</p>
+                  <p className="text-sm font-bold text-green-400">¥{youGet.toFixed(2)}</p>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-600 mt-2 text-center">
+                平台服务费 {PLATFORM_FEE_RATE * 100}% + 税费 {TAX_RATE * 100}%
+              </p>
+            </div>
+          )}
+
           <div>
-            <label className="block text-sm text-gray-400 mb-2">账号描述</label>
+            <label className="block text-sm text-slate-400 mb-2">账号描述</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -188,7 +315,7 @@ const AccountEditPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">账号截图 (最多5张)</label>
+            <label className="block text-sm text-slate-400 mb-2">账号截图 (最多5张)</label>
             <div className="flex gap-2 mb-2">
               <input
                 type="url"
