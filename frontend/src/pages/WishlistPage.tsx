@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlistStore } from '../store/wishlist';
 import { useAuthStore } from '../store/auth';
@@ -34,13 +34,15 @@ const WishlistPage: React.FC = () => {
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [filterVerified, setFilterVerified] = useState(false);
 
-  const sortedItems = [...wishlistItems]
-    .filter((a) => !filterVerified || a.verificationStatus === 'VERIFIED')
-    .sort((a, b) => {
-      if (sortMode === 'price_asc') return a.price - b.price;
-      if (sortMode === 'price_desc') return b.price - a.price;
-      return 0; // default: order added
-    });
+  const sortedItems = useMemo(() => {
+    return [...wishlistItems]
+      .filter((a) => !filterVerified || a.verificationStatus === 'VERIFIED')
+      .sort((a, b) => {
+        if (sortMode === 'price_asc') return a.price - b.price;
+        if (sortMode === 'price_desc') return b.price - a.price;
+        return 0;
+      });
+  }, [wishlistItems, filterVerified, sortMode]);
 
   const handleClearAll = () => {
     if (!confirm(`确定要清空全部 ${wishlistItems.length} 个收藏吗？`)) return;
@@ -53,7 +55,10 @@ const WishlistPage: React.FC = () => {
     showToast('已从收藏移除', 'info');
   };
 
-  const verifiedCount = wishlistItems.filter((a) => a.verificationStatus === 'VERIFIED').length;
+  const verifiedCount = useMemo(
+    () => wishlistItems.filter((a) => a.verificationStatus === 'VERIFIED').length,
+    [wishlistItems]
+  );
 
   if (!token) {
     return (

@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WalletSkeleton } from '../components/ui/Skeleton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } from '../hooks/useQueries';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
   RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X,
@@ -226,6 +227,10 @@ const WalletPage: React.FC = () => {
   const [accountNo, setAccountNo] = useState('');
   const [accountName, setAccountName] = useState('');
   const [txSearch, setTxSearch] = useState('');
+  const rechargeModalRef = useRef<HTMLDivElement>(null);
+  const withdrawModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(rechargeModalRef, showRechargeModal);
+  useFocusTrap(withdrawModalRef, showWithdrawModal);
 
   const { data: balanceData, isLoading: balanceLoading, isError: balanceError, refetch: refetchBalance } = useWalletBalance();
   const { data: transactionsData, isLoading: txLoading, isError: txError, refetch: refetchTx } = useWalletTransactions({ page: 1, size: 50 });
@@ -647,7 +652,7 @@ const WalletPage: React.FC = () => {
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowRechargeModal(false)}
         >
-          <div className="card w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div className="card w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()} ref={rechargeModalRef}>
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
               <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Plus className="w-5 h-5 text-green-400" />
@@ -720,7 +725,7 @@ const WalletPage: React.FC = () => {
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowWithdrawModal(false)}
         >
-          <div className="card w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div className="card w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()} ref={withdrawModalRef}>
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
               <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
                 <Minus className="w-5 h-5 text-red-400" />

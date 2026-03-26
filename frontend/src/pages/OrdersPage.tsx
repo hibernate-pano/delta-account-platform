@@ -31,6 +31,12 @@ interface Order {
     images?: string[];
     gameRank?: string;
     skinCount?: number;
+    gameType?: string;
+    sellerNickname?: string;
+    sellerUsername?: string;
+    sellerAvatar?: string;
+    verificationStatus?: string;
+    sellerCreditScore?: number;
   };
 }
 

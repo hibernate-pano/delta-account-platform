@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
@@ -245,6 +246,8 @@ const NotificationsPage: React.FC = () => {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, !!selectedNotification);
 
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
@@ -531,7 +534,7 @@ const NotificationsPage: React.FC = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedNotification(null)}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
             <div className="relative w-full max-w-sm bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-slide-up overflow-hidden"
-              onClick={(e) => e.stopPropagation()}>
+              onClick={(e) => e.stopPropagation()} ref={modalRef}>
               <div className="px-6 py-5 border-b border-dark-border flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cfg.bg}`}>
                   <Icon className={`w-5 h-5 ${cfg.color}`} />
