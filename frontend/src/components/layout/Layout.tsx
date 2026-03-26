@@ -8,10 +8,12 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { notificationApi, messageApi } from '../../api';
+import { useToast } from '../ui/Toast';
 import MobileTabBar from './MobileTabBar';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, user, logout } = useAuthStore();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -521,10 +523,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <Link to="/privacy" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   隐私政策
                 </Link>
-                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <a href="#" onClick={(e) => { e.preventDefault(); showToast('退款政策页面即将上线', 'info'); }} className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   退款政策
                 </a>
-                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <a href="#" onClick={(e) => { e.preventDefault(); showToast('联系我们页面即将上线', 'info'); }} className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   联系我们
                 </a>
               </div>

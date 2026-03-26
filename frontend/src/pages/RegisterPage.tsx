@@ -50,6 +50,10 @@ const RegisterPage: React.FC = () => {
       setError('用户名需要3-20个字符');
       return false;
     }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('请输入有效的邮箱地址');
+      return false;
+    }
     if (!formData.password) {
       setError('请输入密码');
       return false;
