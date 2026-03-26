@@ -530,9 +530,17 @@ const MessagesPage: React.FC = () => {
         ) : sessions.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="w-10 h-10 text-slate-700" />
+              <svg className="w-12 h-12 text-slate-600" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="8" width="32" height="28" rx="4" stroke="currentColor" strokeWidth="2"/>
+                <path d="M4 16L20 28L36 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="22" r="1.5" fill="currentColor"/>
+                <circle cx="18" cy="22" r="1.5" fill="currentColor"/>
+                <circle cx="24" cy="22" r="1.5" fill="currentColor"/>
+                <rect x="24" y="4" width="20" height="14" rx="3" fill="#1e293b" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M28 8h12M28 11h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </div>
-            <h3 className="text-lg font-medium mb-2 text-slate-400">暂无消息</h3>
+            <h3 className="text-lg font-medium mb-2 text-slate-400">暂无会话</h3>
             <p className="text-slate-600 text-sm mb-6">浏览账号并联系卖家开始对话</p>
             <button onClick={() => navigate('/accounts')} className="btn-primary">
               去逛逛

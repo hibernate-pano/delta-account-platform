@@ -115,22 +115,40 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
           {/* Timeline */}
           <div className="bg-dark rounded-xl p-4">
             <p className="text-xs text-slate-500 mb-3">处理进度</p>
-            <div className="space-y-3">
+            <div className="relative">
+              {/* Vertical connector line */}
+              <div className="absolute left-[11px] top-3 bottom-3 w-0.5 bg-dark-lighter" />
               {[
                 { label: '提交申请', time: refund.createdAt, done: true },
-                { label: '审核中', time: refund.status === 'PENDING' ? '进行中' : '已完成', done: refund.status !== 'PENDING' },
+                { label: '审核中', time: refund.status === 'PENDING' ? '进行中' : '已完成', done: refund.status !== 'PENDING', active: refund.status === 'PENDING' },
                 { label: '退款完成', time: refund.status === 'APPROVED' ? refund.updatedAt : '-', done: refund.status === 'APPROVED' },
               ].map((item, i) => (
-                <div key={item.label} className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    item.done ? 'bg-primary/20 text-primary' : 'bg-dark-lighter text-slate-600'
+                <div key={item.label} className="relative flex items-start gap-3 pb-4 last:pb-0">
+                  {/* Filled connector up to this step */}
+                  <div
+                    className="absolute left-[11px] top-0 w-0.5 -translate-y-full"
+                    style={{ height: '12px', background: item.done ? 'rgba(168,85,247,0.3)' : 'transparent' }}
+                  />
+                  <div className={`relative w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10 transition-all ${
+                    item.done
+                      ? 'bg-primary/20 text-primary'
+                      : item.active
+                      ? 'bg-yellow-500/20 text-yellow-400 ring-2 ring-yellow-400/30 animate-pulse'
+                      : 'bg-dark-lighter text-slate-600'
                   }`}>
-                    {item.done ? <CheckCircle className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">{i + 1}</span>}
+                    {item.done ? (
+                      <CheckCircle className="w-3.5 h-3.5" />
+                    ) : item.active ? (
+                      <div className="w-2 h-2 rounded-full bg-yellow-400 animate-ping" />
+                    ) : (
+                      <span className="text-[10px] font-bold">{i + 1}</span>
+                    )}
                   </div>
-                  <div className="flex-1">
-                    <p className={`text-sm ${item.done ? 'text-slate-300' : 'text-slate-600'}`}>{item.label}</p>
+                  <div className="flex-1 pt-0.5">
+                    <p className={`text-sm ${item.done ? 'text-slate-300' : item.active ? 'text-yellow-400 font-medium' : 'text-slate-600'}`}>{item.label}</p>
+                    {item.active && <p className="text-[10px] text-yellow-400/70 mt-0.5">等待管理员处理中</p>}
                   </div>
-                  <span className="text-xs text-slate-600">{item.time === '进行中' ? '进行中' : item.time === '已完成' ? '已完成' : formatDate(item.time as string)}</span>
+                  <span className="text-xs text-slate-600 pt-0.5">{item.time === '进行中' ? '进行中' : item.time === '已完成' ? '已完成' : formatDate(item.time as string)}</span>
                 </div>
               ))}
             </div>
