@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle } from 'lucide-react';
+import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
 import { GridSkeleton } from '../components/ui/Skeleton';
@@ -150,7 +150,14 @@ const FavoritesPage: React.FC = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Gamepad2 className="w-10 h-10 text-gray-700" />
+                    <Gamepad2 className="w-10 h-10 text-slate-700" />
+                  </div>
+                )}
+                {account.verificationStatus === 'VERIFIED' && (
+                  <div className="absolute bottom-2 left-2">
+                    <span className="px-2 py-0.5 bg-green-500/90 text-white text-xs rounded-full flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" /> 已认证
+                    </span>
                   </div>
                 )}
                 <button
@@ -169,18 +176,38 @@ const FavoritesPage: React.FC = () => {
               <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-1">
                 {account.title}
               </h3>
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
                 <span className="px-2 py-1 bg-dark rounded">{account.gameRank || '暂无'}</span>
                 <span>{account.skinCount} 皮肤</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-primary">¥{account.price}</span>
                 {account.rentalPrice && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-slate-500">
                     租 ¥{account.rentalPrice}/时
                   </span>
                 )}
               </div>
+              {(account.sellerNickname || account.sellerUsername) && (
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dark-border">
+                  <div className="w-5 h-5 rounded-full overflow-hidden bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    {account.sellerAvatar ? (
+                      <img src={account.sellerAvatar} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-[8px] text-primary font-bold">{(account.sellerNickname || account.sellerUsername || '?')[0].toUpperCase()}</span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-slate-500 truncate flex-1">
+                    {account.sellerNickname || account.sellerUsername}
+                  </span>
+                  {account.sellerCreditScore != null && (
+                    <span className="flex items-center gap-0.5 text-[11px] text-yellow-400/80 flex-shrink-0">
+                      <Star className="w-3 h-3 fill-yellow-400/80" />
+                      {account.sellerCreditScore}分
+                    </span>
+                  )}
+                </div>
+              )}
             </Link>
           ))}
         </div>

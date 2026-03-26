@@ -7,7 +7,7 @@ import { useMyRefunds, useApplyRefund, useCancelRefund, useMyOrders } from '../h
 import {
   ArrowLeft, Package, RefreshCw, CheckCircle, XCircle, Clock,
   AlertTriangle, DollarSign, ChevronRight, Plus, X, Upload, FileText,
-  ExternalLink, Eye, AlertCircle
+  ExternalLink, Eye, AlertCircle, Gamepad2
 } from 'lucide-react';
 
 interface Refund {
@@ -446,11 +446,17 @@ const RefundsPage: React.FC = () => {
                 <CheckCircle className="w-10 h-10 text-green-500/50" />
               </div>
               <h3 className="text-lg font-medium mb-2 text-slate-400">没有可退款的订单</h3>
-              <p className="text-slate-600 text-sm mb-6">已完成或已取消的订单无法申请退款</p>
-              <Link to="/orders" className="btn-primary inline-flex items-center gap-2">
-                查看我的订单
-                <ChevronRight className="w-4 h-4" />
-              </Link>
+              <p className="text-slate-600 text-sm mb-4">已完成或已取消的订单无法申请退款</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link to="/orders" className="btn-primary inline-flex items-center gap-2">
+                  查看我的订单
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+                <Link to="/accounts" className="btn-secondary inline-flex items-center gap-2">
+                  <Gamepad2 className="w-4 h-4" />
+                  逛逛账号市场
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="divide-y divide-dark-border">
