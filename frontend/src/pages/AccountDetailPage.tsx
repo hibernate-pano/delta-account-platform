@@ -10,7 +10,8 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession } from '../hooks/useQueries';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
-  ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw
+  ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
+  Shield, CheckCircle
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -232,7 +233,7 @@ const AccountDetailPage: React.FC = () => {
                 {[
                   { label: '游戏段位', value: account.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
-                  { label: '所属英雄', value: account.weapons || '未填写' },
+                  { label: '装备描述', value: account.weapons || '未填写' },
                 ].map((item, i) => (
                   <div
                     key={i}
@@ -249,6 +250,75 @@ const AccountDetailPage: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Seller Trust Card */}
+          {account.sellerId && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-primary/8 to-purple-500/5 rounded-xl border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary/40 to-purple-500/40 rounded-full flex items-center justify-center border-2 border-primary/30">
+                    <User className="w-6 h-6 text-primary" />
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-dark-card" title="在线" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-semibold text-white truncate">
+                      {account.sellerNickname || account.sellerUsername}
+                    </p>
+                    {account.verificationStatus === 'VERIFIED' && (
+                      <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex-shrink-0 items-center gap-0.5">
+                        ✓ 已认证
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Star rating */}
+                    <div className="flex items-center gap-0.5">
+                      {[1,2,3,4,5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`w-3 h-3 ${
+                            s <= Math.round((account.sellerCreditScore || 50) / 20)
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-slate-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-yellow-400 font-medium">
+                      {account.sellerCreditScore || '—'}
+                    </span>
+                    <span className="text-xs text-slate-500">分</span>
+                  </div>
+                </div>
+                {!isOwner && (
+                  <button
+                    onClick={handleContactSeller}
+                    className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-primary text-sm font-medium transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    聊聊
+                  </button>
+                )}
+              </div>
+              {/* Trust badges */}
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-primary/10">
+                <div className="flex items-center gap-1 text-xs text-slate-500">
+                  <Shield className="w-3 h-3 text-green-400" />
+                  <span>平台托管</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-slate-500">
+                  <CheckCircle className="w-3 h-3 text-blue-400" />
+                  <span>账号认证</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-slate-500">
+                  <Clock className="w-3 h-3 text-purple-400" />
+                  <span>快速交付</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="space-y-3">
@@ -321,35 +391,6 @@ const AccountDetailPage: React.FC = () => {
               </button>
             )}
           </div>
-
-          {/* Seller Card */}
-          {account.sellerId && (
-            <div className="mt-6 p-4 bg-dark-lighter rounded-xl border border-dark-border">
-              <p className="text-xs text-slate-500 mb-3">卖家信息</p>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">
-                    {account.sellerNickname || account.sellerUsername}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                    信誉分: {account.sellerCreditScore}
-                  </div>
-                </div>
-                {!isOwner && (
-                  <button
-                    onClick={handleContactSeller}
-                    className="text-primary hover:text-primary-light text-sm font-medium flex items-center gap-1"
-                  >
-                    聊聊 <ChevronRight className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
