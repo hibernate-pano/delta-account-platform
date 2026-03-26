@@ -7,11 +7,21 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
-  ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star
+  ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
 type SortMode = 'default' | 'price_asc' | 'price_desc' | 'recent';
+
+const formatRelative = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  const h = Math.floor(diff / 3600000);
+  if (h < 24) return `${h}小时前`;
+  return `${Math.floor(h / 24)}天前`;
+};
 
 const WishlistPage: React.FC = () => {
   usePageTitle('我的心愿单');
@@ -239,6 +249,22 @@ const WishlistPage: React.FC = () => {
                         )}
                       </div>
                     )}
+                    {/* Engagement stats */}
+                    <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-600">
+                      {account.viewCount != null && (
+                        <span className="flex items-center gap-0.5">
+                          <Eye className="w-3 h-3" />
+                          {account.viewCount}
+                        </span>
+                      )}
+                      {account.orderCount != null && account.orderCount > 0 && (
+                        <span className="flex items-center gap-0.5">
+                          <ShoppingCart className="w-3 h-3" />
+                          {account.orderCount}笔交易
+                        </span>
+                      )}
+                      <span className="ml-auto opacity-60">{formatRelative(account.createdAt)}</span>
+                    </div>
                   </Link>
 
                   {/* Actions */}

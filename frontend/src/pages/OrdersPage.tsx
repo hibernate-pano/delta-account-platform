@@ -118,6 +118,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { showToast } = useToast();
+  const payMutation = usePayOrder();
   const isBuyer = user?.id === order.buyerId;
   const isSeller = user?.id === order.sellerId;
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
@@ -337,10 +338,21 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
             )}
             {order.status === 'PENDING' && (
               <button
-                className="btn-primary flex-1 !py-2.5 text-sm flex items-center justify-center gap-2"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    await payMutation.mutateAsync(order.id);
+                    showToast('支付成功！', 'success');
+                    onClose();
+                  } catch (err: any) {
+                    showToast(err.response?.data?.message || '支付失败', 'error');
+                  }
+                }}
+                disabled={payMutation.isPending}
+                className="btn-primary flex-1 !py-2.5 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <CreditCard className="w-4 h-4" />
-                立即支付
+                {payMutation.isPending ? '支付中...' : '立即支付'}
               </button>
             )}
           </div>
