@@ -141,6 +141,7 @@ const WishlistPage: React.FC = () => {
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as SortMode)}
+              aria-label="排序方式"
               className="bg-dark-lighter border border-dark-border text-slate-400 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary"
             >
               <option value="default">默认排序</option>

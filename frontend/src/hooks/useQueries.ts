@@ -309,6 +309,7 @@ export const useRecharge = () => {
       walletApi.recharge(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.wallet.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance });
     },
   });
 };
@@ -321,6 +322,7 @@ export const useWithdraw = () => {
       walletApi.withdraw(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.wallet.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance });
     },
   });
 };
