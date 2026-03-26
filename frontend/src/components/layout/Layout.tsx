@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/auth';
 import {
   Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X, Wallet,
   MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw, Heart,
-  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle, History
+  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle, History, Search
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { notificationApi, messageApi } from '../../api';
@@ -18,6 +18,29 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [msgUnreadCount, setMsgUnreadCount] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchRef = React.useRef<HTMLInputElement>(null);
+
+  // Cmd/Ctrl+K to focus search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/accounts?keyword=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      searchRef.current?.blur();
+    }
+  };
 
   // Poll for notifications + messages
   useEffect(() => {
@@ -115,6 +138,25 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 Delta<span className="gradient-text">Hub</span>
               </span>
             </Link>
+
+            {/* Quick Search */}
+            <form onSubmit={handleSearch} className="hidden md:flex items-center mx-6 flex-1 max-w-xs">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索账号..."
+                  className="w-full pl-9 pr-14 py-2 bg-dark-lighter border border-dark-border rounded-xl text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-primary/50 focus:bg-dark focus:ring-1 focus:ring-primary/20 transition-all"
+                />
+                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 text-[10px] text-slate-600 pointer-events-none">
+                  <span className="px-1 py-0.5 bg-dark-border rounded text-slate-500">⌘</span>
+                  <span className="px-1 py-0.5 bg-dark-border rounded text-slate-500">K</span>
+                </kbd>
+              </div>
+            </form>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
