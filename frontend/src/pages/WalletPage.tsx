@@ -501,7 +501,16 @@ const WalletPage: React.FC = () => {
             </h2>
             <form onSubmit={handleWithdraw}>
               <div className="mb-4">
-                <label className="block text-sm text-slate-400 mb-2">提现金额</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm text-slate-400">提现金额</label>
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawAmount(balance.toFixed(2))}
+                    className="text-xs text-primary hover:text-primary-light transition-colors"
+                  >
+                    全部提现
+                  </button>
+                </div>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-slate-500">¥</span>
                   <input
@@ -520,6 +529,22 @@ const WalletPage: React.FC = () => {
                 <p className="text-sm text-slate-500 mt-1">
                   可用余额: <span className="text-primary font-medium">¥{balance.toFixed(2)}</span>
                 </p>
+              </div>
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {[50, 100, 200, 500].map((amount) => (
+                  <button
+                    key={amount}
+                    type="button"
+                    onClick={() => setWithdrawAmount(Math.min(amount, balance).toString())}
+                    className={`py-2.5 rounded-xl font-medium transition-all ${
+                      withdrawAmount === Math.min(amount, balance).toFixed(2)
+                        ? 'bg-primary text-white'
+                        : 'bg-dark-lighter text-gray-400 hover:bg-slate-700'
+                    }`}
+                  >
+                    ¥{amount}
+                  </button>
+                ))}
               </div>
               <div className="mb-4">
                 <label className="block text-sm text-slate-400 mb-2">支付宝账号</label>

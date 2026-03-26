@@ -329,7 +329,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
 
       {/* Mobile Bottom Tab Bar */}
-      <MobileTabBar msgUnreadCount={msgUnreadCount} />
+      <MobileTabBar msgUnreadCount={msgUnreadCount} notifUnreadCount={unreadCount} />
 
       {/* Footer */}
       <footer className="border-t border-slate-800 pt-12 pb-6 mt-8 hidden md:block bg-dark-darker/50">

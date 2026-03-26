@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
-  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus
+  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus, Bell
 } from 'lucide-react';
 
 interface TabBarItem {
@@ -11,9 +11,13 @@ interface TabBarItem {
   label: string;
   badge?: number;
   isAction?: boolean;
+  isNotification?: boolean;
 }
 
-const MobileTabBar: React.FC<{ msgUnreadCount?: number }> = ({ msgUnreadCount = 0 }) => {
+const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: number }> = ({
+  msgUnreadCount = 0,
+  notifUnreadCount = 0,
+}) => {
   const { token } = useAuthStore();
   const location = useLocation();
 
@@ -29,6 +33,30 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number }> = ({ msgUnreadCount = 
         { to: '/sell', icon: Plus, label: '发布', isAction: true },
         { to: '/orders', icon: ShoppingCart, label: '订单' },
         { to: '/messages', icon: MessageCircle, label: '消息', badge: msgUnreadCount },
+        { to: '/notifications', icon: Bell, label: '通知', badge: notifUnreadCount },
+        { to: '/profile', icon: User, label: '我的' },
+      ]
+    : [
+        { to: '/', icon: Home, label: '首页' },
+        { to: '/accounts', icon: Gamepad2, label: '市场' },
+        { to: '/login', icon: User, label: '登录' },
+      ];
+
+  // For logged-in users, group into 5 tabs: Home | Market | Action | Orders | More
+  const displayTabs: TabBarItem[] = token
+    ? [
+        { to: '/', icon: Home, label: '首页' },
+        { to: '/accounts', icon: Gamepad2, label: '市场' },
+        { to: '/sell', icon: Plus, label: '发布', isAction: true },
+        { to: '/orders', icon: ShoppingCart, label: '订单' },
+        {
+          to: '/notifications',
+          icon: Bell,
+          label: '通知',
+          badge: notifUnreadCount + msgUnreadCount, // combined badge
+          isNotification: true,
+        },
+        { to: '/profile', icon: User, label: '我的' },
       ]
     : [
         { to: '/', icon: Home, label: '首页' },
@@ -47,7 +75,7 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number }> = ({ msgUnreadCount = 
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div className="flex items-stretch h-16 bg-dark/95 backdrop-blur-xl">
-          {tabs.map((tab) => {
+          {displayTabs.map((tab) => {
             const active = isActive(tab.to);
             const Icon = tab.icon;
 
@@ -86,28 +114,13 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number }> = ({ msgUnreadCount = 
                 <span className={`text-[10px] mt-1 transition-all ${active ? 'font-semibold' : ''}`}>
                   {tab.label}
                 </span>
-                {/* Active indicator dot */}
+                {/* Active indicator */}
                 {active && (
                   <span className="absolute bottom-0 w-1 h-1 bg-primary rounded-full" />
                 )}
               </Link>
             );
           })}
-
-          {/* Profile tab (always last for logged in) */}
-          {token && (
-            <Link
-              to="/profile"
-              className={`flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
-                isActive('/profile') ? 'text-primary' : 'text-slate-500'
-              }`}
-            >
-              <User className={`w-5 h-5 transition-all ${isActive('/profile') ? 'scale-110' : ''}`} />
-              <span className={`text-[10px] mt-1 transition-all ${isActive('/profile') ? 'font-semibold' : ''}`}>
-                我的
-              </span>
-            </Link>
-          )}
         </div>
       </nav>
     </>
