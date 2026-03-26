@@ -91,10 +91,10 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
         <div
           key={toast.id}
           className={`toast-enter flex flex-col bg-dark-card border border-dark-border border-l-4 ${
-            type === 'success' ? 'border-l-green-400' :
-            type === 'error'   ? 'border-l-red-400'   :
-            type === 'warning' ? 'border-l-yellow-400' :
-                                 'border-l-blue-400'
+            toast.type === 'success' ? 'border-l-green-400' :
+            toast.type === 'error'   ? 'border-l-red-400'   :
+            toast.type === 'warning' ? 'border-l-yellow-400' :
+                                       'border-l-blue-400'
           } rounded-lg shadow-2xl overflow-hidden`}
         >
           {/* Progress bar */}

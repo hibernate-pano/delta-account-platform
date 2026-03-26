@@ -172,7 +172,7 @@ const MessagesPage: React.FC = () => {
   }, [filteredSessions, sessionSearch, navigate]);
 
   const currentSessionId = sessionId ? parseInt(sessionId) : null;
-  const { data: messagesData, isLoading: messagesLoading, refetch } = useSessionMessages(currentSessionId!);
+  const { data: messagesData, isLoading: messagesLoading, isError: messagesError, refetch } = useSessionMessages(currentSessionId!);
   const messages: Message[] = messagesData?.data?.data || [];
 
   const sendMessageMutation = useSendMessage();
@@ -342,7 +342,19 @@ const MessagesPage: React.FC = () => {
         <div className="card flex-1 flex flex-col bg-dark-darker border-dark-border overflow-hidden">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-1">
-            {messagesLoading ? (
+            {messagesError ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <AlertCircle className="w-12 h-12 text-red-400 mb-3" />
+                <p className="text-slate-400 mb-1">消息加载失败</p>
+                <p className="text-slate-600 text-xs mb-4">无法获取消息记录</p>
+                <button
+                  onClick={() => refetch()}
+                  className="btn-ghost text-sm inline-flex items-center gap-1"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> 重试
+                </button>
+              </div>
+            ) : messagesLoading ? (
               <div className="flex justify-center py-12">
                 <RefreshCw className="w-6 h-6 animate-spin text-slate-500" />
               </div>

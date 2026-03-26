@@ -6,7 +6,7 @@ import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead 
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
-  BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X
+  BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft
 } from 'lucide-react';
 
 interface Notification {
@@ -229,7 +229,7 @@ const NotificationsPage: React.FC = () => {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
 
-  const { data, isLoading, refetch, dataUpdatedAt } = useNotifications();
+  const { data, isLoading, isError, refetch, dataUpdatedAt } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
 
@@ -294,6 +294,32 @@ const NotificationsPage: React.FC = () => {
               <div className="flex-1"><div className="h-4 w-2/3 skeleton rounded mb-2" /><div className="h-3 w-1/2 skeleton rounded" /></div>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={() => navigate(-1)} className="btn-ghost p-2">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="text-center py-20">
+          <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+            <AlertCircle className="w-10 h-10 text-red-400" />
+          </div>
+          <h3 className="text-lg font-medium mb-2 text-slate-300">加载通知失败</h3>
+          <p className="text-slate-600 text-sm mb-6">无法获取通知列表，请检查网络后重试</p>
+          <button
+            onClick={() => refetch()}
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            重试
+          </button>
         </div>
       </div>
     );
