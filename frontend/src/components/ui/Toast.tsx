@@ -54,6 +54,8 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
+const TOAST_DURATION = 4000;
+
 const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void }> = ({
   toasts,
   removeToast,
@@ -74,17 +76,12 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
     }
   };
 
-  const getBorderColor = (type: ToastType) => {
+  const getBarColor = (type: ToastType) => {
     switch (type) {
-      case 'success':
-        return 'border-l-green-400';
-      case 'error':
-        return 'border-l-red-400';
-      case 'warning':
-        return 'border-l-yellow-400';
-      case 'info':
-      default:
-        return 'border-l-blue-400';
+      case 'success': return 'bg-green-400';
+      case 'error':   return 'bg-red-400';
+      case 'warning': return 'bg-yellow-400';
+      case 'info':    return 'bg-blue-400';
     }
   };
 
@@ -93,18 +90,30 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`toast-enter flex items-start gap-3 bg-dark-card border border-dark-border border-l-4 ${getBorderColor(
-            toast.type
-          )} rounded-lg p-4 shadow-2xl`}
+          className={`toast-enter flex flex-col bg-dark-card border border-dark-border border-l-4 ${
+            type === 'success' ? 'border-l-green-400' :
+            type === 'error'   ? 'border-l-red-400'   :
+            type === 'warning' ? 'border-l-yellow-400' :
+                                 'border-l-blue-400'
+          } rounded-lg shadow-2xl overflow-hidden`}
         >
-          <div className="flex-shrink-0 mt-0.5">{getIcon(toast.type)}</div>
-          <p className="flex-1 text-sm text-slate-200">{toast.message}</p>
-          <button
-            onClick={() => removeToast(toast.id)}
-            className="flex-shrink-0 text-slate-500 hover:text-white transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {/* Progress bar */}
+          <div
+            className={`h-0.5 ${getBarColor(toast.type)} opacity-60`}
+            style={{
+              animation: `toast-progress ${TOAST_DURATION}ms linear forwards`,
+            }}
+          />
+          <div className="flex items-start gap-3 p-4">
+            <div className="flex-shrink-0 mt-0.5">{getIcon(toast.type)}</div>
+            <p className="flex-1 text-sm text-slate-200">{toast.message}</p>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="flex-shrink-0 text-slate-500 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       ))}
     </div>

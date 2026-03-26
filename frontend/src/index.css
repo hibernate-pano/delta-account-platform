@@ -294,6 +294,11 @@ body {
   animation: heart-burst 0.45s ease-out forwards;
 }
 
+@keyframes toast-progress {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
 /* Nav */
 .nav-link {
   position: relative;
