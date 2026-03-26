@@ -141,7 +141,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 className={`w-full p-4 rounded-xl border-2 flex items-center gap-4 transition-all ${
                   selectedMethod === method.id
                     ? 'border-primary bg-primary/10'
-                    : 'border-dark-border hover:border-gray-600'
+                    : 'border-dark-border hover:border-slate-600'
                 } ${method.id !== 'BALANCE' ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${

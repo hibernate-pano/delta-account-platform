@@ -462,7 +462,7 @@ const HomePage: React.FC = () => {
                       <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Gamepad2 className="w-8 h-8 text-gray-700" />
+                        <Gamepad2 className="w-8 h-8 text-slate-700" />
                       </div>
                     )}
                     <div className="absolute bottom-2 left-2">

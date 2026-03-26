@@ -126,7 +126,7 @@ export const NotificationBell: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleOpen}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors"
+        className="relative p-2 text-slate-400 hover:text-white transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -137,8 +137,8 @@ export const NotificationBell: React.FC = () => {
       </button>
 
       {showDropdown && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-dark-lighter border border-gray-800 rounded-xl shadow-xl z-50">
-          <div className="p-3 border-b border-gray-800 flex items-center justify-between">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-dark-lighter border border-dark-border rounded-xl shadow-xl z-50">
+          <div className="p-3 border-b border-dark-border flex items-center justify-between">
             <h3 className="font-semibold">通知</h3>
             {unreadCount > 0 && (
               <button onClick={handleMarkAllRead} className="text-xs text-primary hover:underline">
