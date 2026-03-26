@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
-  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus, Bell
+  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus, Bell, Heart
 } from 'lucide-react';
 
 interface TabBarItem {
@@ -42,20 +42,14 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
         { to: '/login', icon: User, label: '登录' },
       ];
 
-  // For logged-in users, group into 5 tabs: Home | Market | Action | Orders | More
+  // For logged-in users: Home | Market | Action | Orders | Wishlist | More
   const displayTabs: TabBarItem[] = token
     ? [
         { to: '/', icon: Home, label: '首页' },
         { to: '/accounts', icon: Gamepad2, label: '市场' },
         { to: '/sell', icon: Plus, label: '发布', isAction: true },
         { to: '/orders', icon: ShoppingCart, label: '订单' },
-        {
-          to: '/notifications',
-          icon: Bell,
-          label: '通知',
-          badge: notifUnreadCount + msgUnreadCount, // combined badge
-          isNotification: true,
-        },
+        { to: '/wishlist', icon: Heart, label: '收藏' },
         { to: '/profile', icon: User, label: '我的' },
       ]
     : [
