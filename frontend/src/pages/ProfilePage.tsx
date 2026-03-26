@@ -8,7 +8,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
-  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw
+  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
@@ -19,19 +19,22 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist'>('accounts');
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const { data: profileData, isLoading: profileLoading } = useAuthProfile();
-  const { data: ordersData, isLoading: ordersLoading } = useMyOrders();
+  const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useAuthProfile();
+  const { data: ordersData, isLoading: ordersLoading, isError: ordersError } = useMyOrders();
   const { data: unreadData } = useUnreadCount();
 
   const profile = profileData?.data?.data;
   const profileId = profile?.id ?? user?.id;
-  const { data: sellerAccounts, isLoading: accountsLoading } = useSellerAccounts(profileId);
+  const { data: sellerAccounts, isLoading: accountsLoading, isError: accountsError } = useSellerAccounts(profileId);
 
   const accounts = sellerAccounts || [];
   const orders = ordersData?.data?.data?.records || [];
 
   const { items: wishlistItems, removeItem } = useWishlistStore();
   const wishlistCount = wishlistItems.length;
+
+  const anyError = profileError || ordersError || accountsError;
+  const refetchAll = () => { refetchProfile?.(); };
 
   const handleLogout = () => {
     logout();
@@ -63,6 +66,25 @@ const ProfilePage: React.FC = () => {
   if (!token) {
     navigate('/login');
     return null;
+  }
+
+  if (anyError) {
+    return (
+      <div className="max-w-6xl mx-auto text-center py-20">
+        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="w-10 h-10 text-red-400" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">加载失败</h2>
+        <p className="text-slate-500 mb-6">无法获取个人资料，请检查网络后重试</p>
+        <button
+          onClick={refetchAll}
+          className="btn-primary inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          重试
+        </button>
+      </div>
+    );
   }
 
   return (
