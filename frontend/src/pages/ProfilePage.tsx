@@ -61,18 +61,16 @@ const ProfilePage: React.FC = () => {
   const creditLevel = getCreditLevel(stats.creditScore);
   const CreditIcon = creditLevel.icon;
 
-  // Profile completeness score
-  const completeness = (() => {
-    const fields = [
-      !!(profile?.avatar || user?.avatar),          // avatar (15)
-      !!(profile?.nickname || user?.nickname),      // nickname (15)
-      !!profile?.phone,                             // phone (20)
-      !!profile?.email,                             // email (20)
-      accounts.length > 0,                          // has listed accounts (15)
-      !!profile?.bio,                               // bio (15)
-    ];
-    return Math.round(fields.filter(Boolean).length / fields.length * 100);
-  })();
+  // Profile completeness score + missing fields list
+  const completenessFields = [
+    { key: 'avatar', label: '上传头像', done: !!(profile?.avatar || user?.avatar), icon: '🖼️' },
+    { key: 'nickname', label: '设置昵称', done: !!(profile?.nickname || user?.nickname), icon: '✏️' },
+    { key: 'phone', label: '绑定手机', done: !!profile?.phone, icon: '📱' },
+    { key: 'email', label: '填写邮箱', done: !!profile?.email, icon: '📧' },
+    { key: 'bio', label: '填写简介', done: !!profile?.bio, icon: '📝' },
+  ];
+  const missingFields = completenessFields.filter(f => !f.done);
+  const completeness = Math.round(completenessFields.filter(f => f.done).length / completenessFields.length * 100);
 
   const isLoading = profileLoading || ordersLoading || accountsLoading;
 
@@ -190,6 +188,21 @@ const ProfilePage: React.FC = () => {
              completeness < 80 ? '再完善一下就能提升信用分了，上传头像和绑定手机' :
              '资料完善度优秀！'}
           </p>
+          {/* Quick-action chips for missing fields */}
+          {missingFields.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {missingFields.slice(0, 4).map((field) => (
+                <button
+                  key={field.key}
+                  onClick={() => setShowEditModal(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-dark-lighter hover:bg-dark-lighter/80 border border-dark-border hover:border-primary/40 rounded-full text-xs text-slate-400 hover:text-primary transition-all"
+                >
+                  <span>{field.icon}</span>
+                  <span>{field.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

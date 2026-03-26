@@ -134,12 +134,34 @@ const HomePage: React.FC = () => {
   const onSaleCount = accounts.filter(a => a.status === 'ON_SALE').length;
   const maxSkins = accounts.length > 0 ? Math.max(...accounts.map(a => a.skinCount || 0)) : 0;
 
-  const categories = [
-    { label: '新手入门', Icon: Sparkles, color: 'text-green-400', bg: 'bg-green-400/20', desc: '低价优质入门号', count: accounts.filter(a => a.price < 50).length },
-    { label: '钻石段位', Icon: Star, color: 'text-blue-400', bg: 'bg-blue-400/20', desc: '中端性价比之选', count: accounts.filter(a => a.price >= 50 && a.price < 500).length },
-    { label: '星耀王者', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-400/20', desc: '高端实力账号', count: accounts.filter(a => a.price >= 500 && a.price < 2000).length },
-    { label: '满皮肤号', Icon: Zap, color: 'text-red-400', bg: 'bg-red-400/20', desc: '限定皮肤收藏级', count: accounts.filter(a => a.price >= 2000).length },
-  ];
+  // Dynamic price thresholds from actual price distribution (quartile-based)
+  const prices = accounts.map(a => a.price).filter(p => p > 0).sort((a, b) => a - b);
+  const q1 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.25)] : null;
+  const q2 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.5)] : null;
+  const q3 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.75)] : null;
+
+  const categories = (() => {
+    if (prices.length < 4 || q1 == null || q2 == null || q3 == null) {
+      // Fallback: use percentage-based tiers
+      const maxP = prices.length > 0 ? Math.max(...prices) : 1000;
+      const tier1 = Math.round(maxP * 0.25);
+      const tier2 = Math.round(maxP * 0.5);
+      const tier3 = Math.round(maxP * 0.75);
+      return [
+        { label: '入门价', Icon: Sparkles, color: 'text-green-400', bg: 'bg-green-400/20', desc: `¥${tier1}以下`, count: accounts.filter(a => a.price < tier1).length },
+        { label: '中端价', Icon: Star, color: 'text-blue-400', bg: 'bg-blue-400/20', desc: `¥${tier1}-${tier2}`, count: accounts.filter(a => a.price >= tier1 && a.price < tier2).length },
+        { label: '高端价', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-400/20', desc: `¥${tier2}-${tier3}`, count: accounts.filter(a => a.price >= tier2 && a.price < tier3).length },
+        { label: '顶级账号', Icon: Zap, color: 'text-red-400', bg: 'bg-red-400/20', desc: `¥${tier3}+`, count: accounts.filter(a => a.price >= tier3).length },
+      ];
+    }
+    // Quartile-based: Q1 budget, Q2 mid-range, Q3 high-end, Q4+ premium
+    return [
+      { label: '入门价', Icon: Sparkles, color: 'text-green-400', bg: 'bg-green-400/20', desc: `¥${q1}以下`, count: accounts.filter(a => a.price < q1).length },
+      { label: '中端价', Icon: Star, color: 'text-blue-400', bg: 'bg-blue-400/20', desc: `¥${q1}-${q2}`, count: accounts.filter(a => a.price >= q1 && a.price < q2).length },
+      { label: '高端价', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-400/20', desc: `¥${q2}-${q3}`, count: accounts.filter(a => a.price >= q2 && a.price < q3).length },
+      { label: '顶级账号', Icon: Zap, color: 'text-red-400', bg: 'bg-red-400/20', desc: `¥${q3}+`, count: accounts.filter(a => a.price >= q3).length },
+    ];
+  })();
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
