@@ -3,7 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
   Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X, Wallet,
-  MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw
+  MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw, Heart,
+  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { notificationApi, messageApi } from '../../api';
@@ -117,7 +118,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <NavLink to="/" icon={Home}>首页</NavLink>
               <NavLink to="/accounts">账号市场</NavLink>
               {token && <NavLink to="/sell" icon={Plus}>发布账号</NavLink>}
-              {token && <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>}
+              <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>
+              <NavLink to="/wishlist" icon={Heart}>收藏</NavLink>
               {token && <NavLink to="/wallet" icon={Wallet}>钱包</NavLink>}
               {token && <NavLink to="/refunds" icon={RefreshCw}>退款</NavLink>}
               {token && <NavLink to="/messages" icon={MessageCircle} badge={msgUnreadCount}>消息</NavLink>}
@@ -188,6 +190,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                           <span className="ml-auto text-primary text-sm">¥{user?.balance?.toFixed(2)}</span>
                         </Link>
                         <Link
+                          to="/wishlist"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-dark-lighter transition-colors"
+                        >
+                          <Heart className="w-4 h-4" />
+                          我的收藏
+                        </Link>
+                        <Link
                           to="/orders"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-dark-lighter transition-colors"
@@ -252,6 +262,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <>
                   <NavLink to="/sell" icon={Plus}>发布账号</NavLink>
                   <NavLink to="/orders" icon={ShoppingCart}>订单</NavLink>
+                  <NavLink to="/wishlist" icon={Heart}>我的收藏</NavLink>
                   <NavLink to="/wallet" icon={Wallet}>钱包</NavLink>
                   <NavLink to="/refunds" icon={RefreshCw}>退款</NavLink>
                   <NavLink to="/messages" icon={MessageCircle} badge={msgUnreadCount}>消息</NavLink>
@@ -297,17 +308,111 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <MobileTabBar msgUnreadCount={msgUnreadCount} />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-8 mt-auto hidden md:block">
+      <footer className="border-t border-slate-800 pt-12 pb-6 mt-8 hidden md:block bg-dark-darker/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-500">
-              <Gamepad2 className="w-5 h-5" />
+          <div className="grid grid-cols-4 gap-8 mb-10">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-9 h-9 bg-gradient-to-br from-primary to-purple-500 rounded-lg flex items-center justify-center">
+                  <Gamepad2 className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-lg font-bold text-white">
+                  Delta<span className="gradient-text">Hub</span>
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 leading-relaxed mb-4">
+                专业游戏账号交易平台，买卖租赁，安全可靠，快速交付。
+              </p>
+              <div className="space-y-2">
+                {[
+                  { icon: Shield, text: '资金托管保障' },
+                  { icon: CheckCircle, text: '账号审核认证' },
+                  { icon: BarChart3, text: '信用评价体系' },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2 text-xs text-slate-500">
+                    <Icon className="w-3.5 h-3.5 text-green-400" />
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-medium text-sm text-slate-300 mb-4">快捷链接</h4>
+              <div className="space-y-2.5">
+                {[
+                  { to: '/', label: '首页' },
+                  { to: '/accounts', label: '账号市场' },
+                  { to: '/sell', label: '发布账号' },
+                  { to: '/orders', label: '我的订单' },
+                  { to: '/wishlist', label: '我的收藏' },
+                ].map((link) => (
+                  <Link key={link.to} to={link.to}
+                    className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h4 className="font-medium text-sm text-slate-300 mb-4">帮助支持</h4>
+              <div className="space-y-2.5">
+                {[
+                  { to: '/notifications', label: '通知中心' },
+                  { to: '/wallet', label: '钱包充值' },
+                  { to: '/refunds', label: '退款申请' },
+                ].map((link) => (
+                  <Link key={link.to} to={link.to}
+                    className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                ))}
+                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                  常见问题 FAQ
+                </a>
+                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                  交易指南
+                </a>
+              </div>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-medium text-sm text-slate-300 mb-4">法律信息</h4>
+              <div className="space-y-2.5">
+                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                  服务条款
+                </a>
+                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                  隐私政策
+                </a>
+                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                  退款政策
+                </a>
+                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                  联系我们
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-dark-border pt-6 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2 text-slate-500 text-xs">
               <span>© 2026 DeltaHub. All rights reserved.</span>
             </div>
-            <div className="flex items-center gap-6 text-sm text-slate-500">
-              <a href="#" className="hover:text-primary transition-colors">服务条款</a>
-              <a href="#" className="hover:text-primary transition-colors">隐私政策</a>
-              <a href="#" className="hover:text-primary transition-colors">联系我们</a>
+            <div className="flex items-center gap-4">
+              {/* Payment icons placeholder */}
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <span>支付方式:</span>
+                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500">微信</span>
+                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500">支付宝</span>
+                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500">平台余额</span>
+              </div>
             </div>
           </div>
         </div>
