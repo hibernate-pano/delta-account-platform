@@ -129,12 +129,9 @@ const HomePage: React.FC = () => {
   const featuredAccounts = accounts.filter((a) => a.verificationStatus === 'VERIFIED').slice(0, 4);
   const displayAccounts = accounts.slice(0, 6);
 
-  // Real stats derived from fetched accounts
+  // Stats derived from latest fetched listings
   const verifiedCount = accounts.filter(a => a.verificationStatus === 'VERIFIED').length;
   const onSaleCount = accounts.filter(a => a.status === 'ON_SALE').length;
-  const avgPrice = accounts.length > 0
-    ? Math.round(accounts.reduce((s, a) => s + a.price, 0) / accounts.length)
-    : 0;
   const maxSkins = accounts.length > 0 ? Math.max(...accounts.map(a => a.skinCount || 0)) : 0;
 
   const categories = [
@@ -291,8 +288,8 @@ const HomePage: React.FC = () => {
                   <div className="text-slate-500 text-sm mt-1">正在出售</div>
                 </div>
                 <div className="text-center">
-                  <AnimatedCounter end={avgPrice} prefix="¥" />
-                  <div className="text-slate-500 text-sm mt-1">平均价格</div>
+                  <AnimatedCounter end={maxSkins} suffix="+" />
+                  <div className="text-slate-500 text-sm mt-1">最高皮肤数</div>
                 </div>
               </>
             )}
@@ -524,7 +521,7 @@ const HomePage: React.FC = () => {
             <h2 className="text-3xl font-bold mb-3">
               用户 <span className="gradient-text">真实评价</span>
             </h2>
-            <p className="text-slate-400">来自真实交易用户的好评</p>
+            <p className="text-slate-400">精选已完成的真实交易评价 · <span className="text-slate-600">示例展示</span></p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
@@ -574,7 +571,7 @@ const HomePage: React.FC = () => {
                   <div className="w-8 h-8 bg-dark rounded-full flex items-center justify-center text-sm">{t.avatar}</div>
                   <div>
                     <p className="text-sm font-medium">{t.name}</p>
-                    <p className="text-xs text-slate-600">已验证用户</p>
+                    <p className="text-xs text-slate-600">示例用户</p>
                   </div>
                   <span className="ml-auto flex items-center gap-1 text-xs text-green-400">
                     <CheckCircle className="w-3 h-3" /> 已完成
