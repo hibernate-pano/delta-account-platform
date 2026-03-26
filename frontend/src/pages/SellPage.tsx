@@ -115,7 +115,7 @@ const SellPage: React.FC = () => {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNextToStep2 = () => {
     if (validateStep1()) handleNext(2);
   };
 
@@ -432,7 +432,7 @@ const SellPage: React.FC = () => {
               </div>
             </div>
 
-            <button type="button" onClick={handleNext} className="btn-primary w-full py-4 flex items-center justify-center gap-2">
+            <button type="button" onClick={handleNextToStep2} className="btn-primary w-full py-4 flex items-center justify-center gap-2">
               下一步 <ArrowRight className="w-5 h-5" />
             </button>
           </div>
