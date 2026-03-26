@@ -6,7 +6,8 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { useAccounts } from '../hooks/useQueries';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
-  Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye
+  Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
+  ChevronDown, MessageSquare, ThumbsUp
 } from 'lucide-react';
 
 // Animated counter
@@ -88,6 +89,27 @@ const TransactionToast: React.FC = () => {
         </div>
         <div className="text-sm font-bold text-primary flex-shrink-0">{current.price}</div>
       </div>
+    </div>
+  );
+};
+
+// FAQ Accordion Item
+const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="card overflow-hidden p-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-dark-lighter/40 transition-colors"
+      >
+        <span className="font-medium text-sm pr-4">{q}</span>
+        <ChevronDown className={`w-4 h-4 text-slate-500 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="px-5 pb-4">
+          <p className="text-sm text-slate-400 leading-relaxed">{a}</p>
+        </div>
+      )}
     </div>
   );
 };
@@ -357,6 +379,113 @@ const HomePage: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-2 text-white">{feature.title}</h3>
                 <p className="text-slate-400 text-sm">{feature.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-3">
+              用户 <span className="gradient-text">真实评价</span>
+            </h2>
+            <p className="text-slate-400">来自真实交易用户的好评</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                name: '阿杰', role: '买家', avatar: '👤', rating: 5,
+                game: '王者荣耀', amount: '¥1,299',
+                content: '第一次在这买账号，整体流程非常顺畅。卖家响应很快，账号信息和描述完全一致，客服也很专业。十分钟就完成了交易，太方便了！',
+                highlight: '交易超快'
+              },
+              {
+                name: '星星', role: '卖家', avatar: '⭐', rating: 5,
+                game: '和平精英', amount: '¥888',
+                content: '闲置账号放了一个月都没卖出去，在 DeltaHub 上架第二天就成交了。平台抽成也很合理，提现秒到账，以后有账号都来这里卖。',
+                highlight: '提现秒到'
+              },
+              {
+                name: '小李', role: '买家', avatar: '🎮', rating: 5,
+                game: '英雄联盟', amount: '¥88/天',
+                content: '租号体验超出预期！账号很干净，段位真实，租了三天打上了钻石。价格比市面便宜很多，而且有押金保障很放心。',
+                highlight: '价格实惠'
+              },
+            ].map((t, i) => (
+              <div key={i} className="card-static p-6 hover:border-primary/30 transition-all group relative">
+                <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <MessageSquare className="w-8 h-8 text-primary" />
+                </div>
+                {/* Stars */}
+                <div className="flex gap-0.5 mb-4">
+                  {[...Array(t.rating)].map((_, s) => (
+                    <Star key={s} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+                {/* Game badge */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs px-2 py-0.5 bg-dark rounded text-slate-500">{t.game}</span>
+                  <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">{t.role}</span>
+                  <span className="ml-auto text-xs font-medium text-green-400">{t.amount}</span>
+                </div>
+                {/* Content */}
+                <p className="text-sm text-slate-300 leading-relaxed mb-4">"{t.content}"</p>
+                {/* Highlight tag */}
+                <div className="inline-flex items-center gap-1.5 text-xs px-3 py-1 bg-yellow-500/10 text-yellow-400 rounded-full">
+                  <ThumbsUp className="w-3 h-3" /> {t.highlight}
+                </div>
+                {/* User */}
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-dark-border">
+                  <div className="w-8 h-8 bg-dark rounded-full flex items-center justify-center text-sm">{t.avatar}</div>
+                  <div>
+                    <p className="text-sm font-medium">{t.name}</p>
+                    <p className="text-xs text-slate-600">已验证用户</p>
+                  </div>
+                  <span className="ml-auto flex items-center gap-1 text-xs text-green-400">
+                    <CheckCircle className="w-3 h-3" /> 已完成
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 bg-dark-darker">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-3">
+              常见问题 <span className="gradient-text">FAQ</span>
+            </h2>
+            <p className="text-slate-400">你可能想了解的问题</p>
+          </div>
+          <div className="space-y-3">
+            {[
+              {
+                q: '交易是否安全？',
+                a: '平台全程托管交易资金，买家确认收货后资金才会释放给卖家。同时所有账号信息经过平台审核，虚假描述可申请全额退款。'
+              },
+              {
+                q: '账号被找回怎么办？',
+                a: '平台提供账号找回全额赔付保障。交易完成后如原主人通过官方渠道找回账号，平台将协助买家维权并提供相应赔偿。'
+              },
+              {
+                q: '支持哪些支付方式？',
+                a: '目前支持微信支付、支付宝，以及平台余额支付。后续将陆续支持银行卡和信用卡支付。'
+              },
+              {
+                q: '卖家如何发布账号？',
+                a: '登录后进入"发布账号"页面，填写账号信息、上传图片、设置价格即可发布。发布后需等待平台审核通过后展示。'
+              },
+              {
+                q: '租号有什么规则？',
+                a: '租号最长租期30天，到期后自动归还。租号期间禁止修改账号密码及敏感信息，违规将扣除押金并封禁账号。'
+              },
+            ].map((faq, i) => (
+              <FaqItem key={i} q={faq.q} a={faq.a} />
             ))}
           </div>
         </div>
