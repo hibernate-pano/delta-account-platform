@@ -2,6 +2,7 @@ import React, { useEffect, lazy, Suspense, useState, useCallback, useRef } from 
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
+import { useAuthStore } from './store/auth';
 import HomePage from './pages/HomePage';
 import AccountsPage from './pages/AccountsPage';
 import LoginPage from './pages/LoginPage';
@@ -195,6 +196,27 @@ const BackToTop: React.FC = () => {
 
 const App: React.FC = () => {
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const { isInitialized, initAuth } = useAuthStore();
+
+  // Initialize auth on app mount
+  useEffect(() => {
+    if (!isInitialized) {
+      initAuth();
+    }
+  }, []);
+
+  // Show minimal loader while auth initializes
+  if (!isInitialized) {
+    return (
+      <div className="fixed inset-0 bg-dark flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-slate-500">加载中...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>

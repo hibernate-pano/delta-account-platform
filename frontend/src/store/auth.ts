@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '../types';
+import { authApi } from '../api';
 
 interface AuthState {
   token: string | null;
@@ -10,7 +11,7 @@ interface AuthState {
   setAuth: (token: string, user: User) => void;
   updateUser: (user: Partial<User>) => void;
   logout: () => void;
-  initAuth: () => void;
+  initAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -38,12 +39,23 @@ export const useAuthStore = create<AuthState>()(
         set({ token: null, user: null });
       },
 
-      initAuth: () => {
+      initAuth: async () => {
         const token = localStorage.getItem('auth-token');
         if (token) {
           set({ token, isLoading: true });
-          // Token will be validated on API call, just mark as initialized
-          set({ isInitialized: true, isLoading: false });
+          try {
+            const res = await authApi.getProfile();
+            const profile = res.data?.data;
+            if (profile) {
+              set({ user: profile, isInitialized: true, isLoading: false });
+            } else {
+              set({ isInitialized: true, isLoading: false });
+            }
+          } catch {
+            // Token may be expired; clear it
+            localStorage.removeItem('auth-token');
+            set({ token: null, user: null, isInitialized: true, isLoading: false });
+          }
         } else {
           set({ isInitialized: true });
         }
@@ -51,7 +63,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ token: state.token, user: state.user }),
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        isInitialized: state.isInitialized,
+      }),
     }
   )
 );
