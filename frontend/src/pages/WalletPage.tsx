@@ -759,13 +759,13 @@ const WalletPage: React.FC = () => {
                 </p>
               </div>
               <div className="grid grid-cols-4 gap-2 mb-4">
-                {[50, 100, 200, 500].map((amount) => (
+                {[50, 100, 200, 500].filter((a) => a <= balance).map((amount) => (
                   <button
                     key={amount}
                     type="button"
-                    onClick={() => setWithdrawAmount(Math.min(amount, balance).toString())}
+                    onClick={() => setWithdrawAmount(amount.toString())}
                     className={`py-2.5 rounded-xl font-medium transition-all ${
-                      withdrawAmount === Math.min(amount, balance).toFixed(2)
+                      withdrawAmount === amount.toString()
                         ? 'bg-primary text-white'
                         : 'bg-dark-lighter text-slate-400 hover:bg-slate-700'
                     }`}
@@ -773,6 +773,25 @@ const WalletPage: React.FC = () => {
                     ¥{amount}
                   </button>
                 ))}
+                {balance > 0 && [50, 100, 200, 500].filter((a) => a > balance).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawAmount(balance.toFixed(2))}
+                    className={`py-2.5 rounded-xl font-medium transition-all text-xs ${
+                      withdrawAmount === balance.toFixed(2)
+                        ? 'bg-primary text-white'
+                        : 'bg-dark-lighter text-slate-400 hover:bg-slate-700'
+                    }`}
+                  >
+                    ¥{balance.toFixed(0)} 全部
+                  </button>
+                )}
+                {[50, 100, 200, 500].filter((a) => a <= balance).length === 0 && balance > 0 && (
+                  <p className="col-span-4 text-xs text-slate-500 text-center py-2">余额不足¥50，无法使用快捷金额</p>
+                )}
+                {balance === 0 && (
+                  <p className="col-span-4 text-xs text-slate-500 text-center py-2">余额为0，无法提现</p>
+                )}
               </div>
               <div className="mb-4">
                 <label className="block text-sm text-slate-400 mb-2">支付宝账号</label>

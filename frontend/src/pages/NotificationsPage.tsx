@@ -135,7 +135,10 @@ const NotificationItem: React.FC<{
   return (
     <div className={`relative overflow-hidden transition-all ${isUnread ? 'bg-primary/4' : ''}`}>
       {/* Swipe-to-delete action */}
-      <div className="absolute inset-y-0 right-0 w-20 bg-red-500/90 flex items-center justify-center">
+      <div
+        className="absolute inset-y-0 right-0 w-20 bg-red-500/90 flex items-center justify-center cursor-pointer"
+        onClick={() => { onDelete(notification.id); setSwipeX(0); }}
+      >
         <Trash2 className="w-5 h-5 text-white" />
       </div>
 
