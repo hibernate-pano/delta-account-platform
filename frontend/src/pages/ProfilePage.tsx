@@ -455,18 +455,18 @@ const ProfilePage: React.FC = () => {
           <Link to="/messages" className="btn-secondary text-sm flex items-center gap-2 relative">
             <MessageCircle className="w-4 h-4" />
             消息中心
-            {unreadData?.data?.messageCount ? (
+            {unreadData?.messageCount ? (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-white font-bold">
-                {(unreadData.data.messageCount ?? 0) > 9 ? '9+' : unreadData.data.messageCount}
+                {(unreadData.messageCount ?? 0) > 9 ? '9+' : unreadData.messageCount}
               </span>
             ) : null}
           </Link>
           <Link to="/notifications" className="btn-secondary text-sm flex items-center gap-2 relative">
             <Bell className="w-4 h-4" />
             通知中心
-            {unreadData?.data?.notificationCount ? (
+            {unreadData?.notificationCount ? (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
-                {(unreadData.data.notificationCount ?? 0) > 9 ? '9+' : unreadData.data.notificationCount}
+                {(unreadData.notificationCount ?? 0) > 9 ? '9+' : unreadData.notificationCount}
               </span>
             ) : null}
           </Link>

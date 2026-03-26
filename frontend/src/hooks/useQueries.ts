@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi, refundApi } from '../api';
+import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi, refundApi, reviewApi } from '../api';
 import { useAuthStore } from '../store/auth';
 
 // Query keys factory
@@ -89,6 +89,29 @@ export const useCreateAccount = () => {
       description?: string;
       images?: string[];
     }) => accountApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+    },
+  });
+};
+
+export const useUpdateAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof accountApi.update>[1] }) =>
+      accountApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+    },
+  });
+};
+
+export const useDeleteAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => accountApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
@@ -230,6 +253,28 @@ export const usePayOrder = () => {
   });
 };
 
+export const useCompleteOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (orderId: number) => orderApi.complete(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+    },
+  });
+};
+
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (orderId: number) => orderApi.cancel(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+    },
+  });
+};
+
 // ==================== Wallet Hooks ====================
 
 export const useWalletBalance = () => {
@@ -330,11 +375,34 @@ export const useNotifications = () => {
 };
 
 export const useUnreadCount = () => {
-  return useQuery({
+  return useQuery<{ notificationCount: number; messageCount: number }>({
     queryKey: queryKeys.notifications.unreadCount,
-    queryFn: () => notificationApi.getUnreadCount(),
-    staleTime: 1000 * 10, // 10 seconds
+    queryFn: async () => {
+      const [notifRes, msgRes] = await Promise.all([
+        notificationApi.getUnreadCount(),
+        messageApi.getUnreadCount(),
+      ]);
+      const notifData = notifRes.data?.data;
+      const msgData = msgRes.data?.data;
+      return {
+        notificationCount: typeof notifData === 'number' ? notifData : (notifData?.notificationCount ?? 0),
+        messageCount: typeof msgData === 'number' ? msgData : (msgData?.messageCount ?? 0),
+      };
+    },
+    staleTime: 1000 * 10,
     refetchInterval: 30000,
+  });
+};
+
+export const useReviewOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { orderId: number; revieweeId: number; rating: number; content: string }) =>
+      reviewApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+    },
   });
 };
 
