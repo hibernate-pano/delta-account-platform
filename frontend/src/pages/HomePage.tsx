@@ -263,11 +263,13 @@ const HomePage: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((cat) => (
-              <Link
+              <button
                 key={cat.label}
-                to={`/accounts?sort=${cat.label.includes('满皮肤') ? 'price_desc' : 'price_asc'}`}
-                onClick={() => navigate(`/accounts?keyword=${encodeURIComponent(cat.label)}`)}
-                className="card-static p-5 group hover:border-primary/50 transition-all cursor-pointer"
+                onClick={() => {
+                  const label = cat.label.split(' ').slice(1).join(' ');
+                  navigate(`/accounts?keyword=${encodeURIComponent(label)}`);
+                }}
+                className="card-static p-5 group hover:border-primary/50 transition-all cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-2xl">{cat.label.split(' ')[0]}</span>
@@ -275,7 +277,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <p className="text-sm font-medium mb-1">{cat.label.split(' ').slice(1).join(' ')}</p>
                 <p className="text-xs text-slate-500">{cat.desc}</p>
-              </Link>
+              </button>
             ))}
           </div>
         </div>
@@ -325,7 +327,9 @@ const HomePage: React.FC = () => {
                     <h4 className="font-medium text-sm mb-2 line-clamp-1 group-hover:text-primary transition-colors">{account.title}</h4>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-primary">¥{account.price}</span>
-                      <span className="text-xs text-slate-500">👑 {account.skinCount}</span>
+                      {account.sellerNickname && (
+                        <span className="text-xs text-slate-500 truncate max-w-[80px]">{account.sellerNickname}</span>
+                      )}
                     </div>
                   </Link>
                 </div>
