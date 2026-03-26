@@ -19,6 +19,8 @@ const AccountsPage: React.FC = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [compareItems, setCompareItems] = useState<Array<{ account: Account; addedAt: number }>>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 12;
   const [showCompareModal, setShowCompareModal] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -38,7 +40,12 @@ const AccountsPage: React.FC = () => {
     }, 100);
   }, [debouncedKeyword, sort]);
 
-  const { data, isLoading } = useAccounts({ keyword: debouncedKeyword, sort });
+  // Reset to page 1 when search or sort changes
+  React.useEffect(() => { setCurrentPage(1); }, [debouncedKeyword, sort]);
+
+  const { data, isLoading } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
+  const totalPages = data?.data?.data?.pages ?? 1;
+  const totalRecords = data?.data?.data?.total ?? 0;
   const { items: recentItems } = useRecentStore();
   const recentAccounts = recentItems.slice(0, 6); // Show max 6 recent
 
@@ -266,7 +273,8 @@ const AccountsPage: React.FC = () => {
       {/* Results Count */}
       {!isLoading && accounts.length > 0 && (
         <p className="text-sm text-gray-500 mb-4">
-          共找到 <span className="text-primary font-medium">{accounts.length}</span> 个账号
+          第 <span className="text-primary font-medium">{currentPage}</span> / {totalPages} 页，
+          共 <span className="text-primary font-medium">{totalRecords}</span> 个账号
         </p>
       )}
 
@@ -405,6 +413,68 @@ const AccountsPage: React.FC = () => {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <button
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage <= 1}
+            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+          >
+            首页
+          </button>
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}
+            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+          >
+            上一页
+          </button>
+
+          {/* Page numbers */}
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let page: number;
+            if (totalPages <= 5) {
+              page = i + 1;
+            } else if (currentPage <= 3) {
+              page = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              page = totalPages - 4 + i;
+            } else {
+              page = currentPage - 2 + i;
+            }
+            return (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                  currentPage === page
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                    : 'bg-dark-lighter text-slate-400 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                {page}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}
+            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+          >
+            下一页
+          </button>
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage >= totalPages}
+            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+          >
+            末页
+          </button>
         </div>
       )}
 
