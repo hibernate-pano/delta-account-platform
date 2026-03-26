@@ -429,6 +429,12 @@ const AccountsPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                {account.sellerCreditScore && (
+                  <span className="text-[10px] text-yellow-400/80 flex items-center gap-0.5">
+                    <Star className="w-3 h-3 fill-yellow-400/80 text-yellow-400/80" />
+                    {account.sellerCreditScore}
+                  </span>
+                )}
                 {account.rentalPrice && (
                   <span className="text-xs text-gray-500">租 ¥{account.rentalPrice}/时</span>
                 )}
@@ -486,6 +492,12 @@ const AccountsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xl font-bold text-primary">¥{account.price}</span>
+                  {account.sellerCreditScore && (
+                    <span className="text-xs text-yellow-400/80 flex items-center gap-0.5">
+                      <Star className="w-3.5 h-3.5 fill-yellow-400/80 text-yellow-400/80" />
+                      {account.sellerCreditScore}分
+                    </span>
+                  )}
                   {account.rentalPrice && (
                     <span className="text-sm text-gray-500">租 ¥{account.rentalPrice}/时</span>
                   )}
