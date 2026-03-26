@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { TransactionSkeleton } from '../components/ui/Skeleton';
-import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder } from '../hooks/useQueries';
+import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder, useReviewOrder } from '../hooks/useQueries';
 import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, ArrowDownCircle, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
-  Shield, User
+  Shield, User, Star
 } from 'lucide-react';
 
 interface Order {
@@ -113,7 +113,7 @@ const OrderStepper: React.FC<{ status: string; type: 'BUY' | 'RENT' }> = ({ stat
 };
 
 // Order Detail Modal
-const OrderDetailModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, onClose }) => {
+const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: (order: Order) => void }> = ({ order, onClose, onReview }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { showToast } = useToast();
@@ -264,6 +264,15 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void }> = ({ ord
                 申请退款
               </Link>
             )}
+            {order.status === 'COMPLETED' && (
+              <button
+                onClick={() => { onClose(); onReview(order); }}
+                className="btn-secondary flex-1 !py-2.5 text-sm flex items-center justify-center gap-2"
+              >
+                <Star className="w-4 h-4 text-yellow-400" />
+                评价
+              </button>
+            )}
             {order.status === 'PENDING' && (
               <button
                 className="btn-primary flex-1 !py-2.5 text-sm flex items-center justify-center gap-2"
@@ -280,7 +289,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void }> = ({ ord
 };
 
 // Single Order Card
-const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void }> = ({ order, onViewDetail }) => {
+const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; onReview: (order: Order) => void }> = ({ order, onViewDetail, onReview }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -428,9 +437,147 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void }
                 申请退款
               </Link>
             )}
+            {order.status === 'COMPLETED' && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onReview(order); }}
+                className="btn-secondary !py-2 !px-2.5 text-xs flex items-center justify-center gap-1.5"
+              >
+                <Star className="w-3.5 h-3.5 text-yellow-400" />
+              </button>
+            )}
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Review Modal
+const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, onClose }) => {
+  const { user } = useAuthStore();
+  const { showToast } = useToast();
+  const reviewMutation = useReviewOrder();
+  const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [content, setContent] = useState('');
+
+  const revieweeId = user?.id === order.buyerId ? order.sellerId : order.buyerId;
+
+  const handleSubmit = async () => {
+    if (rating === 0) { showToast('请选择评分', 'error'); return; }
+    if (!content.trim()) { showToast('请输入评价内容', 'error'); return; }
+    try {
+      await reviewMutation.mutateAsync({ orderId: order.id, revieweeId, rating, content: content.trim() });
+      showToast('评价成功，感谢您的反馈！', 'success');
+      onClose();
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '评价失败，请重试', 'error');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-md bg-dark-card border border-dark-border rounded-2xl p-6 shadow-2xl animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+            评价订单
+          </h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-500 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Account info */}
+        <div className="flex items-center gap-3 p-3 bg-dark rounded-xl mb-5 border border-dark-border">
+          {order.account?.images?.[0] ? (
+            <img src={order.account.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover" />
+          ) : (
+            <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center">
+              <Gamepad2 className="w-6 h-6 text-primary" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">{order.account?.title || `订单 #${order.orderNo}`}</p>
+            <p className="text-xs text-slate-500">交易金额 ¥{order.amount}</p>
+          </div>
+        </div>
+
+        {/* Star rating */}
+        <div className="mb-4">
+          <p className="text-sm text-slate-400 mb-3">您的评分</p>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(0)}
+                className="p-1 transition-transform hover:scale-110"
+              >
+                <Star
+                  className={`w-8 h-8 transition-colors ${
+                    star <= (hoverRating || rating)
+                      ? 'text-yellow-400 fill-yellow-400'
+                      : 'text-slate-700 hover:text-yellow-500'
+                  }`}
+                />
+              </button>
+            ))}
+            <span className="ml-3 text-sm text-yellow-400 font-medium">
+              {['', '极差', '较差', '一般', '满意', '非常满意'][rating]}
+            </span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="mb-5">
+          <label className="block text-sm text-slate-400 mb-2">评价内容</label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="分享您的购买体验，帮助其他买家做出更好的选择..."
+            rows={4}
+            maxLength={500}
+            className="w-full bg-dark border border-dark-border rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-primary/60 resize-none transition-colors"
+          />
+          <p className="text-right text-xs text-slate-600 mt-1">{content.length}/500</p>
+        </div>
+
+        {/* Quick tags */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {['账号真实', '交付快速', '服务态度好', '性价比高', '值得推荐'].map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setContent((c) => c.includes(tag) ? c.replace(tag + '，', '').replace(tag, '') : c + (c ? '，' : '') + tag + '，')}
+              className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+                content.includes(tag)
+                  ? 'bg-primary/20 border-primary/50 text-primary'
+                  : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          disabled={reviewMutation.isPending}
+          className="w-full btn-primary !py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {reviewMutation.isPending ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Star className="w-4 h-4" />
+          )}
+          {reviewMutation.isPending ? '提交中...' : '提交评价'}
+        </button>
+      </div>
     </div>
   );
 };
@@ -441,6 +588,7 @@ const OrdersPage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'all' | 'BUY' | 'RENT'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
 
   const { data, isLoading } = useMyOrders();
   const orders: Order[] = data?.data?.data?.records || [];
@@ -555,7 +703,7 @@ const OrdersPage: React.FC = () => {
               </div>
               <div className="space-y-2">
                 {groupedOrders[month].map(order => (
-                  <OrderCard key={order.id} order={order} onViewDetail={setSelectedOrder} />
+                  <OrderCard key={order.id} order={order} onViewDetail={setSelectedOrder} onReview={setReviewingOrder} />
                 ))}
               </div>
             </div>
@@ -565,7 +713,11 @@ const OrdersPage: React.FC = () => {
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} onReview={setReviewingOrder} />
+      )}
+      {/* Review Modal */}
+      {reviewingOrder && (
+        <ReviewModal order={reviewingOrder} onClose={() => setReviewingOrder(null)} />
       )}
     </div>
   );
