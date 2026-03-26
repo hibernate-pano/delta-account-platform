@@ -9,7 +9,7 @@ import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
-  Shield, User, Star
+  Shield, User, Star, Search
 } from 'lucide-react';
 
 interface Order {

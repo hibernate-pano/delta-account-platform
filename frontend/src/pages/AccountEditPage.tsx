@@ -118,9 +118,17 @@ const AccountEditPage: React.FC = () => {
   };
 
   const addImage = () => {
-    if (newImage && formData.images.length < 5) {
+    if (formData.images.length >= 5) {
+      showToast('最多只能上传5张图片', 'warning');
+      return;
+    }
+    if (!newImage) return;
+    try {
+      new URL(newImage);
       setFormData({ ...formData, images: [...formData.images, newImage] });
       setNewImage('');
+    } catch {
+      showToast('请输入有效的图片URL', 'error');
     }
   };
 
