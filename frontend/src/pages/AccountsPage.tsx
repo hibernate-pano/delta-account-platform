@@ -79,7 +79,7 @@ const AccountsPage: React.FC = () => {
     return () => document.removeEventListener('keydown', handler);
   }, [quickViewAccount]);
 
-  const { data, isLoading } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
+  const { data, isLoading, dataUpdatedAt } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
   const totalPages = data?.data?.data?.pages ?? 1;
   const totalRecords = data?.data?.data?.total ?? 0;
   const { items: recentItems } = useRecentStore();
@@ -357,10 +357,16 @@ const AccountsPage: React.FC = () => {
 
       {/* Results Count */}
       {!isLoading && accounts.length > 0 && (
-        <p className="text-sm text-gray-500 mb-4">
-          第 <span className="text-primary font-medium">{currentPage}</span> / {totalPages} 页，
-          共 <span className="text-primary font-medium">{totalRecords}</span> 个账号
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-500">
+            第 <span className="text-primary font-medium">{currentPage}</span> / {totalPages} 页，
+            共 <span className="text-primary font-medium">{totalRecords}</span> 个账号
+          </p>
+          <p className="text-xs text-slate-600 flex items-center gap-1">
+            <RefreshCw className="w-3 h-3" />
+            {dataUpdatedAt ? `更新于 ${(() => { const d = Math.floor((Date.now() - dataUpdatedAt) / 60000); return d < 1 ? '刚刚' : d < 60 ? `${d}分钟前` : `${Math.floor(d/60)}小时前`; })()}` : ''}
+          </p>
+        </div>
       )}
 
       {/* Loading Skeletons */}
