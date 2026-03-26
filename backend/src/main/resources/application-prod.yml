@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: prod
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    com.delta.account: ${LOG_LEVEL:warn}

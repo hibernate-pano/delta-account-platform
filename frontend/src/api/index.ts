@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -7,27 +8,33 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 15000, // 15秒请求超时
 });
 
-// Add token to requests
+// Token 从 Zustand store 读取（单一数据源）
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth-token') || localStorage.getItem('token');
+  const token = useAuthStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Handle response errors
+// 401 软跳转：清除 store 状态，用 React Router 跳转而非硬刷新
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (!error.response) {
+      console.error('网络错误:', error.message);
+    }
+
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth-token');
-      localStorage.removeItem('token');
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login?expired=1';
+      const { logout } = useAuthStore.getState();
+      logout();
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/register') {
+        window.history.replaceState(null, '', '/login');
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }
     }
     return Promise.reject(error);
@@ -41,22 +48,51 @@ export const authApi = {
   register: (data: { username: string; password: string; nickname?: string; email?: string; phone?: string }) =>
     api.post('/api/auth/register', data),
   getProfile: () => api.get('/api/auth/profile'),
+  updateProfile: (data: { nickname?: string; email?: string; phone?: string; avatar?: string }) =>
+    api.put('/api/auth/profile', data),
+  changePassword: (data: { oldPassword: string; newPassword: string }) =>
+    api.put('/api/auth/password', data),
+  getMembership: () => api.get('/api/auth/membership'),
 };
 
 // Account API
 export const accountApi = {
-  getList: (params?: { page?: number; size?: number; keyword?: string; sort?: string }) =>
+  getList: (params?: { page?: number; size?: number; keyword?: string; sort?: string; minPrice?: number; maxPrice?: number; gameRank?: string }) =>
     api.get('/api/accounts', { params }),
   getById: (id: number) => api.get(`/api/accounts/${id}`),
-  create: (data: any) => api.post('/api/accounts', data),
-  update: (id: number, data: any) => api.put(`/api/accounts/${id}`, data),
+  getMy: (params?: { page?: number; size?: number }) =>
+    api.get('/api/accounts/my', { params }),
+  create: (data: {
+    title: string;
+    gameRank?: string;
+    skinCount?: number;
+    weapons?: string;
+    price: number;
+    rentalPrice?: number | null;
+    description?: string;
+    images?: string[];
+  }) => api.post('/api/accounts', data),
+  update: (id: number, data: {
+    title?: string;
+    gameRank?: string;
+    skinCount?: number;
+    weapons?: string;
+    price?: number;
+    rentalPrice?: number | null;
+    description?: string;
+    images?: string[];
+  }) => api.put(`/api/accounts/${id}`, data),
   delete: (id: number) => api.delete(`/api/accounts/${id}`),
+  toggleStatus: (id: number, status: string) =>
+    api.put(`/api/accounts/${id}/toggle`, null, { params: { status } }),
 };
 
 // Order API
 export const orderApi = {
   create: (data: { accountId: number; type: string; rentHours?: number }) =>
     api.post('/api/orders', data),
+  getMy: (params?: { page?: number; size?: number }) =>
+    api.get('/api/orders/my', { params }),
   getById: (id: number) => api.get(`/api/orders/${id}`),
   pay: (id: number) => api.put(`/api/orders/${id}/pay`),
   complete: (id: number) => api.put(`/api/orders/${id}/complete`),
@@ -121,6 +157,9 @@ export const adminApi = {
     api.put(`/api/admin/accounts/${id}/verify`, { approved }),
   banUser: (id: number, banned: boolean) =>
     api.put(`/api/admin/users/${id}/ban`, { banned }),
+  unbanUser: (id: number) => api.put(`/api/admin/users/${id}/unban`),
+  getPendingAccounts: (params?: { page?: number; size?: number }) =>
+    api.get('/api/admin/accounts/pending', { params }),
 };
 
 // Review API
@@ -129,6 +168,28 @@ export const reviewApi = {
     api.post('/api/reviews', data),
   getByAccount: (accountId: number) => api.get(`/api/reviews/account/${accountId}`),
   getByUser: (userId: number) => api.get(`/api/reviews/user/${userId}`),
+  getUserReviews: (userId: number) => api.get(`/api/reviews/user/${userId}`),
+  getUserStats: (userId: number) => api.get(`/api/reviews/user/${userId}/stats`),
+  reply: (id: number, reply: string) =>
+    api.post(`/api/reviews/${id}/reply`, null, { params: { reply } }),
+};
+
+// Favorite API
+export const favoriteApi = {
+  toggle: (accountId: number) => api.post(`/api/favorites/${accountId}`),
+  getMyIds: () => api.get('/api/favorites/ids'),
+  getMyList: () => api.get('/api/favorites'),
+};
+
+// Payment API
+export const paymentApi = {
+  create: (data: { orderId: number; paymentMethod: string }) =>
+    api.post('/api/payments', data),
+  pay: (id: number) => api.post(`/api/payments/${id}/pay`),
+  getByOrderId: (orderId: number) => api.get(`/api/payments/order/${orderId}`),
+  getMy: () => api.get('/api/payments/my'),
+  refund: (id: number, reason?: string) =>
+    api.post(`/api/payments/${id}/refund`, null, { params: { reason } }),
 };
 
 export default api;

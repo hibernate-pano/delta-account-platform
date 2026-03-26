@@ -74,3 +74,45 @@ export const WalletSkeleton: React.FC = () => {
     </div>
   );
 };
+
+export const CardSkeleton: React.FC = () => (
+  <div className="card">
+    <Skeleton className="aspect-video mb-3 rounded-lg" />
+    <Skeleton className="h-5 w-3/4 mb-2 rounded" />
+    <div className="flex justify-between mb-2">
+      <Skeleton className="h-4 w-16 rounded" />
+      <Skeleton className="h-4 w-12 rounded" />
+    </div>
+    <div className="flex justify-between">
+      <Skeleton className="h-6 w-20 rounded" />
+      <Skeleton className="h-4 w-16 rounded" />
+    </div>
+  </div>
+);
+
+export const GridSkeleton: React.FC<{ count?: number }> = ({ count = 8 }) => (
+  <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {Array.from({ length: count }).map((_, i) => (
+      <CardSkeleton key={i} />
+    ))}
+  </div>
+);
+
+export const ListSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => (
+  <div className="space-y-4">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="card flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Skeleton className="w-12 h-12 rounded" />
+          <div>
+            <Skeleton className="h-5 w-40 mb-2 rounded" />
+            <Skeleton className="h-4 w-28 rounded" />
+          </div>
+        </div>
+        <Skeleton className="h-8 w-20 rounded-lg" />
+      </div>
+    ))}
+  </div>
+);
+
+export default Skeleton;

@@ -12,6 +12,7 @@ interface Toast {
 interface ToastContextType {
   toasts: Toast[];
   showToast: (message: string, type?: ToastType) => void;
+  toast: (type: ToastType, message: string) => void;
   removeToast: (id: string) => void;
 }
 
@@ -37,12 +38,16 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, 4000);
   }, []);
 
+  const toast = useCallback((type: ToastType, message: string) => {
+    showToast(message, type);
+  }, [showToast]);
+
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toasts, showToast, removeToast }}>
+    <ToastContext.Provider value={{ toasts, showToast, toast, removeToast }}>
       {children}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </ToastContext.Provider>

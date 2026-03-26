@@ -72,11 +72,11 @@ const AccountDetailPage: React.FC = () => {
       navigate('/login');
       return;
     }
-    if (!account?.seller) return;
+    if (!account?.sellerId) return;
     try {
       const res = await createSessionMutation.mutateAsync({
         accountId,
-        sellerId: account.seller.id,
+        sellerId: account.sellerId,
       });
       showToast('正在打开聊天窗口...', 'info');
       setTimeout(() => navigate(`/messages/${res.data.data.id}`), 500);
@@ -92,7 +92,7 @@ const AccountDetailPage: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isOwner = user?.id === account?.seller?.id;
+  const isOwner = user?.id === account?.sellerId;
   const isOnSale = account?.status === 'ON_SALE';
   const isPending = buyMutation.isPending || rentMutation.isPending;
 
@@ -304,7 +304,7 @@ const AccountDetailPage: React.FC = () => {
               <div className="text-center py-3 text-slate-500">该账号暂不可购买</div>
             )}
 
-            {account.seller && !isOwner && (
+            {account.sellerId && !isOwner && (
               <button
                 onClick={handleContactSeller}
                 disabled={createSessionMutation.isPending}
@@ -323,7 +323,7 @@ const AccountDetailPage: React.FC = () => {
           </div>
 
           {/* Seller Card */}
-          {account.seller && (
+          {account.sellerId && (
             <div className="mt-6 p-4 bg-dark-lighter rounded-xl border border-dark-border">
               <p className="text-xs text-slate-500 mb-3">卖家信息</p>
               <div className="flex items-center gap-3">
@@ -332,11 +332,11 @@ const AccountDetailPage: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">
-                    {account.seller.nickname || account.seller.username}
+                    {account.sellerNickname || account.sellerUsername}
                   </p>
                   <div className="flex items-center gap-2 text-sm text-slate-500">
                     <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                    信誉分: {account.seller.creditScore}
+                    信誉分: {account.sellerCreditScore}
                   </div>
                 </div>
                 {!isOwner && (

@@ -30,11 +30,14 @@ public class Order {
     
     // 关联查询用
     @TableField(exist = false)
+    private String accountTitle;
+
+    @TableField(exist = false)
     private Account account;
-    
+
     @TableField(exist = false)
     private User buyer;
-    
+
     @TableField(exist = false)
     private User seller;
 }

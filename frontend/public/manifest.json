@@ -1,7 +1,13 @@
 {
+<<<<<<< HEAD
   "name": "DeltaHub - 三角洲账号交易平台",
   "short_name": "DeltaHub",
   "description": "安全可靠的三角洲行动账号交易平台，支持购买、租赁和即时通讯",
+=======
+  "name": "DeltaHub - 三角洲行动账号交易平台",
+  "short_name": "DeltaHub",
+  "description": "专业的三角洲行动游戏账号交易平台",
+>>>>>>> origin/main
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -11,12 +17,17 @@
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
+<<<<<<< HEAD
       "type": "image/png",
       "purpose": "any maskable"
+=======
+      "type": "image/png"
+>>>>>>> origin/main
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
+<<<<<<< HEAD
       "type": "image/png",
       "purpose": "any maskable"
     }
@@ -24,4 +35,9 @@
   "categories": ["games", "shopping", "finance"],
   "lang": "zh-CN",
   "prefer_related_applications": false
+=======
+      "type": "image/png"
+    }
+  ]
+>>>>>>> origin/main
 }

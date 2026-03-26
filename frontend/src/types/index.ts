@@ -3,6 +3,8 @@ export interface User {
   username: string;
   nickname?: string;
   avatar?: string;
+  phone?: string;
+  email?: string;
   balance: number;
   creditScore: number;
   role: 'USER' | 'ADMIN';
@@ -18,11 +20,15 @@ export interface Account {
   weapons?: string;
   price: number;
   rentalPrice?: number;
-  status: 'PENDING' | 'ON_SALE' | 'RENTED' | 'SOLD' | 'OFFLINE';
+  status: 'PENDING' | 'ON_SALE' | 'LOCKED' | 'RENTED' | 'SOLD' | 'OFFLINE';
   verificationStatus: 'UNVERIFIED' | 'VERIFIED' | 'REJECTED';
   description?: string;
   images?: string[];
   createdAt: string;
+  sellerUsername?: string;
+  sellerNickname?: string;
+  sellerAvatar?: string;
+  sellerCreditScore?: number;
   seller?: User;
 }
 
@@ -39,6 +45,7 @@ export interface Order {
   rentStart?: string;
   rentEnd?: string;
   createdAt: string;
+  accountTitle?: string;
   account?: Account;
   buyer?: User;
   seller?: User;
@@ -58,4 +65,15 @@ export interface Page<T> {
   size: number;
   current: number;
   pages: number;
+}
+
+export interface Review {
+  id: number;
+  orderId: number;
+  reviewerId: number;
+  revieweeId: number;
+  rating: number;
+  content?: string;
+  createdAt: string;
+  reviewer?: User;
 }

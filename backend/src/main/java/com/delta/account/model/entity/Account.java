@@ -29,7 +29,16 @@ public class Account {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
     
-    // 关联查询用
+    // 关联查询用 - 扁平字段避免嵌套映射问题
     @TableField(exist = false)
-    private User seller;
+    private String sellerUsername;
+
+    @TableField(exist = false)
+    private String sellerNickname;
+
+    @TableField(exist = false)
+    private String sellerAvatar;
+
+    @TableField(exist = false)
+    private Integer sellerCreditScore;
 }
