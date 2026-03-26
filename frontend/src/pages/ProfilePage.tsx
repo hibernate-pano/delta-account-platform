@@ -61,6 +61,19 @@ const ProfilePage: React.FC = () => {
   const creditLevel = getCreditLevel(stats.creditScore);
   const CreditIcon = creditLevel.icon;
 
+  // Profile completeness score
+  const completeness = (() => {
+    const fields = [
+      !!(profile?.avatar || user?.avatar),          // avatar (15)
+      !!(profile?.nickname || user?.nickname),      // nickname (15)
+      !!profile?.phone,                             // phone (20)
+      !!profile?.email,                             // email (20)
+      accounts.length > 0,                          // has listed accounts (15)
+      !!profile?.bio,                               // bio (15)
+    ];
+    return Math.round(fields.filter(Boolean).length / fields.length * 100);
+  })();
+
   const isLoading = profileLoading || ordersLoading || accountsLoading;
 
   if (!token) {
@@ -101,8 +114,8 @@ const ProfilePage: React.FC = () => {
                   className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-primary/30"
                 />
               ) : (
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-2xl flex items-center justify-center border-2 border-primary/30">
-                  <User className="w-8 h-8 md:w-10 md:h-10 text-primary" />
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center border-2 border-primary/30 bg-gradient-to-br from-primary to-purple-500 text-white font-bold text-xl md:text-2xl">
+                  {(profile?.nickname || user?.nickname || user?.username || 'U').charAt(0).toUpperCase()}
                 </div>
               )}
               {profile?.role === 'ADMIN' && (
@@ -151,6 +164,34 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Profile Completeness Meter */}
+      {completeness < 100 && (
+        <div className="card mb-4 p-4 animate-fade-in">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-primary" />
+              <span className="text-sm text-slate-300">资料完整度</span>
+            </div>
+            <span className={`text-sm font-bold ${completeness >= 80 ? 'text-green-400' : completeness >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+              {completeness}%
+            </span>
+          </div>
+          <div className="h-1.5 bg-dark-lighter rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ${
+                completeness >= 80 ? 'bg-green-400' : completeness >= 50 ? 'bg-yellow-400' : 'bg-primary'
+              }`}
+              style={{ width: `${completeness}%` }}
+            />
+          </div>
+          <p className="text-xs text-slate-500 mt-1.5">
+            {completeness < 50 ? '完善资料可提高交易安全性，建议补充头像和联系方式' :
+             completeness < 80 ? '再完善一下就能提升信用分了，上传头像和绑定手机' :
+             '资料完善度优秀！'}
+          </p>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-dark-lighter rounded-lg p-1 w-fit">
