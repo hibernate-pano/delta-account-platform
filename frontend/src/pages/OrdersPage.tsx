@@ -621,7 +621,7 @@ const OrdersPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
 
-  const { data, isLoading } = useMyOrders();
+  const { data, isLoading, isError, refetch } = useMyOrders();
   const orders: Order[] = data?.data?.data?.records || [];
 
   const filteredOrders = orders.filter(o => {
@@ -662,6 +662,25 @@ const OrdersPage: React.FC = () => {
         <div className="card">
           {[1, 2, 3].map(i => <TransactionSkeleton key={i} />)}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="max-w-4xl mx-auto text-center py-20">
+        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="w-10 h-10 text-red-400" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">加载失败</h2>
+        <p className="text-slate-500 mb-6">无法获取订单数据，请检查网络后重试</p>
+        <button
+          onClick={() => refetch()}
+          className="btn-primary inline-flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          重试
+        </button>
       </div>
     );
   }
