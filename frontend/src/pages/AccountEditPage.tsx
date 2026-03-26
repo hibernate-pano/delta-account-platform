@@ -5,7 +5,6 @@ import { Account } from '../types';
 import { Plus, X, DollarSign, Info, Gamepad2, BarChart3 } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { CardSkeleton } from '../components/ui/Skeleton';
 import SkeletonBase from '../components/ui/Skeleton';
 
 const PLATFORM_FEE_RATE = 0.05;

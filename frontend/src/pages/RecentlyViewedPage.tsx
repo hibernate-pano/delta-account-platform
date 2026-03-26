@@ -133,6 +133,9 @@ const RecentlyViewedPage: React.FC = () => {
                   {item.account.title}
                 </h3>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
+                  {item.account.gameType && (
+                    <span className="bg-purple-500/20 text-purple-400 text-xs px-2 py-0.5 rounded">{item.account.gameType}</span>
+                  )}
                   {item.account.gameRank && (
                     <span className="badge badge-primary">{item.account.gameRank}</span>
                   )}

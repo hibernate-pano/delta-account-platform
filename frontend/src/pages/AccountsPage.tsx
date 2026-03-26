@@ -483,6 +483,7 @@ const AccountsPage: React.FC = () => {
                 {account.title}
               </h3>
               <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                <span className="px-2 py-1 bg-dark rounded">{account.gameType}</span>
                 <span className="px-2 py-1 bg-dark rounded">{account.gameRank || '暂无'}</span>
                 <span>{account.skinCount} 皮肤</span>
               </div>
@@ -560,6 +561,7 @@ const AccountsPage: React.FC = () => {
                   {account.title}
                 </h3>
                 <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-2">
+                  <span className="px-2 py-0.5 bg-dark rounded">{account.gameType}</span>
                   <span className="px-2 py-0.5 bg-dark rounded">{account.gameRank || '暂无'}</span>
                   <span>👑 {account.skinCount} 皮肤</span>
                   {account.description && (
@@ -715,6 +717,9 @@ const AccountsPage: React.FC = () => {
                   <WishlistButton account={quickViewAccount} size="md" />
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {quickViewAccount.gameType && (
+                    <span className="px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium">{quickViewAccount.gameType}</span>
+                  )}
                   <span className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">{quickViewAccount.gameRank || '暂无段位'}</span>
                   <span className="px-2.5 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm">🎨 {quickViewAccount.skinCount} 皮肤</span>
                   {quickViewAccount.verificationStatus === 'VERIFIED' && (
@@ -745,6 +750,7 @@ const AccountsPage: React.FC = () => {
               {/* Account Info Grid */}
               <div className="grid grid-cols-2 gap-3">
                 {[
+                  { label: '游戏类型', value: quickViewAccount.gameType || '未填写' },
                   { label: '游戏段位', value: quickViewAccount.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${quickViewAccount.skinCount} 个` },
                   { label: '装备描述', value: quickViewAccount.weapons || '未填写' },
