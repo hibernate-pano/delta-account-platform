@@ -5,7 +5,8 @@ import { useToast } from '../components/ui/Toast';
 import { useCreateAccount } from '../hooks/useQueries';
 import {
   Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
-  Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical
+  Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical,
+  Shield, Clock, BarChart3, CheckCircle, Edit3
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
@@ -118,9 +119,45 @@ const SellPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Seller Guide */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-1">发布账号</h1>
         <p className="text-slate-500 text-sm">填写信息，快速将账号变现</p>
+      </div>
+
+      {/* How it works - 4 steps */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {[
+          { num: '1', title: '填写信息', desc: '完善账号信息与描述', icon: Edit3, color: 'from-blue-500/20 to-blue-600/20', iconColor: 'text-blue-400' },
+          { num: '2', title: '上传图片', desc: '添加多张高清截图', icon: Camera, color: 'from-purple-500/20 to-purple-600/20', iconColor: 'text-purple-400' },
+          { num: '3', title: '审核发布', desc: '平台审核后展示', icon: Shield, color: 'from-emerald-500/20 to-emerald-600/20', iconColor: 'text-emerald-400' },
+          { num: '4', title: '收款到账', desc: '交易完成自动结算', icon: DollarSign, color: 'from-amber-500/20 to-amber-600/20', iconColor: 'text-amber-400' },
+        ].map((step) => {
+          const Icon = step.icon;
+          return (
+            <div key={step.num} className="card p-4 text-center group hover:border-primary/30 transition-all">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
+                <Icon className={`w-5 h-5 ${step.iconColor}`} />
+              </div>
+              <p className="text-xs font-medium text-white mb-0.5">{step.title}</p>
+              <p className="text-[10px] text-slate-500">{step.desc}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Trust badges */}
+      <div className="flex items-center gap-6 mb-6 pb-6 border-b border-dark-border">
+        {[
+          { icon: Shield, text: '平台托管保障资金安全', color: 'text-green-400' },
+          { icon: BarChart3, text: '5%平台服务费+1%税费', color: 'text-slate-400' },
+          { icon: Clock, text: '审核通常在1小时内完成', color: 'text-slate-400' },
+        ].map(({ icon: Icon, text, color }) => (
+          <div key={text} className={`flex items-center gap-1.5 text-xs ${color}`}>
+            <Icon className="w-3.5 h-3.5" />
+            <span>{text}</span>
+          </div>
+        ))}
       </div>
 
       {/* 3-Step Progress */}
