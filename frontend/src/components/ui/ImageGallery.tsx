@@ -18,20 +18,35 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
   const imgRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const [galleryFocused, setGalleryFocused] = useState(false);
 
-  // Keyboard navigation in lightbox
+  // Keyboard navigation: ←/→ works in main gallery when hovered/focused, and in lightbox
   useEffect(() => {
-    if (!lightboxOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setLightboxOpen(false); setZoomLevel(1); }
-      if (e.key === 'ArrowLeft') navigatePrev();
-      if (e.key === 'ArrowRight') navigateNext();
-      if (e.key === '+' || e.key === '=') setZoomLevel((z) => Math.min(z + 0.5, 4));
-      if (e.key === '-') setZoomLevel((z) => Math.max(z - 0.5, 0.5));
+      const target = e.target as HTMLElement;
+      const inInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+      if (inInput) return;
+
+      // Lightbox nav
+      if (lightboxOpen) {
+        if (e.key === 'Escape') { setLightboxOpen(false); setZoomLevel(1); }
+        if (e.key === 'ArrowLeft') navigatePrev();
+        if (e.key === 'ArrowRight') navigateNext();
+        if (e.key === '+' || e.key === '=') setZoomLevel((z) => Math.min(z + 0.5, 4));
+        if (e.key === '-') setZoomLevel((z) => Math.max(z - 0.5, 0.5));
+        return;
+      }
+
+      // Main gallery: arrow keys when gallery is hovered
+      if (galleryFocused && images.length > 1) {
+        if (e.key === 'ArrowLeft') { e.preventDefault(); setCurrentIndex((p) => (p === 0 ? images.length - 1 : p - 1)); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); setCurrentIndex((p) => (p === images.length - 1 ? 0 : p + 1)); }
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [lightboxOpen, lightboxIndex]);
+  }, [lightboxOpen, galleryFocused, images.length]);
 
   // Reset zoom on image change
   useEffect(() => {
@@ -93,11 +108,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
     <div>
       {/* Main Image */}
       <div
+        ref={galleryRef}
         className="aspect-video bg-dark rounded-xl overflow-hidden cursor-zoom-in relative group"
         onClick={() => openLightbox(currentIndex)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onMouseEnter={() => setGalleryFocused(true)}
+        onMouseLeave={() => setGalleryFocused(false)}
       >
         <img
           src={images[currentIndex]}
