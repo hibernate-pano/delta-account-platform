@@ -662,8 +662,12 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleSave = async () => {
     if (!nickname.trim()) { showToast('请输入昵称', 'error'); return; }
+    const emailVal = email.trim();
+    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      showToast('请输入有效的邮箱格式', 'error'); return;
+    }
     try {
-      await updateMutation.mutateAsync({ nickname: nickname.trim(), avatar, phone: phone.trim() || undefined, email: email.trim() || undefined });
+      await updateMutation.mutateAsync({ nickname: nickname.trim(), avatar, phone: phone.trim() || undefined, email: emailVal || undefined });
       showToast('资料更新成功！', 'success');
       onClose();
     } catch (err: any) {

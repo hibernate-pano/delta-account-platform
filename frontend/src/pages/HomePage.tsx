@@ -693,15 +693,33 @@ const HomePage: React.FC = () => {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity">
+                        {account.gameType && (
+                          <span className="px-1.5 py-0.5 bg-purple-500/30 text-purple-300 rounded text-xs">
+                            {account.gameType}
+                          </span>
+                        )}
                         {account.gameRank && (
                           <span className="badge badge-primary">{account.gameRank}</span>
                         )}
                         <span className="text-sm text-slate-300">🎨 {account.skinCount} 皮肤</span>
                       </div>
                     </div>
-                    <h3 className="font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-1 text-lg">
+                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-1 text-lg">
                       {account.title}
                     </h3>
+                    <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                      {account.gameType && (
+                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs">
+                          {account.gameType}
+                        </span>
+                      )}
+                      {account.gameRank && (
+                        <span className="px-2 py-0.5 bg-primary/20 text-primary/80 rounded-full text-xs">
+                          {account.gameRank}
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-600">🎨 {account.skinCount}</span>
+                    </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-2xl font-bold text-primary">¥{account.price}</span>
