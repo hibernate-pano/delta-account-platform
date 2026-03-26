@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { useEffect, lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
@@ -66,7 +66,7 @@ const LoadingProgressBar: React.FC = () => {
 };
 
 // Keyboard shortcuts
-const KeyboardShortcuts: React.FC = () => {
+const KeyboardShortcuts: React.FC<{ onShowShortcuts: () => void }> = ({ onShowShortcuts }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -86,15 +86,72 @@ const KeyboardShortcuts: React.FC = () => {
         e.preventDefault();
         navigate('/accounts');
       }
+      if (e.key === '?' && !(e.target instanceof HTMLInputElement)) {
+        e.preventDefault();
+        onShowShortcuts();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, onShowShortcuts]);
 
   return null;
 };
 
+// Keyboard shortcuts help overlay
+const KeyboardShortcutsHelp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const shortcuts = [
+    { keys: ['⌘', 'K'], desc: '打开账号市场搜索' },
+    { keys: ['/'], desc: '在市场页聚焦搜索框' },
+    { keys: ['Esc'], desc: '关闭弹窗 / 取消聚焦' },
+    { keys: ['←', '→'], desc: '图片画廊左右切换' },
+    { keys: ['+', '-'], desc: '图片画廊放大/缩小' },
+    { keys: ['?'], desc: '显示此帮助面板' },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
+      <div
+        className="relative w-full max-w-sm bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-slide-up overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-6 py-5 border-b border-dark-border">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">键盘快捷键</h2>
+            <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-500 hover:text-white transition-colors text-sm">
+              ✕
+            </button>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">按 <kbd className="px-1 py-0.5 bg-dark rounded text-slate-400 font-mono">?</kbd> 打开此面板</p>
+        </div>
+        <div className="p-4 space-y-2">
+          {shortcuts.map((s) => (
+            <div key={s.desc} className="flex items-center justify-between py-1.5">
+              <span className="text-sm text-slate-300">{s.desc}</span>
+              <div className="flex items-center gap-1">
+                {s.keys.map((k) => (
+                  <kbd key={k} className="px-2 py-1 bg-dark rounded text-xs font-mono text-slate-400 border border-dark-border">
+                    {k}
+                  </kbd>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
+  const [showShortcuts, setShowShortcuts] = useState(false);
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
@@ -102,7 +159,7 @@ const App: React.FC = () => {
           <ErrorBoundary>
             <BrowserRouter>
               <LoadingProgressBar />
-              <KeyboardShortcuts />
+              <KeyboardShortcuts onShowShortcuts={() => setShowShortcuts(true)} />
               <Layout>
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
@@ -125,6 +182,7 @@ const App: React.FC = () => {
                   </Routes>
                 </Suspense>
               </Layout>
+              {showShortcuts && <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />}
             </BrowserRouter>
           </ErrorBoundary>
         </GlobalLoadingProvider>
