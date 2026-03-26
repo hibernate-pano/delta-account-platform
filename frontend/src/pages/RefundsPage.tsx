@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyRefunds, useApplyRefund, useCancelRefund, useMyOrders } from '../hooks/useQueries';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import {
   ArrowLeft, Package, RefreshCw, CheckCircle, XCircle, Clock,
   AlertTriangle, DollarSign, ChevronRight, Plus, X, Upload, FileText,
@@ -45,8 +46,9 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const handleCancel = async () => {
-    if (!confirm('确定要撤销此退款申请吗？')) return;
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const confirmCancel = async () => {
     try {
       await cancelMutation.mutateAsync(refund.id);
       showToast('退款申请已撤销', 'info');
@@ -195,14 +197,27 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
               查看订单
             </Link>
             {refund.status === 'PENDING' && (
-              <button
-                onClick={handleCancel}
-                disabled={cancelMutation.isPending}
-                className="btn-ghost flex-1 !py-2.5 text-sm !text-red-400 !border-red-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <X className="w-4 h-4" />
-                撤销申请
-              </button>
+              <>
+                {showCancelConfirm ? (
+                  <div className="flex-1">
+                    <ConfirmInline
+                      message="确定要撤销此退款申请吗？"
+                      onConfirm={confirmCancel}
+                      onCancel={() => setShowCancelConfirm(false)}
+                      confirmLabel="撤销"
+                    />
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowCancelConfirm(true)}
+                    disabled={cancelMutation.isPending}
+                    className="btn-ghost flex-1 !py-2.5 text-sm !text-red-400 !border-red-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4" />
+                    撤销申请
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -221,6 +236,7 @@ const RefundsPage: React.FC = () => {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [cancelRefundId, setCancelRefundId] = useState<number | null>(null);
   const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
   const [amountError, setAmountError] = useState('');
@@ -293,13 +309,19 @@ const RefundsPage: React.FC = () => {
     }
   };
 
-  const handleCancelRefund = async (refundId: number) => {
-    if (!confirm('确定取消此退款申请？')) return;
+  const handleCancelRefund = (refundId: number) => {
+    setCancelRefundId(refundId);
+  };
+
+  const confirmCancelRefund = async () => {
+    if (cancelRefundId == null) return;
     try {
-      await cancelMutation.mutateAsync(refundId);
+      await cancelMutation.mutateAsync(cancelRefundId);
       showToast('已取消退款申请', 'success');
+      setCancelRefundId(null);
     } catch {
       showToast('取消失败', 'error');
+      setCancelRefundId(null);
     }
   };
 
@@ -419,13 +441,24 @@ const RefundsPage: React.FC = () => {
                       <div className="text-right flex-shrink-0">
                         <p className="text-lg font-bold text-red-400">-¥{refund.amount.toFixed(2)}</p>
                         {refund.status === 'PENDING' && (
-                          <button
-                            onClick={() => handleCancelRefund(refund.id)}
-                            disabled={cancelMutation.isPending}
-                            className="text-xs text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-50 mt-1"
-                          >
-                            取消申请
-                          </button>
+                          cancelRefundId === refund.id ? (
+                            <div className="mt-1">
+                              <ConfirmInline
+                                message="确定取消此退款申请？"
+                                onConfirm={confirmCancelRefund}
+                                onCancel={() => setCancelRefundId(null)}
+                                confirmLabel="取消"
+                              />
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleCancelRefund(refund.id)}
+                              disabled={cancelMutation.isPending}
+                              className="text-xs text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-50 mt-1"
+                            >
+                              取消申请
+                            </button>
+                          )
                         )}
                       </div>
                     </div>

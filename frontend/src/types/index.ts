@@ -26,6 +26,8 @@ export interface Account {
   description?: string;
   images?: string[];
   createdAt: string;
+  viewCount?: number;
+  orderCount?: number;
   sellerUsername?: string;
   sellerNickname?: string;
   sellerAvatar?: string;

@@ -4,6 +4,7 @@ import { useWishlistStore } from '../store/wishlist';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
@@ -33,6 +34,7 @@ const WishlistPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [filterVerified, setFilterVerified] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const sortedItems = useMemo(() => {
     return [...wishlistItems]
@@ -45,8 +47,12 @@ const WishlistPage: React.FC = () => {
   }, [wishlistItems, filterVerified, sortMode]);
 
   const handleClearAll = () => {
-    if (!confirm(`确定要清空全部 ${wishlistItems.length} 个收藏吗？`)) return;
+    setShowClearConfirm(true);
+  };
+
+  const confirmClearAll = () => {
     clearAll();
+    setShowClearConfirm(false);
     showToast('收藏列表已清空', 'info');
   };
 
@@ -108,6 +114,17 @@ const WishlistPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {showClearConfirm && (
+        <div className="mb-4">
+          <ConfirmInline
+            message={`确定要清空全部 ${wishlistItems.length} 个收藏吗？`}
+            onConfirm={confirmClearAll}
+            onCancel={() => setShowClearConfirm(false)}
+            confirmLabel="清空"
+          />
+        </div>
+      )}
 
       {wishlistItems.length === 0 ? (
         /* Empty State */

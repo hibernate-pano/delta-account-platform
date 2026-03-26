@@ -486,6 +486,20 @@ const AccountsPage: React.FC = () => {
                 <span className="px-2 py-1 bg-dark rounded">{account.gameType}</span>
                 <span className="px-2 py-1 bg-dark rounded">{account.gameRank || '暂无'}</span>
                 <span>{account.skinCount} 皮肤</span>
+                {(account.viewCount != null || account.orderCount != null) && (
+                  <div className="flex items-center gap-2 text-[10px]">
+                    {account.viewCount != null && (
+                      <span className="flex items-center gap-0.5 text-slate-600">
+                        <Eye className="w-3 h-3" />{account.viewCount}
+                      </span>
+                    )}
+                    {account.orderCount != null && account.orderCount > 0 && (
+                      <span className="flex items-center gap-0.5 text-slate-600">
+                        <ShoppingCart className="w-3 h-3" />{account.orderCount}笔
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-primary">¥{account.price}</span>
