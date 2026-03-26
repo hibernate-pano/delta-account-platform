@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi, refundApi, reviewApi } from '../api';
+import { accountApi, orderApi, walletApi, messageApi, notificationApi, authApi, adminApi, refundApi, reviewApi, favoriteApi } from '../api';
 import { useAuthStore } from '../store/auth';
 
 // Query keys factory
@@ -36,6 +36,11 @@ export const queryKeys = {
     all: ['refunds'] as const,
     my: ['refunds', 'my'] as const,
     detail: (id: number) => ['refunds', 'detail', id] as const,
+  },
+  favorites: {
+    all: ['favorites'] as const,
+    list: ['favorites', 'list'] as const,
+    ids: ['favorites', 'ids'] as const,
   },
 };
 
@@ -283,6 +288,7 @@ export const useWalletBalance = () => {
     queryKey: queryKeys.wallet.balance,
     queryFn: () => walletApi.getBalance(),
     staleTime: 1000 * 30, // 30 seconds for balance
+    ...defaultQueryOptions,
   });
 };
 
@@ -392,6 +398,7 @@ export const useUnreadCount = () => {
     },
     staleTime: 1000 * 10,
     refetchInterval: 30000,
+    ...defaultQueryOptions,
   });
 };
 
@@ -465,6 +472,27 @@ export const useMyRefunds = () => {
     queryKey: queryKeys.refunds.my,
     queryFn: () => refundApi.getMy(),
     ...defaultQueryOptions,
+  });
+};
+
+// ==================== Favorites Hooks ====================
+
+export const useFavorites = () => {
+  return useQuery({
+    queryKey: queryKeys.favorites.list,
+    queryFn: () => favoriteApi.getMyList(),
+    ...defaultQueryOptions,
+  });
+};
+
+export const useToggleFavorite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (accountId: number) => favoriteApi.toggle(accountId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.favorites.list });
+    },
   });
 };
 

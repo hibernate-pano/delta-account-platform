@@ -1,40 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { favoriteApi } from '../api';
-import { Account } from '../types';
-import { Gamepad2, Heart, Trash2, X } from 'lucide-react';
+import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
 import { GridSkeleton } from '../components/ui/Skeleton';
+import { useFavorites, useToggleFavorite } from '../hooks/useQueries';
+import { Account } from '../types';
 
 const FavoritesPage: React.FC = () => {
   usePageTitle('我的收藏');
   const { showToast } = useToast();
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, isError, refetch } = useFavorites();
+  const toggleMutation = useToggleFavorite();
   const [removingId, setRemovingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const res = await favoriteApi.getMyList();
-        setAccounts(res.data.data || []);
-      } catch (error: any) {
-        showToast(error.response?.data?.message || '加载失败', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFavorites();
-  }, []);
+  const accounts: Account[] = data?.data?.data || [];
 
   const handleRemove = async (e: React.MouseEvent, accountId: number, title: string) => {
     e.preventDefault();
     e.stopPropagation();
     setRemovingId(accountId);
     try {
-      await favoriteApi.toggle(accountId);
-      setAccounts((prev) => prev.filter((a) => a.id !== accountId));
+      await toggleMutation.mutateAsync(accountId);
       showToast(`已取消收藏「${title}」`, 'success');
     } catch {
       showToast('移除失败，请重试', 'error');
@@ -46,21 +33,44 @@ const FavoritesPage: React.FC = () => {
   const handleClearAll = async () => {
     if (accounts.length === 0) return;
     try {
-      await Promise.all(accounts.map((a) => favoriteApi.toggle(a.id)));
-      setAccounts([]);
+      await Promise.all(accounts.map((a) => toggleMutation.mutateAsync(a.id)));
       showToast(`已清空全部 ${accounts.length} 个收藏`, 'success');
     } catch {
       showToast('清空失败，请重试', 'error');
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">我的收藏</h1>
         </div>
         <GridSkeleton count={6} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">我的收藏</h1>
+        </div>
+        <div className="text-center py-20">
+          <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+            <AlertCircle className="w-10 h-10 text-red-400" />
+          </div>
+          <h3 className="text-lg font-medium mb-2 text-slate-300">加载收藏失败</h3>
+          <p className="text-slate-600 text-sm mb-6">无法获取收藏列表，请检查网络后重试</p>
+          <button
+            onClick={() => refetch()}
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            重试
+          </button>
+        </div>
       </div>
     );
   }
