@@ -171,6 +171,22 @@ export const useBanUser = () => {
   });
 };
 
+export const useAdminOrders = (params?: { page?: number; size?: number }) => {
+  return useQuery({
+    queryKey: ['admin', 'orders', params],
+    queryFn: () => adminApi.getOrders(params),
+    ...defaultQueryOptions,
+  });
+};
+
+export const useAdminUsers = (params?: { page?: number; size?: number }) => {
+  return useQuery({
+    queryKey: ['admin', 'users', params],
+    queryFn: () => adminApi.getUsers(params),
+    ...defaultQueryOptions,
+  });
+};
+
 // ==================== Order Hooks ====================
 
 export const useMyOrders = () => {

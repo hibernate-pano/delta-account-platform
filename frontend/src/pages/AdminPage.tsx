@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
-import { useAdminStats, useAdminAccounts, useVerifyAccount, useBanUser } from '../hooks/useQueries';
+import { useAdminStats, useAdminAccounts, useAdminOrders, useAdminUsers, useVerifyAccount, useBanUser } from '../hooks/useQueries';
 import {
   Users, Package, FileText, Shield, RefreshCw, DollarSign,
   CheckCircle, XCircle, Clock, BarChart3, ArrowRight, Eye,
@@ -173,9 +173,13 @@ const AdminPage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'orders' | 'users'>('overview');
   const [accountFilter, setAccountFilter] = useState<'PENDING' | 'VERIFIED' | 'BANNED' | 'ALL'>('PENDING');
+  const [orderPage, setOrderPage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
 
   const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useAdminStats();
   const { data: accountsData, isLoading: accountsLoading, refetch: refetchAccounts } = useAdminAccounts({ status: accountFilter, size: 50 });
+  const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useAdminOrders({ page: orderPage, size: 20 });
+  const { data: usersData, isLoading: usersLoading, refetch: refetchUsers } = useAdminUsers({ page: userPage, size: 20 });
   const verifyMutation = useVerifyAccount();
   const banMutation = useBanUser();
 
@@ -196,7 +200,7 @@ const AdminPage: React.FC = () => {
   const handleBan = (id: number) => {
     if (!confirm('确定要封禁此用户吗？')) return;
     banMutation.mutate({ id, banned: true }, {
-      onSuccess: () => { showToast('用户已被封禁', 'warning'); refetchStats(); },
+      onSuccess: () => { showToast('用户已被封禁', 'warning'); refetchUsers(); refetchStats(); },
       onError: () => showToast('操作失败', 'error'),
     });
   };
@@ -413,31 +417,225 @@ const AdminPage: React.FC = () => {
 
       {/* ===== ORDERS ===== */}
       {activeTab === 'orders' && (
-        <div className="card text-center py-16 animate-fade-in">
-          <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-10 h-10 text-slate-700" />
-          </div>
-          <h3 className="text-lg font-medium mb-2 text-slate-400">订单管理</h3>
-          <p className="text-slate-600 text-sm mb-6">完整订单管理功能正在开发中</p>
-          <Link to="/orders" className="btn-primary inline-flex items-center gap-2">
-            查看我的订单 <ArrowRight className="w-4 h-4" />
-          </Link>
+        <div className="space-y-4 animate-fade-in">
+          {/* Stats row */}
+          {stats && (
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: '总订单', value: stats.totalOrders ?? 0, color: 'text-white' },
+                { label: '已完成', value: stats.completedOrders ?? 0, color: 'text-green-400' },
+                { label: '收入总额', value: `¥${(stats.totalRevenue ?? 0).toFixed(2)}`, color: 'text-primary' },
+              ].map(item => (
+                <div key={item.label} className="card py-4 text-center">
+                  <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
+                  <p className="text-xs text-slate-500 mt-1">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {ordersLoading ? (
+            <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div>
+          ) : (
+            <>
+              <div className="card overflow-hidden p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-dark-border text-left">
+                        {['订单号', '类型', '金额', '状态', '买家', '卖家', '时间'].map(h => (
+                          <th key={h} className="px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-dark-border">
+                      {(ordersData?.data?.data?.records || []).map((order: any) => {
+                        const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+                          PENDING: { label: '待支付', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+                          PAID: { label: '已支付', color: 'text-blue-400', bg: 'bg-blue-500/20' },
+                          PROCESSING: { label: '处理中', color: 'text-purple-400', bg: 'bg-purple-500/20' },
+                          COMPLETED: { label: '已完成', color: 'text-green-400', bg: 'bg-green-500/20' },
+                          CANCELLED: { label: '已取消', color: 'text-slate-400', bg: 'bg-slate-500/20' },
+                        };
+                        const st = statusMap[order.status] || statusMap.PENDING;
+                        return (
+                          <tr key={order.id} className="hover:bg-dark-lighter/40 transition-colors cursor-pointer"
+                            onClick={() => navigate(`/orders`)}>
+                            <td className="px-4 py-3 font-mono text-xs text-slate-400">#{order.id}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                                order.type === 'BUY' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
+                              }`}>
+                                {order.type === 'BUY' ? '买' : '租'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-primary font-medium">¥{order.amount}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs px-2 py-0.5 rounded ${st.bg} ${st.color}`}>{st.label}</span>
+                            </td>
+                            <td className="px-4 py-3 text-slate-400">{order.buyerUsername || '-'}</td>
+                            <td className="px-4 py-3 text-slate-400">{order.sellerUsername || '-'}</td>
+                            <td className="px-4 py-3 text-slate-500 text-xs">
+                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString('zh-CN') : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {(ordersData?.data?.data?.records || []).length === 0 && (
+                        <tr><td colSpan={7} className="px-4 py-12 text-center text-slate-500">暂无订单记录</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Pagination */}
+              {ordersData?.data?.data && (ordersData.data.data.totalPages > 1 || ordersData.data.data.total > 0) && (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">
+                    共 {ordersData.data.data.total ?? 0} 条，第 {ordersData.data.data.current ?? 1} / {ordersData.data.data.pages ?? 1} 页
+                  </p>
+                  <div className="flex gap-1">
+                    <button onClick={() => setOrderPage(p => Math.max(1, p - 1))}
+                      disabled={orderPage <= 1} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">上一页</button>
+                    <button onClick={() => setOrderPage(p => p + 1)}
+                      disabled={orderPage >= (ordersData.data.data.pages ?? 1)} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">下一页</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 
       {/* ===== USERS ===== */}
       {activeTab === 'users' && (
-        <div className="card text-center py-16 animate-fade-in">
-          <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Users className="w-10 h-10 text-slate-700" />
-          </div>
-          <h3 className="text-lg font-medium mb-2 text-slate-400">用户管理</h3>
-          <p className="text-slate-600 text-sm mb-6">用户列表和封禁管理功能正在开发中</p>
-          <div className="flex gap-3 justify-center">
-            <Link to="/profile" className="btn-secondary inline-flex items-center gap-2">
-              <Eye className="w-4 h-4" /> 个人信息
-            </Link>
-          </div>
+        <div className="space-y-4 animate-fade-in">
+          {/* Stats */}
+          {stats && (
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: '总用户', value: stats.totalUsers ?? 0 },
+                { label: '活跃用户', value: stats.activeUsers ?? (stats.totalUsers ?? 0) },
+                { label: '平均积分', value: stats.avgCreditScore ?? '100' },
+              ].map(item => (
+                <div key={item.label} className="card py-4 text-center">
+                  <p className="text-xl font-bold text-white">{item.value}</p>
+                  <p className="text-xs text-slate-500 mt-1">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {usersLoading ? (
+            <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div>
+          ) : (
+            <>
+              <div className="card overflow-hidden p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-dark-border text-left">
+                        {['ID', '用户名', '昵称', '角色', '状态', '积分', '注册时间', '操作'].map(h => (
+                          <th key={h} className="px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-dark-border">
+                      {(usersData?.data?.data?.records || []).map((user: any) => {
+                        const roleMap: Record<string, { label: string; color: string; bg: string }> = {
+                          ADMIN: { label: '管理员', color: 'text-red-400', bg: 'bg-red-500/20' },
+                          SELLER: { label: '卖家', color: 'text-blue-400', bg: 'bg-blue-500/20' },
+                          BUYER: { label: '买家', color: 'text-slate-400', bg: 'bg-slate-500/20' },
+                        };
+                        const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+                          ACTIVE: { label: '正常', color: 'text-green-400', bg: 'bg-green-500/20' },
+                          BANNED: { label: '已封禁', color: 'text-red-400', bg: 'bg-red-500/20' },
+                          INACTIVE: { label: '未激活', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+                        };
+                        const roleBadge = roleMap[user.role] || { label: user.role as string, color: 'text-slate-400', bg: 'bg-slate-500/20' };
+                        const statusBadge = statusMap[user.status] || { label: (user.status as string) || '正常', color: 'text-slate-400', bg: 'bg-slate-500/20' };
+                        return (
+                          <tr key={user.id} className="hover:bg-dark-lighter/40 transition-colors">
+                            <td className="px-4 py-3 font-mono text-xs text-slate-400">#{user.id}</td>
+                            <td className="px-4 py-3 font-medium">{user.username}</td>
+                            <td className="px-4 py-3 text-slate-400">{user.nickname || '-'}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs px-2 py-0.5 rounded ${roleBadge.bg} ${roleBadge.color}`}>{roleBadge.label}</span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs px-2 py-0.5 rounded ${statusBadge.bg} ${statusBadge.color}`}>{statusBadge.label}</span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`font-medium ${(user.creditScore ?? 100) >= 80 ? 'text-green-400' : (user.creditScore ?? 100) >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                {user.creditScore ?? 100}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-slate-500 text-xs">
+                              {user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-CN') : '-'}
+                            </td>
+                            <td className="px-4 py-3">
+                              {user.role !== 'ADMIN' && (
+                                <div className="flex gap-1">
+                                  <button onClick={() => navigate(`/profile?userId=${user.id}`)}
+                                    className="p-1.5 text-slate-500 hover:text-white hover:bg-dark rounded transition-colors" title="查看">
+                                    <Eye className="w-3.5 h-3.5" />
+                                  </button>
+                                  {user.status === 'BANNED' ? (
+                                    <button onClick={() => {
+                                      if (!confirm(`确定要解封用户 ${user.username} 吗？`)) return;
+                                      banMutation.mutate({ id: user.id, banned: false }, {
+                                        onSuccess: () => { showToast('用户已解封', 'success'); refetchUsers(); },
+                                        onError: () => showToast('操作失败', 'error'),
+                                      });
+                                    }}
+                                      disabled={banMutation.isPending}
+                                      className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs hover:bg-green-500/30 disabled:opacity-50 transition-colors">
+                                      解封
+                                    </button>
+                                  ) : (
+                                    <button onClick={() => {
+                                      if (!confirm(`确定要封禁用户 ${user.username} 吗？`)) return;
+                                      banMutation.mutate({ id: user.id, banned: true }, {
+                                        onSuccess: () => { showToast('用户已封禁', 'warning'); refetchUsers(); },
+                                        onError: () => showToast('操作失败', 'error'),
+                                      });
+                                    }}
+                                      disabled={banMutation.isPending}
+                                      className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 disabled:opacity-50 transition-colors">
+                                      封禁
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {(usersData?.data?.data?.records || []).length === 0 && (
+                        <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500">暂无用户记录</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Pagination */}
+              {usersData?.data?.data && (usersData.data.data.totalPages > 1 || usersData.data.data.total > 0) && (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">
+                    共 {usersData.data.data.total ?? 0} 条，第 {usersData.data.data.current ?? 1} / {usersData.data.data.pages ?? 1} 页
+                  </p>
+                  <div className="flex gap-1">
+                    <button onClick={() => setUserPage(p => Math.max(1, p - 1))}
+                      disabled={userPage <= 1} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">上一页</button>
+                    <button onClick={() => setUserPage(p => p + 1)}
+                      disabled={userPage >= (usersData.data.data.pages ?? 1)} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">下一页</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>
