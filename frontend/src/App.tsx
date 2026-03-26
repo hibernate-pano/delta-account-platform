@@ -18,6 +18,7 @@ import RecentlyViewedPage from './pages/RecentlyViewedPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import { ToastProvider } from './components/ui/Toast';
+import { BrowserTabBadge, UnreadIndicator } from './components/ui/BrowserTabBadge';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalLoadingProvider, useGlobalLoading } from './components/GlobalLoading';
 import { createQueryClient } from './hooks/useQueries';
@@ -199,6 +200,8 @@ const App: React.FC = () => {
           <ErrorBoundary>
             <BrowserRouter>
               <LoadingProgressBar />
+              <BrowserTabBadge />
+              <UnreadIndicator />
               <KeyboardShortcuts onShowShortcuts={() => setShowShortcuts(true)} />
               <Layout>
                 <Suspense fallback={<PageLoader />}>
