@@ -67,7 +67,6 @@ const ProfilePage: React.FC = () => {
     { key: 'nickname', label: '设置昵称', done: !!(profile?.nickname || user?.nickname), icon: '✏️' },
     { key: 'phone', label: '绑定手机', done: !!profile?.phone, icon: '📱' },
     { key: 'email', label: '填写邮箱', done: !!profile?.email, icon: '📧' },
-    { key: 'bio', label: '填写简介', done: !!profile?.bio, icon: '📝' },
   ];
   const missingFields = completenessFields.filter(f => !f.done);
   const completeness = Math.round(completenessFields.filter(f => f.done).length / completenessFields.length * 100);

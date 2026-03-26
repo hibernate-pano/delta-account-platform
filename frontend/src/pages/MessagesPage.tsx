@@ -25,6 +25,7 @@ interface Session {
     nickname: string;
     username: string;
     creditScore?: number;
+    avatar?: string;
   };
 }
 
@@ -137,9 +138,13 @@ const MessagesPage: React.FC = () => {
         className="py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 transition-colors active:bg-dark-lighter"
       >
         <div className="relative flex-shrink-0">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center">
-            <User className="w-5 h-5 text-primary" />
-          </div>
+          {session.otherUser?.avatar ? (
+            <img src={session.otherUser.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
+          ) : (
+            <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-primary" />
+            </div>
+          )}
           {session.unreadCount && session.unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold leading-none">
               {session.unreadCount > 9 ? '9+' : session.unreadCount}
@@ -276,9 +281,13 @@ const MessagesPage: React.FC = () => {
           </button>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary/30 to-purple-500/30 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-primary" />
-              </div>
+              {currentSession?.otherUser?.avatar ? (
+                <img src={currentSession.otherUser.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-br from-primary/30 to-purple-500/30 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+              )}
               {/* Online indicator */}
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-dark" />
             </div>
