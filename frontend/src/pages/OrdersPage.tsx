@@ -458,6 +458,15 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 </p>
               </div>
             )}
+            {order.deposit && order.deposit > 0 && (
+              <div className="bg-dark rounded-lg px-3 py-2 col-span-2">
+                <p className="text-[10px] text-slate-500 mb-0.5">押金</p>
+                <p className="text-xs font-medium text-slate-300">
+                  ¥{order.deposit}
+                  <span className="text-slate-500 ml-1">(账号归还后全额退还)</span>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Seller info for PAID/PROCESSING — buyer needs to know who to contact */}

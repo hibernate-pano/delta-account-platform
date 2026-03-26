@@ -101,7 +101,12 @@ const AccountDetailPage: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isOwner = user?.id === account?.sellerId;
+  const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+const isOwner = user?.id === account?.sellerId;
   const isOnSale = account?.status === 'ON_SALE';
   const isPending = buyMutation.isPending || rentMutation.isPending;
 
@@ -245,6 +250,7 @@ const AccountDetailPage: React.FC = () => {
                   { label: '游戏段位', value: account.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
                   { label: '装备描述', value: account.weapons || '未填写' },
+                  { label: '发布时间', value: account.createdAt ? formatDate(account.createdAt) : '未知' },
                 ].map((item, i) => (
                   <div
                     key={i}
@@ -267,9 +273,17 @@ const AccountDetailPage: React.FC = () => {
             <div className="mb-6 p-4 bg-gradient-to-r from-primary/8 to-purple-500/5 rounded-xl border border-primary/20">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary/40 to-purple-500/40 rounded-full flex items-center justify-center border-2 border-primary/30">
-                    <User className="w-6 h-6 text-primary" />
-                  </div>
+                  {account.sellerAvatar ? (
+                    <img
+                      src={account.sellerAvatar}
+                      alt=""
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary/40 to-purple-500/40 rounded-full flex items-center justify-center border-2 border-primary/30">
+                      <User className="w-6 h-6 text-primary" />
+                    </div>
+                  )}
                   <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-dark-card" title="在线" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -303,7 +317,14 @@ const AccountDetailPage: React.FC = () => {
                     {reviewStats ? (
                       <span className="text-xs text-yellow-400 font-medium">
                         {(reviewStats.avgRating || 0).toFixed(1)}
+                        {account.sellerCreditScore != null && (
+                          <span className="ml-1 text-yellow-400/70">({account.sellerCreditScore}分)</span>
+                        )}
                         <span className="text-slate-500 ml-1">({reviewStats.totalCount}条评价)</span>
+                      </span>
+                    ) : account.sellerCreditScore != null ? (
+                      <span className="text-xs text-yellow-400 font-medium">
+                        {account.sellerCreditScore}分
                       </span>
                     ) : (
                       <span className="text-xs text-slate-500">暂无评价</span>
