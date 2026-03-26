@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import AccountsPage from './pages/AccountsPage';
-import AccountDetailPage from './pages/AccountDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import SellPage from './pages/SellPage';
 import ProfilePage from './pages/ProfilePage';
 import OrdersPage from './pages/OrdersPage';
 import WalletPage from './pages/WalletPage';
@@ -16,11 +14,25 @@ import NotificationsPage from './pages/NotificationsPage';
 import RefundsPage from './pages/RefundsPage';
 import WishlistPage from './pages/WishlistPage';
 import NotFoundPage from './pages/NotFoundPage';
-import AdminPage from './pages/AdminPage';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalLoadingProvider, useGlobalLoading } from './components/GlobalLoading';
 import { createQueryClient } from './hooks/useQueries';
+
+// Lazy-loaded heavy pages for code splitting
+const AccountDetailPage = lazy(() => import('./pages/AccountDetailPage'));
+const SellPage = lazy(() => import('./pages/SellPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+
+// Page-level loading fallback
+const PageLoader: React.FC = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <span className="text-sm text-slate-500">加载中...</span>
+    </div>
+  </div>
+);
 
 const queryClient = createQueryClient();
 
@@ -92,24 +104,26 @@ const App: React.FC = () => {
               <LoadingProgressBar />
               <KeyboardShortcuts />
               <Layout>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/accounts" element={<AccountsPage />} />
-                  <Route path="/accounts/:id" element={<AccountDetailPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/sell" element={<SellPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/orders" element={<OrdersPage />} />
-                  <Route path="/wallet" element={<WalletPage />} />
-                  <Route path="/messages" element={<MessagesPage />} />
-                  <Route path="/messages/:sessionId" element={<MessagesPage />} />
-                  <Route path="/notifications" element={<NotificationsPage />} />
-                  <Route path="/refunds" element={<RefundsPage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/accounts" element={<AccountsPage />} />
+                    <Route path="/accounts/:id" element={<AccountDetailPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/sell" element={<SellPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/wallet" element={<WalletPage />} />
+                    <Route path="/messages" element={<MessagesPage />} />
+                    <Route path="/messages/:sessionId" element={<MessagesPage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
+                    <Route path="/refunds" element={<RefundsPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </Suspense>
               </Layout>
             </BrowserRouter>
           </ErrorBoundary>
