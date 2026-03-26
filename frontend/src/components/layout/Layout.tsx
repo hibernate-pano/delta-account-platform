@@ -19,6 +19,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [msgUnreadCount, setMsgUnreadCount] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('delta_recent_searches') || '[]'); }
+    catch { return []; }
+  });
   const searchRef = React.useRef<HTMLInputElement>(null);
 
   // Cmd/Ctrl+K to focus search
@@ -35,11 +40,28 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/accounts?keyword=${encodeURIComponent(searchQuery.trim())}`);
+    const q = searchQuery.trim();
+    if (q) {
+      // Save to recent searches (max 8, dedup)
+      const updated = [q, ...recentSearches.filter((s) => s !== q)].slice(0, 8);
+      setRecentSearches(updated);
+      localStorage.setItem('delta_recent_searches', JSON.stringify(updated));
+      navigate(`/accounts?keyword=${encodeURIComponent(q)}`);
       setSearchQuery('');
+      setShowSuggestions(false);
       searchRef.current?.blur();
     }
+  };
+
+  const handleSuggestionClick = (q: string) => {
+    navigate(`/accounts?keyword=${encodeURIComponent(q)}`);
+    setSearchQuery('');
+    setShowSuggestions(false);
+  };
+
+  const handleClearSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem('delta_recent_searches');
   };
 
   // Poll for notifications + messages
@@ -140,23 +162,47 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </Link>
 
             {/* Quick Search */}
-            <form onSubmit={handleSearch} className="hidden md:flex items-center mx-6 flex-1 max-w-xs">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜索账号..."
-                  className="w-full pl-9 pr-14 py-2 bg-dark-lighter border border-dark-border rounded-xl text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-primary/50 focus:bg-dark focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 text-[10px] text-slate-600 pointer-events-none">
-                  <span className="px-1 py-0.5 bg-dark-border rounded text-slate-500">⌘</span>
-                  <span className="px-1 py-0.5 bg-dark-border rounded text-slate-500">K</span>
-                </kbd>
-              </div>
-            </form>
+            <div className="hidden md:block mx-6 flex-1 max-w-xs relative">
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                    placeholder="搜索账号..."
+                    className="w-full pl-9 pr-14 py-2 bg-dark-lighter border border-dark-border rounded-xl text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-primary/50 focus:bg-dark focus:ring-1 focus:ring-primary/20 transition-all"
+                  />
+                  <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 text-[10px] text-slate-600 pointer-events-none">
+                    <span className="px-1 py-0.5 bg-dark-border rounded text-slate-500">⌘</span>
+                    <span className="px-1 py-0.5 bg-dark-border rounded text-slate-500">K</span>
+                  </kbd>
+                </div>
+              </form>
+
+              {/* Recent searches dropdown */}
+              {showSuggestions && recentSearches.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-dark-card border border-dark-border rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-dark-border">
+                    <span className="text-xs text-slate-500">最近搜索</span>
+                    <button onClick={handleClearSearches} className="text-xs text-red-400 hover:text-red-300 transition-colors">清除</button>
+                  </div>
+                  {recentSearches.map((q) => (
+                    <button
+                      key={q}
+                      onMouseDown={() => handleSuggestionClick(q)}
+                      className="w-full text-left px-3 py-2.5 text-sm text-slate-300 hover:bg-dark-lighter hover:text-white transition-colors flex items-center gap-2"
+                    >
+                      <History className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
