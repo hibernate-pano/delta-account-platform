@@ -18,6 +18,7 @@ const AccountsPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [rentalOnly, setRentalOnly] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [compareItems, setCompareItems] = useState<Array<{ account: Account; addedAt: number }>>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,9 +53,10 @@ const AccountsPage: React.FC = () => {
 
   const allAccounts: Account[] = data?.data?.data?.records || [];
 
-  // Client-side price range + verified filter
+  // Client-side price range + verified filter + rental filter
   const accounts = allAccounts.filter((acc) => {
     if (verifiedOnly && acc.verificationStatus !== 'VERIFIED') return false;
+    if (rentalOnly && !acc.rentalPrice) return false;
     if (selectedPriceRange) {
       const [min, max] = selectedPriceRange.split('-').map(Number);
       if (max) return acc.price >= min && acc.price <= max;
@@ -86,10 +88,11 @@ const AccountsPage: React.FC = () => {
     setSort('');
     setSelectedPriceRange('');
     setVerifiedOnly(false);
+    setRentalOnly(false);
     setSearchParams({});
   };
 
-  const hasActiveFilters = keyword || sort || selectedPriceRange || verifiedOnly;
+  const hasActiveFilters = keyword || sort || selectedPriceRange || verifiedOnly || rentalOnly;
   const isSearching = keyword !== debouncedKeyword;
 
   const toggleCompare = (account: Account) => {
@@ -280,6 +283,17 @@ const AccountsPage: React.FC = () => {
             <ShieldCheck className="w-3.5 h-3.5 inline mr-1" />
             认证卖家
           </button>
+          <button
+            onClick={() => setRentalOnly(!rentalOnly)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+              rentalOnly
+                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40'
+                : 'bg-dark-lighter text-gray-400 hover:text-white'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 inline mr-1" />
+            支持租赁
+          </button>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -359,6 +373,12 @@ const AccountsPage: React.FC = () => {
                 {account.verificationStatus === 'VERIFIED' && (
                   <span className="absolute left-2 bottom-2 px-1.5 py-0.5 bg-emerald-500/90 text-white text-[10px] rounded flex items-center gap-0.5">
                     <ShieldCheck className="w-3 h-3" /> 已认证
+                  </span>
+                )}
+                {/* Rental badge */}
+                {account.rentalPrice && (
+                  <span className="absolute left-2 bottom-2 px-1.5 py-0.5 bg-purple-500/90 text-white text-[10px] rounded flex items-center gap-0.5 ml-auto mr-2">
+                    <Clock className="w-3 h-3" /> 租
                   </span>
                 )}
                 {/* Compare toggle */}
