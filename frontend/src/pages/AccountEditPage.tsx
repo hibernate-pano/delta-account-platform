@@ -44,6 +44,7 @@ const AccountEditPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
+    gameType: '王者荣耀',
     gameRank: '',
     skinCount: 0,
     weapons: '',
@@ -61,6 +62,7 @@ const AccountEditPage: React.FC = () => {
         const account: Account = res.data.data;
         setFormData({
           title: account.title,
+          gameType: account.gameType || '王者荣耀',
           gameRank: account.gameRank || '',
           skinCount: account.skinCount,
           weapons: account.weapons || '',
@@ -99,6 +101,7 @@ const AccountEditPage: React.FC = () => {
     try {
       await accountApi.update(Number(id), {
         title: formData.title,
+        gameType: formData.gameType,
         gameRank: formData.gameRank || undefined,
         skinCount: formData.skinCount,
         weapons: formData.weapons || undefined,
@@ -165,24 +168,47 @@ const AccountEditPage: React.FC = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-sm text-slate-400 mb-2">游戏类型</label>
+            <div className="flex gap-2 flex-wrap">
+              {gamePresets.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => {
+                    if (formData.gameType !== preset.label) {
+                      setFormData((prev) => ({ ...prev, gameType: preset.label, gameRank: '' }));
+                    }
+                  }}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                    formData.gameType === preset.label
+                      ? 'bg-primary/20 border-primary text-primary'
+                      : 'bg-dark-lighter border-dark-border text-slate-400 hover:text-white hover:border-slate-600'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-400 mb-2">游戏段位</label>
-              {/* Preset ranks by game */}
+              {/* Rank presets for selected game */}
               <div className="flex flex-wrap gap-1 mb-2">
-                {gamePresets.map((g) => (
+                {(gamePresets.find((g) => g.label === formData.gameType)?.ranks || []).map((rank) => (
                   <button
-                    key={g.label}
+                    key={rank}
                     type="button"
-                    onClick={() => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        gameRank: g.ranks[Math.floor(g.ranks.length / 2)],
-                      }));
-                    }}
-                    className="text-[11px] px-2 py-0.5 bg-dark rounded text-slate-500 hover:text-white hover:bg-dark-lighter transition-all"
+                    onClick={() => setFormData((prev) => ({ ...prev, gameRank: rank }))}
+                    className={`text-[11px] px-2 py-0.5 rounded transition-all ${
+                      formData.gameRank === rank
+                        ? 'bg-primary/20 text-primary border border-primary/40'
+                        : 'bg-dark text-slate-500 hover:text-white hover:bg-dark-lighter'
+                    }`}
                   >
-                    {g.label}
+                    {rank}
                   </button>
                 ))}
               </div>
@@ -195,7 +221,7 @@ const AccountEditPage: React.FC = () => {
                 list="rank-suggestions"
               />
               <datalist id="rank-suggestions">
-                {gamePresets.flatMap((g) => g.ranks).map((r) => (
+                {(gamePresets.find((g) => g.label === formData.gameType)?.ranks || []).map((r) => (
                   <option key={r} value={r} />
                 ))}
               </datalist>
@@ -273,7 +299,7 @@ const AccountEditPage: React.FC = () => {
             <div>
               <label className="block text-sm text-slate-400 mb-2">时租价格</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">¥</span>
                 <input
                   type="number"
                   value={formData.rentalPrice}
