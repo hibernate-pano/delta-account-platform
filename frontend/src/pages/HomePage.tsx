@@ -195,7 +195,7 @@ const HomePage: React.FC = () => {
           </p>
 
           {/* Quick Search Bar */}
-          <form onSubmit={handleQuickSearch} className="max-w-2xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <form onSubmit={handleQuickSearch} className="max-w-2xl mx-auto mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="flex gap-3">
               <div className="flex-1 relative">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -233,6 +233,24 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           </form>
+
+          {/* Dual CTA */}
+          <div className="flex gap-3 justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <Link
+              to="/accounts"
+              className="btn-primary flex items-center gap-2 px-6 py-2.5"
+            >
+              <Gamepad2 className="w-4 h-4" />
+              逛市场
+            </Link>
+            <Link
+              to="/sell"
+              className="btn-secondary flex items-center gap-2 px-6 py-2.5"
+            >
+              <TrendingUp className="w-4 h-4" />
+              立即发布
+            </Link>
+          </div>
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>

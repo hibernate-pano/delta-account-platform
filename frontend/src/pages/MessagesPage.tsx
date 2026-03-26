@@ -3,11 +3,11 @@ import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import {
-  useMessageSessions, useSessionMessages, useSendMessage, useCreateSession
+  useMessageSessions, useSessionMessages, useSendMessage, useCreateSession, useAccount
 } from '../hooks/useQueries';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star
 } from 'lucide-react';
 
 interface Session {
@@ -237,6 +237,8 @@ const MessagesPage: React.FC = () => {
   // --- Chat View ---
   if (sessionId) {
     const currentSession = sessions.find((s) => s.id === parseInt(sessionId));
+    const { data: accountData } = useAccount(currentSession?.accountId);
+    const account = accountData?.data?.data;
 
     // Group messages by date
     const groupedMessages: { date: string; messages: Message[] }[] = [];
@@ -287,6 +289,43 @@ const MessagesPage: React.FC = () => {
             <span>在线</span>
           </div>
         </div>
+
+        {/* Account Preview Card */}
+        {account && (
+          <Link
+            to={`/accounts/${account.id}`}
+            className="mb-4 p-3 bg-gradient-to-r from-dark-card to-dark-lighter border border-dark-border rounded-xl flex items-center gap-3 hover:border-primary/40 transition-colors group"
+          >
+            {account.images?.[0] ? (
+              <img src={account.images[0]} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+            ) : (
+              <div className="w-14 h-14 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Gamepad2 className="w-6 h-6 text-primary" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate group-hover:text-primary transition-colors">
+                {account.title}
+              </p>
+              <div className="flex items-center gap-3 mt-0.5">
+                <span className="text-xs text-yellow-400 flex items-center gap-0.5">
+                  <Star className="w-3 h-3 fill-yellow-400" />
+                  {account.sellerCreditScore || '—'}
+                </span>
+                <span className="text-xs text-slate-500">{account.gameRank || '暂无段位'}</span>
+                <span className="text-xs text-slate-600">·</span>
+                <span className="text-xs text-slate-500">🎨 {account.skinCount}皮肤</span>
+              </div>
+            </div>
+            <div className="flex-shrink-0 flex flex-col items-end gap-1">
+              <span className="text-primary font-bold">¥{account.price}</span>
+              {account.rentalPrice && (
+                <span className="text-xs text-purple-400">租¥{account.rentalPrice}/时</span>
+              )}
+            </div>
+            <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-primary transition-colors flex-shrink-0" />
+          </Link>
+        )}
 
         {/* Chat container */}
         <div className="card flex-1 flex flex-col bg-dark-darker border-dark-border overflow-hidden">

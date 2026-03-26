@@ -3,18 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
-import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount } from '../hooks/useQueries';
+import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile } from '../hooks/useQueries';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
-  MessageCircle, Bell, Wallet, Edit2, BarChart2
+  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const { token, user, logout } = useAuthStore();
+  const { token, user, logout, updateUser } = useAuthStore();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist'>('accounts');
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const { data: profileData, isLoading: profileLoading } = useAuthProfile();
   const { data: ordersData, isLoading: ordersLoading } = useMyOrders();
@@ -116,6 +117,13 @@ const ProfilePage: React.FC = () => {
               </p>
               <p className="text-xs text-slate-500">账户余额</p>
             </div>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="card-static p-3 flex items-center gap-2 hover:border-primary/50 transition-colors cursor-pointer"
+            >
+              <Edit2 className="w-4 h-4 text-slate-400" />
+              <span className="text-sm text-slate-400">编辑资料</span>
+            </button>
           </div>
         </div>
       </div>
@@ -483,8 +491,125 @@ const ProfilePage: React.FC = () => {
           </button>
         </div>
       </div>
+      {/* Edit Profile Modal */}
+      {showEditModal && <EditProfileModal onClose={() => setShowEditModal(false)} />}
     </div>
   );
 };
 
 export default ProfilePage;
+
+// Edit Profile Modal
+const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { user, updateUser } = useAuthStore();
+  const { showToast } = useToast();
+  const updateMutation = useUpdateProfile();
+  const [nickname, setNickname] = useState(user?.nickname || '');
+  const [avatar, setAvatar] = useState(user?.avatar || '');
+
+  const handleSave = async () => {
+    if (!nickname.trim()) { showToast('请输入昵称', 'error'); return; }
+    try {
+      await updateMutation.mutateAsync({ nickname: nickname.trim(), avatar });
+      showToast('资料更新成功！', 'success');
+      onClose();
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '更新失败，请重试', 'error');
+    }
+  };
+
+  const avatarPresets = [
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Milo',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Leo',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Aria',
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-md bg-dark-card border border-dark-border rounded-2xl p-6 shadow-2xl animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Edit2 className="w-5 h-5 text-primary" />
+            编辑资料
+          </h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-500 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Avatar */}
+        <div className="flex flex-col items-center mb-5">
+          <div className="relative mb-3">
+            {avatar ? (
+              <img src={avatar} alt="" className="w-20 h-20 rounded-2xl object-cover border-2 border-primary/30" />
+            ) : (
+              <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center border-2 border-primary/30">
+                <User className="w-10 h-10 text-primary" />
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-slate-500 mb-2">选择头像</p>
+          <div className="flex gap-2">
+            {avatarPresets.map((url, i) => (
+              <button
+                key={i}
+                onClick={() => setAvatar(url)}
+                className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all ${
+                  avatar === url ? 'border-primary scale-110' : 'border-transparent hover:border-slate-600'
+                }`}
+              >
+                <img src={url} alt="" className="w-full h-full" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Nickname */}
+        <div className="mb-4">
+          <label className="block text-sm text-slate-400 mb-2">昵称</label>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="设置您的昵称"
+            maxLength={20}
+            className="input w-full"
+          />
+          <p className="text-right text-xs text-slate-600 mt-1">{nickname.length}/20</p>
+        </div>
+
+        {/* Current info display */}
+        <div className="mb-5 p-3 bg-dark rounded-xl border border-dark-border">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-slate-500">用户名</span>
+            <span className="text-slate-300">@{user?.username}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500">信誉分</span>
+            <span className="text-yellow-400">{user?.creditScore ?? '—'}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleSave}
+          disabled={updateMutation.isPending}
+          className="w-full btn-primary !py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {updateMutation.isPending ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <CheckCircle className="w-4 h-4" />
+          )}
+          {updateMutation.isPending ? '保存中...' : '保存修改'}
+        </button>
+      </div>
+    </div>
+  );
+};

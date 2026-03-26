@@ -441,6 +441,22 @@ export const useAuthProfile = () => {
   });
 };
 
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  const { updateUser } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (data: { nickname?: string; email?: string; phone?: string; avatar?: string }) =>
+      authApi.updateProfile(data),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile });
+      if (res.data?.data) {
+        updateUser(res.data.data);
+      }
+    },
+  });
+};
+
 // ==================== Refund Hooks ====================
 
 export const useMyRefunds = () => {
