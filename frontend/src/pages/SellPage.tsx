@@ -7,7 +7,7 @@ import { useCreateAccount } from '../hooks/useQueries';
 import {
   Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
   Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical,
-  Shield, Clock, BarChart3, CheckCircle, Edit3
+  Shield, Clock, BarChart3, CheckCircle, Edit3, User
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
@@ -641,6 +641,17 @@ const SellPage: React.FC = () => {
                     {formData.rentalPrice && (
                       <span className="text-xs text-slate-500">租 ¥{formData.rentalPrice}/时</span>
                     )}
+                  </div>
+                  {/* Seller info row */}
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dark-border">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
+                      <User className="w-2.5 h-2.5 text-primary" />
+                    </div>
+                    <span className="text-[11px] text-slate-500">发布账号</span>
+                    <div className="ml-auto flex items-center gap-0.5">
+                      <Shield className="w-3 h-3 text-green-400" />
+                      <span className="text-[10px] text-green-400">平台托管</span>
+                    </div>
                   </div>
                 </div>
               </div>

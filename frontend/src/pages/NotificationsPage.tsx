@@ -6,7 +6,8 @@ import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead 
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
-  BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft
+  BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
+  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock
 } from 'lucide-react';
 
 interface Notification {
@@ -23,11 +24,19 @@ interface Notification {
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string; label: string; priority: 'HIGH' | 'NORMAL' | 'LOW' }> = {
   ORDER_PAID: { icon: ShoppingCart, color: 'text-blue-400', bg: 'bg-blue-500/20', label: '支付', priority: 'HIGH' },
   ORDER_COMPLETED: { icon: Package, color: 'text-green-400', bg: 'bg-green-500/20', label: '完成', priority: 'NORMAL' },
+  ORDER_CANCELLED: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/20', label: '取消', priority: 'HIGH' },
+  ORDER_REJECTED: { icon: XCircle, color: 'text-orange-400', bg: 'bg-orange-500/20', label: '拒绝', priority: 'HIGH' },
   NEW_MESSAGE: { icon: MessageCircle, color: 'text-purple-400', bg: 'bg-purple-500/20', label: '消息', priority: 'HIGH' },
+  NEW_REVIEW: { icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: '评价', priority: 'NORMAL' },
   WALLET: { icon: Wallet, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: '钱包', priority: 'NORMAL' },
   ACCOUNT_VERIFIED: { icon: CheckCheck, color: 'text-emerald-400', bg: 'bg-emerald-500/20', label: '认证', priority: 'LOW' },
+  ACCOUNT_EXPIRING: { icon: Clock, color: 'text-orange-400', bg: 'bg-orange-500/20', label: '即将到期', priority: 'HIGH' },
+  ACCOUNT_SUSPENDED: { icon: ShieldOff, color: 'text-red-400', bg: 'bg-red-500/20', label: '账号异常', priority: 'HIGH' },
   USER_REGISTERED: { icon: User, color: 'text-cyan-400', bg: 'bg-cyan-500/20', label: '用户', priority: 'LOW' },
   REFUND: { icon: Wallet, color: 'text-red-400', bg: 'bg-red-500/20', label: '退款', priority: 'HIGH' },
+  PAYMENT_FAILED: { icon: CreditCard, color: 'text-red-400', bg: 'bg-red-500/20', label: '支付失败', priority: 'HIGH' },
+  LOGIN_ALERT: { icon: AlertTriangle, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: '安全', priority: 'HIGH' },
+  PASSWORD_CHANGED: { icon: Lock, color: 'text-blue-400', bg: 'bg-blue-500/20', label: '安全', priority: 'HIGH' },
   SYSTEM: { icon: Zap, color: 'text-orange-400', bg: 'bg-orange-500/20', label: '系统', priority: 'HIGH' },
 };
 const getDefault = () => ({ icon: Bell, color: 'text-slate-400', bg: 'bg-slate-500/20', label: '通知', priority: 'NORMAL' as const });
@@ -418,16 +427,18 @@ const NotificationsPage: React.FC = () => {
       {/* Type filter pills */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide">
         {[
-          { key: 'all', label: '全部' },
-          { key: 'ORDER_PAID', label: '💳 订单' },
-          { key: 'ORDER_COMPLETED', label: '✅ 完成' },
-          { key: 'NEW_MESSAGE', label: '💬 消息' },
-          { key: 'WALLET', label: '💰 钱包' },
-          { key: 'REFUND', label: '🔄 退款' },
-          { key: 'ACCOUNT_VERIFIED', label: '🛡️ 认证' },
-          { key: 'SYSTEM', label: '⚡ 系统' },
+          { key: 'all', label: '全部', config: { icon: Bell } },
+          { key: 'ORDER_PAID', label: '支付', config: typeConfig.ORDER_PAID },
+          { key: 'ORDER_COMPLETED', label: '完成', config: typeConfig.ORDER_COMPLETED },
+          { key: 'ORDER_CANCELLED', label: '取消', config: typeConfig.ORDER_CANCELLED },
+          { key: 'NEW_MESSAGE', label: '消息', config: typeConfig.NEW_MESSAGE },
+          { key: 'NEW_REVIEW', label: '评价', config: typeConfig.NEW_REVIEW },
+          { key: 'WALLET', label: '钱包', config: typeConfig.WALLET },
+          { key: 'REFUND', label: '退款', config: typeConfig.REFUND },
+          { key: 'SYSTEM', label: '系统', config: typeConfig.SYSTEM },
         ].map((tab) => {
           const count = tab.key === 'all' ? notifications.length : notifications.filter((n) => n.type === tab.key).length;
+          const Icon = tab.config.icon;
           return (
             <button
               key={tab.key}
@@ -438,6 +449,7 @@ const NotificationsPage: React.FC = () => {
                   : 'bg-dark-lighter text-slate-400 hover:text-white border border-transparent'
               }`}
             >
+              <Icon className={`w-3.5 h-3.5 ${tab.key !== 'all' && tab.config.color ? tab.config.color : ''}`} />
               {tab.label}
               {count > 0 && (
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
@@ -537,6 +549,27 @@ const NotificationsPage: React.FC = () => {
                   )}
                   {n.type === 'REFUND' && (
                     <button onClick={() => { setSelectedNotification(null); navigate('/refunds'); }} className="btn-primary flex-1 text-sm">查看退款</button>
+                  )}
+                  {n.type === 'ORDER_CANCELLED' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
+                  )}
+                  {n.type === 'ORDER_REJECTED' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
+                  )}
+                  {n.type === 'PAYMENT_FAILED' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">重新支付</button>
+                  )}
+                  {n.type === 'NEW_REVIEW' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看评价</button>
+                  )}
+                  {n.type === 'LOGIN_ALERT' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">查看主页</button>
+                  )}
+                  {n.type === 'PASSWORD_CHANGED' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">个人中心</button>
+                  )}
+                  {n.type === 'ACCOUNT_EXPIRING' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/accounts'); }} className="btn-primary flex-1 text-sm">浏览账号</button>
                   )}
                   {n.type === 'ACCOUNT_VERIFIED' && (
                     <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">查看主页</button>
