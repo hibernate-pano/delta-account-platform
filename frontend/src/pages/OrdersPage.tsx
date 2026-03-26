@@ -193,6 +193,23 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
             </div>
           </div>
 
+          {/* Terminal State Badge for cancelled/refunded */}
+          {isTerminal && (
+            <div className={`rounded-xl p-4 flex items-start gap-3 ${statusConfig[order.status]?.bg}`}>
+              {order.status === 'CANCELLED' ? (
+                <XCircle className={`w-6 h-6 flex-shrink-0 ${statusConfig[order.status]?.color}`} />
+              ) : (
+                <AlertCircle className={`w-6 h-6 flex-shrink-0 ${statusConfig[order.status]?.color}`} />
+              )}
+              <div>
+                <p className={`font-medium text-sm ${statusConfig[order.status]?.color}`}>
+                  {statusConfig[order.status]?.label}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">该订单已{order.status === 'REFUNDED' ? '退款' : '取消'}，如有疑问请联系客服</p>
+              </div>
+            </div>
+          )}
+
           {/* Progress Stepper */}
           {!isTerminal && (
             <div>
