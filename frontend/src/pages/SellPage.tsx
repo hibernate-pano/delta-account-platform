@@ -83,6 +83,7 @@ const SellPage: React.FC = () => {
 
   const validateStep1 = () => {
     if (!formData.title.trim()) { showToast('请填写账号标题', 'warning'); return false; }
+    if (!formData.gameRank) { showToast('请选择游戏段位', 'warning'); return false; }
     if (!formData.price || parseFloat(formData.price) <= 0) { showToast('请填写正确的售价', 'warning'); return false; }
     return true;
   };

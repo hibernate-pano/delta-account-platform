@@ -799,7 +799,7 @@ const OrdersPage: React.FC = () => {
             <FileText className="w-10 h-10 text-slate-700" />
           </div>
           <h3 className="text-lg font-medium mb-2 text-slate-400">
-            {activeTab === 'all' ? '暂无订单' : activeTab === 'BUY' ? '暂无购买记录' : '暂无租赁记录'}
+            {activeTab === 'all' ? '暂无订单' : activeType === 'BUY' ? '暂无购买记录' : '暂无租赁记录'}
           </h3>
           <p className="text-slate-600 text-sm mb-6">开始探索账号市场吧</p>
           <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">

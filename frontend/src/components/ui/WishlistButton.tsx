@@ -21,6 +21,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const { showToast } = useToast();
   const wishlisted = isWishlisted(account.id);
   const [bursting, setBursting] = React.useState(false);
+  const [pending, setPending] = React.useState(false);
 
   const sizeClasses = {
     sm: 'w-8 h-8',
@@ -37,17 +38,15 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!token) {
-      showToast('请先登录后再收藏账号', 'warning');
-      return;
-    }
+    if (!token || pending) return;
     if (wishlisted) {
       removeItem(account.id);
       showToast('已取消收藏', 'info');
     } else {
+      setPending(true);
       addItem(account);
       setBursting(true);
-      setTimeout(() => setBursting(false), 450);
+      setTimeout(() => { setBursting(false); setPending(false); }, 450);
       showToast('已添加到收藏夹', 'success');
     }
   };
@@ -55,6 +54,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   return (
     <button
       onClick={handleClick}
+      disabled={pending}
       className={`
         ${sizeClasses[size]}
         rounded-full flex items-center justify-center
