@@ -85,7 +85,7 @@ const BalanceSparkline: React.FC<{ transactions: Transaction[] }> = ({ transacti
 
   if (!data || data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-24 text-gray-500 gap-2">
+      <div className="flex items-center justify-center h-24 text-slate-500 gap-2">
         <BarChart3 className="w-5 h-5" />
         <span className="text-sm">暂无足够数据生成图表</span>
       </div>
@@ -107,7 +107,7 @@ const BalanceSparkline: React.FC<{ transactions: Transaction[] }> = ({ transacti
 
   return (
     <div className="mt-4 pt-4 border-t border-dark-border">
-      <p className="text-xs text-gray-500 mb-3">余额趋势（近14笔交易）</p>
+      <p className="text-xs text-slate-500 mb-3">余额趋势（近14笔交易）</p>
       <div className="overflow-hidden">
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-20" preserveAspectRatio="none">
           <defs>
@@ -123,11 +123,11 @@ const BalanceSparkline: React.FC<{ transactions: Transaction[] }> = ({ transacti
         </svg>
       </div>
       <div className="flex justify-between mt-1">
-        <span className="text-xs text-gray-600">¥{Math.min(...data).toFixed(2)}</span>
+        <span className="text-xs text-slate-600">¥{Math.min(...data).toFixed(2)}</span>
         <span className={`text-xs font-medium ${isUp ? 'text-green-400' : 'text-red-400'}`}>
           {isUp ? '↑' : '↓'} ¥{Math.abs(data[data.length - 1] - data[0]).toFixed(2)}
         </span>
-        <span className="text-xs text-gray-600">¥{Math.max(...data).toFixed(2)}</span>
+        <span className="text-xs text-slate-600">¥{Math.max(...data).toFixed(2)}</span>
       </div>
     </div>
   );
@@ -681,7 +681,7 @@ const WalletPage: React.FC = () => {
                     className={`py-2.5 rounded-xl font-medium transition-all ${
                       rechargeAmount === amount.toString()
                         ? 'bg-primary text-white'
-                        : 'bg-dark-lighter text-gray-400 hover:bg-slate-700'
+                        : 'bg-dark-lighter text-slate-400 hover:bg-slate-700'
                     }`}
                   >
                     ¥{amount}
@@ -766,7 +766,7 @@ const WalletPage: React.FC = () => {
                     className={`py-2.5 rounded-xl font-medium transition-all ${
                       withdrawAmount === Math.min(amount, balance).toFixed(2)
                         ? 'bg-primary text-white'
-                        : 'bg-dark-lighter text-gray-400 hover:bg-slate-700'
+                        : 'bg-dark-lighter text-slate-400 hover:bg-slate-700'
                     }`}
                   >
                     ¥{amount}

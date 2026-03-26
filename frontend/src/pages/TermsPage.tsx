@@ -7,7 +7,7 @@ const TermsPage: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">服务条款</h1>
-      <div className="card space-y-6 text-gray-300 leading-relaxed">
+      <div className="card space-y-6 text-slate-300 leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold text-white mb-3">1. 服务说明</h2>
           <p>DeltaHub（以下简称"本平台"）是一个游戏账号交易中介平台，为买卖双方提供信息发布、交易撮合和资金托管服务。本平台不直接参与账号的所有权转让，仅提供技术和信息服务支持。</p>
@@ -49,7 +49,7 @@ const TermsPage: React.FC = () => {
           <p>交易过程中如发生争议，双方应首先通过平台客服协商解决。协商不成的，可依法向有管辖权的人民法院提起诉讼。</p>
         </section>
 
-        <div className="pt-4 border-t border-gray-800 text-sm text-gray-500">
+        <div className="pt-4 border-t border-slate-800 text-sm text-slate-500">
           <p>最后更新：2026年3月</p>
           <Link to="/register" className="text-primary hover:underline mt-2 inline-block">返回注册</Link>
         </div>

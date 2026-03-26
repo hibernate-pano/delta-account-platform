@@ -7,7 +7,7 @@ const PrivacyPage: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">隐私政策</h1>
-      <div className="card space-y-6 text-gray-300 leading-relaxed">
+      <div className="card space-y-6 text-slate-300 leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold text-white mb-3">1. 信息收集</h2>
           <p>我们收集以下类型的信息：</p>
@@ -54,7 +54,7 @@ const PrivacyPage: React.FC = () => {
           <p>本平台使用 Cookie 和类似技术来保持您的登录状态、记住偏好设置。您可以通过浏览器设置禁用 Cookie，但可能影响部分功能的使用。</p>
         </section>
 
-        <div className="pt-4 border-t border-gray-800 text-sm text-gray-500">
+        <div className="pt-4 border-t border-slate-800 text-sm text-slate-500">
           <p>最后更新：2026年3月</p>
           <Link to="/register" className="text-primary hover:underline mt-2 inline-block">返回注册</Link>
         </div>

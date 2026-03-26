@@ -190,7 +190,7 @@ const AccountsPage: React.FC = () => {
                     <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Gamepad2 className="w-6 h-6 text-gray-700" />
+                      <Gamepad2 className="w-6 h-6 text-slate-700" />
                     </div>
                   )}
                   <div className="absolute top-1 right-1">
@@ -209,7 +209,7 @@ const AccountsPage: React.FC = () => {
       <div className="mb-6">
         <form onSubmit={handleSearch} className="flex gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
             <input
               type="text"
               placeholder="搜索账号标题、段位..."
@@ -223,7 +223,7 @@ const AccountsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setKeyword('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -250,13 +250,13 @@ const AccountsPage: React.FC = () => {
           <div className="flex bg-dark-lighter rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-gray-500'}`}
+              className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-slate-500'}`}
             >
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-white' : 'text-gray-500'}`}
+              className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-white' : 'text-slate-500'}`}
             >
               <List className="w-5 h-5" />
             </button>
@@ -293,7 +293,7 @@ const AccountsPage: React.FC = () => {
         {showFilters && (
           <div className="mt-4 p-4 bg-dark-card rounded-xl border border-dark-border animate-fade-in">
             <div className="mb-4">
-              <h4 className="text-sm text-gray-400 mb-3">价格区间</h4>
+              <h4 className="text-sm text-slate-400 mb-3">价格区间</h4>
               <div className="flex flex-wrap gap-2">
                 {priceRanges.map((range) => (
                   <button
@@ -302,7 +302,7 @@ const AccountsPage: React.FC = () => {
                     className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
                       selectedPriceRange === range.key
                         ? 'bg-primary text-white'
-                        : 'bg-dark-lighter text-gray-400 hover:text-white'
+                        : 'bg-dark-lighter text-slate-400 hover:text-white'
                     }`}
                   >
                     {range.label}
@@ -315,7 +315,7 @@ const AccountsPage: React.FC = () => {
 
         {/* Sort Pills */}
         <div className="flex flex-wrap gap-2 mt-4 items-center">
-          <span className="text-sm text-gray-500">排序:</span>
+          <span className="text-sm text-slate-500">排序:</span>
           {sortOptions.map((option) => (
             <button
               key={option.key}
@@ -323,7 +323,7 @@ const AccountsPage: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
                 sort === option.key
                   ? 'bg-primary text-white'
-                  : 'bg-dark-lighter text-gray-400 hover:text-white'
+                  : 'bg-dark-lighter text-slate-400 hover:text-white'
               }`}
             >
               <span className="mr-1">{option.icon}</span>
@@ -335,7 +335,7 @@ const AccountsPage: React.FC = () => {
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
               verifiedOnly
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                : 'bg-dark-lighter text-gray-400 hover:text-white'
+                : 'bg-dark-lighter text-slate-400 hover:text-white'
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5 inline mr-1" />
@@ -346,7 +346,7 @@ const AccountsPage: React.FC = () => {
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
               rentalOnly
                 ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40'
-                : 'bg-dark-lighter text-gray-400 hover:text-white'
+                : 'bg-dark-lighter text-slate-400 hover:text-white'
             }`}
           >
             <Clock className="w-3.5 h-3.5 inline mr-1" />
@@ -366,7 +366,7 @@ const AccountsPage: React.FC = () => {
       {/* Results Count */}
       {!isLoading && accounts.length > 0 && (
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500">
             第 <span className="text-primary font-medium">{currentPage}</span> / {totalPages} 页，
             共 <span className="text-primary font-medium">{totalRecords}</span> 个账号
           </p>
@@ -400,8 +400,8 @@ const AccountsPage: React.FC = () => {
         </div>
       ) : accounts.length === 0 ? (
         <div className="text-center py-20">
-          <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-gray-700" />
-          <p className="text-gray-500 mb-4">暂无符合条件的账号</p>
+          <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-slate-700" />
+          <p className="text-slate-500 mb-4">暂无符合条件的账号</p>
           {hasActiveFilters ? (
             <button onClick={clearFilters} className="btn-secondary">
               清除筛选
@@ -429,7 +429,7 @@ const AccountsPage: React.FC = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Gamepad2 className="w-10 h-10 text-gray-700" />
+                    <Gamepad2 className="w-10 h-10 text-slate-700" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
@@ -482,7 +482,7 @@ const AccountsPage: React.FC = () => {
               <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-1">
                 {account.title}
               </h3>
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+              <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
                 <span className="px-2 py-1 bg-dark rounded">{account.gameRank || '暂无'}</span>
                 <span>{account.skinCount} 皮肤</span>
               </div>
@@ -495,7 +495,7 @@ const AccountsPage: React.FC = () => {
                   </span>
                 )}
                 {account.rentalPrice && (
-                  <span className="text-xs text-gray-500">租 ¥{account.rentalPrice}/时</span>
+                  <span className="text-xs text-slate-500">租 ¥{account.rentalPrice}/时</span>
                 )}
               </div>
               {(account.sellerNickname || account.sellerUsername) && (
@@ -535,7 +535,7 @@ const AccountsPage: React.FC = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Gamepad2 className="w-8 h-8 text-gray-700" />
+                    <Gamepad2 className="w-8 h-8 text-slate-700" />
                   </div>
                 )}
                 <div className="absolute top-2 right-2">
@@ -559,7 +559,7 @@ const AccountsPage: React.FC = () => {
                 <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
                   {account.title}
                 </h3>
-                <div className="flex flex-wrap gap-3 text-sm text-gray-500 mb-2">
+                <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-2">
                   <span className="px-2 py-0.5 bg-dark rounded">{account.gameRank || '暂无'}</span>
                   <span>👑 {account.skinCount} 皮肤</span>
                   {account.description && (
@@ -575,7 +575,7 @@ const AccountsPage: React.FC = () => {
                     </span>
                   )}
                   {account.rentalPrice && (
-                    <span className="text-sm text-gray-500">租 ¥{account.rentalPrice}/时</span>
+                    <span className="text-sm text-slate-500">租 ¥{account.rentalPrice}/时</span>
                   )}
                 </div>
                 {/* Seller info */}
