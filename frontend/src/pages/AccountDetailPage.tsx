@@ -24,7 +24,7 @@ const AccountDetailPage: React.FC = () => {
   const addToRecent = useRecentStore((s) => s.addItem);
 
   const accountId = id ? parseInt(id) : 0;
-  const { data, isLoading } = useAccount(accountId);
+  const { data, isLoading, isError, refetch } = useAccount(accountId);
   const buyMutation = useBuyAccount();
   const rentMutation = useRentAccount();
   const createSessionMutation = useCreateSession();
@@ -126,22 +126,25 @@ const AccountDetailPage: React.FC = () => {
     );
   }
 
-  if (!account) {
+  if (isError || !account) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-24 h-24 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-6 border border-dark-border">
-            <Gamepad2 className="w-12 h-12 text-slate-600" />
+          <div className="w-24 h-24 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+            <AlertCircle className="w-12 h-12 text-red-400" />
           </div>
-          <h2 className="text-xl font-bold mb-3 text-slate-300">账号不存在或已下架</h2>
-          <p className="text-slate-500 mb-8 max-w-sm">该账号可能已被售出或卖家已下架</p>
-          <div className="flex items-center justify-center gap-3">
-            <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2">
-              <ArrowLeft className="w-4 h-4" /> 返回
-            </button>
-            <Link to="/accounts" className="btn-primary flex items-center gap-2">
-              <Gamepad2 className="w-4 h-4" /> 浏览市场
-            </Link>
+          <h2 className="text-xl font-bold mb-2">{isError ? '加载失败' : '账号不存在'}</h2>
+          <p className="text-slate-500 mb-6">{isError ? '无法获取账号详情，请检查网络' : '该账号可能已下架或不存在'}</p>
+          <div className="flex justify-center gap-3">
+            {isError ? (
+              <button onClick={() => refetch()} className="btn-primary inline-flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" />
+                重试
+              </button>
+            ) : (
+              <button onClick={() => navigate('/accounts')} className="btn-secondary">浏览账号市场</button>
+            )}
+            <button onClick={() => navigate(-1)} className="btn-ghost">返回上一页</button>
           </div>
         </div>
       </div>
