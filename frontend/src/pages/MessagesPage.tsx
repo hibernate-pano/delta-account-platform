@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import {
@@ -7,7 +7,7 @@ import {
 } from '../hooks/useQueries';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X
 } from 'lucide-react';
 
 interface Session {
@@ -87,9 +87,78 @@ const MessagesPage: React.FC = () => {
 
   const accountId = searchParams.get('accountId');
   const sellerId = searchParams.get('sellerId');
+  const [sessionSearch, setSessionSearch] = useState('');
 
   const { data: sessionsData, isLoading: sessionsLoading } = useMessageSessions();
   const sessions: Session[] = sessionsData?.data?.data || [];
+  const filteredSessions = sessions.filter((s) =>
+    !sessionSearch.trim()
+      ? true
+      : (s.otherUser?.nickname || s.otherUser?.username || '').toLowerCase().includes(sessionSearch.toLowerCase()) ||
+        (s.accountTitle || '').toLowerCase().includes(sessionSearch.toLowerCase()) ||
+        (s.lastMessage || '').toLowerCase().includes(sessionSearch.toLowerCase())
+  );
+  const unreadCount = sessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0);
+
+  // Session list content
+  const sessionListContent = useMemo(() => {
+    if (filteredSessions.length === 0 && sessionSearch) {
+      return (
+        <div className="text-center py-12">
+          <Search className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+          <p className="text-slate-500 text-sm">未找到匹配的会话</p>
+          <button onClick={() => setSessionSearch('')} className="text-primary text-sm mt-2 hover:underline">清除搜索</button>
+        </div>
+      );
+    }
+    if (filteredSessions.length === 0) {
+      return (
+        <div className="text-center py-10">
+          <MessageCircle className="w-8 h-8 text-slate-700 mx-auto mb-2" />
+          <p className="text-slate-600 text-sm">暂无会话</p>
+        </div>
+      );
+    }
+    return filteredSessions.map((session) => (
+      <div
+        key={session.id}
+        onClick={() => navigate(`/messages/${session.id}`)}
+        className="py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 transition-colors active:bg-dark-lighter"
+      >
+        <div className="relative flex-shrink-0">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center">
+            <User className="w-5 h-5 text-primary" />
+          </div>
+          {session.unreadCount && session.unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold leading-none">
+              {session.unreadCount > 9 ? '9+' : session.unreadCount}
+            </span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <p className={`font-medium truncate text-sm ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
+              {session.otherUser?.nickname || session.otherUser?.username || '用户'}
+            </p>
+            <span className="text-xs text-slate-600 flex-shrink-0 ml-2">
+              {formatSessionTime(session.lastMessageAt)}
+            </span>
+          </div>
+          {session.accountTitle && (
+            <p className="text-[11px] text-primary/70 mb-0.5 truncate">
+              账号: {session.accountTitle}
+            </p>
+          )}
+          <p className={`text-xs truncate ${session.unreadCount ? 'text-slate-300' : 'text-slate-500'}`}>
+            {session.lastMessage || '暂无消息'}
+          </p>
+        </div>
+        {!session.unreadCount && (
+          <div className="w-1.5 h-1.5 rounded-full bg-slate-700 flex-shrink-0" />
+        )}
+      </div>
+    ));
+  }, [filteredSessions, sessionSearch, navigate]);
 
   const currentSessionId = sessionId ? parseInt(sessionId) : null;
   const { data: messagesData, isLoading: messagesLoading, refetch } = useSessionMessages(currentSessionId!);
@@ -347,12 +416,39 @@ const MessagesPage: React.FC = () => {
   // --- Session List View ---
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">消息中心</h1>
-        {sessions.filter(s => s.unreadCount).length > 0 && (
-          <span className="text-xs text-slate-500">
-            {sessions.filter(s => s.unreadCount).length} 个未读会话
-          </span>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-2xl font-bold">消息中心</h1>
+          {unreadCount > 0 && (
+            <p className="text-sm text-slate-500 mt-0.5">
+              <span className="inline-flex items-center justify-center w-4 h-4 bg-red-500 rounded-full text-[10px] text-white mr-1">{unreadCount}</span>
+              条未读消息
+            </p>
+          )}
+        </div>
+        <Link to="/accounts" className="btn-secondary flex items-center gap-2 text-sm">
+          <MessageCircle className="w-4 h-4" />
+          新会话
+        </Link>
+      </div>
+
+      {/* Session Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+        <input
+          type="text"
+          value={sessionSearch}
+          onChange={(e) => setSessionSearch(e.target.value)}
+          placeholder="搜索会话..."
+          className="input w-full !pl-10 !py-2.5 !text-sm"
+        />
+        {sessionSearch && (
+          <button
+            onClick={() => setSessionSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center text-slate-500 hover:text-white"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
 
@@ -405,50 +501,7 @@ const MessagesPage: React.FC = () => {
           </div>
         ) : (
           <div className="divide-y divide-dark-border">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                onClick={() => navigate(`/messages/${session.id}`)}
-                className="py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 transition-colors active:bg-dark-lighter"
-              >
-                {/* Avatar */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  {session.unreadCount && session.unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold leading-none">
-                      {session.unreadCount > 9 ? '9+' : session.unreadCount}
-                    </span>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className={`font-medium truncate text-sm ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
-                      {session.otherUser?.nickname || session.otherUser?.username || '用户'}
-                    </p>
-                    <span className="text-xs text-slate-600 flex-shrink-0 ml-2">
-                      {formatSessionTime(session.lastMessageAt)}
-                    </span>
-                  </div>
-                  {session.accountTitle && (
-                    <p className="text-[11px] text-primary/70 mb-0.5 truncate">
-                      账号: {session.accountTitle}
-                    </p>
-                  )}
-                  <p className={`text-xs truncate ${session.unreadCount ? 'text-slate-300' : 'text-slate-500'}`}>
-                    {session.lastMessage || '暂无消息'}
-                  </p>
-                </div>
-
-                {/* Unread dot */}
-                {!session.unreadCount && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-700 flex-shrink-0" />
-                )}
-              </div>
-            ))}
+            {sessionListContent}
           </div>
         )}
       </div>
