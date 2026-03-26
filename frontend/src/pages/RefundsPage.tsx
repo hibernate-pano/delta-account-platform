@@ -160,7 +160,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
             <div className="bg-dark rounded-xl p-4">
               <p className="text-xs text-slate-500 mb-3">关联订单</p>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-12 h-12 bg-dark-lighter rounded-lg overflow-hidden flex-shrink-0">
                   {refund.order.account?.images?.[0] ? (
                     <img src={refund.order.account.images[0]} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -229,7 +229,7 @@ const RefundsPage: React.FC = () => {
   const [newImage, setNewImage] = useState('');
 
   const { data: refundsData, isLoading, isError, refetch } = useMyRefunds();
-  const { data: ordersData } = useMyOrders();
+  const { data: ordersData, isError: ordersError, refetch: refetchOrders } = useMyOrders();
   const applyMutation = useApplyRefund();
   const cancelMutation = useCancelRefund();
 
@@ -440,7 +440,15 @@ const RefundsPage: React.FC = () => {
       {/* Refundable Orders */}
       {activeTab === 'apply' && (
         <div className="card">
-          {refundableOrders.length === 0 ? (
+          {ordersError ? (
+            <div className="text-center py-12">
+              <AlertCircle className="w-12 h-12 mx-auto mb-3 text-red-400/60" />
+              <p className="text-slate-400 mb-4">加载订单失败</p>
+              <button onClick={() => refetchOrders()} className="btn-primary text-sm px-6">
+                重新加载
+              </button>
+            </div>
+          ) : refundableOrders.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-10 h-10 text-green-500/50" />

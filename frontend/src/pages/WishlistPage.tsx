@@ -212,6 +212,9 @@ const WishlistPage: React.FC = () => {
                       {account.weapons && (
                         <span className="truncate max-w-[80px]">{account.weapons}</span>
                       )}
+                      {account.rentalPrice && (
+                        <span className="text-slate-600 ml-auto">租 ¥{account.rentalPrice}/时</span>
+                      )}
                     </div>
                   </Link>
 
