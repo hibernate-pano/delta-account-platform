@@ -18,6 +18,8 @@ const gamePresets = [
   { label: '和平精英', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '王牌', '无敌战神'] },
 ];
 
+const weaponPresets = ['传说皮肤', '限定皮肤', '全英雄', '全皮肤', 'V10贵族', '稀有道具'];
+
 const SellPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
@@ -226,6 +228,22 @@ const SellPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, skinCount: parseInt(e.target.value) || 0 })}
                     className="input" placeholder="0" min="0"
                   />
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {[10, 50, 100, 200, '满'].map((n) => (
+                      <button
+                        key={String(n)}
+                        type="button"
+                        onClick={() => setFormData((f) => ({ ...f, skinCount: typeof n === 'number' ? n : 999 }))}
+                        className={`px-2.5 py-0.5 rounded text-xs transition-all border ${
+                          (typeof n === 'number' && formData.skinCount === n) || (n === '满' && formData.skinCount === 999)
+                            ? 'bg-primary/20 border-primary/50 text-primary'
+                            : 'bg-dark border-dark-border text-slate-500 hover:text-white'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -311,6 +329,18 @@ const SellPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, weapons: e.target.value })}
                   className="input" placeholder="主要武器和装备，用逗号分隔"
                 />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {weaponPresets.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setFormData((f) => ({ ...f, weapons: f.weapons ? f.weapons + '，' + preset : preset }))}
+                      className="px-2.5 py-1 rounded-full text-xs bg-dark border border-dark-border text-slate-500 hover:text-white hover:border-primary/40 transition-all"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -369,7 +399,14 @@ const SellPage: React.FC = () => {
                   id="url-input" type="url" value={newImage}
                   onChange={(e) => setNewImage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                  className="input flex-1" placeholder="输入图片URL"
+                  onPaste={(e) => {
+                    const pasted = e.clipboardData.getData('text');
+                    if (pasted && images.length < 5) {
+                      try { new URL(pasted); setImages([...images, pasted]); setNewImage(''); showToast('图片已添加', 'success'); }
+                      catch { showToast('请输入有效的图片URL', 'error'); }
+                    }
+                  }}
+                  className="input flex-1" placeholder="输入图片URL或直接粘贴"
                 />
                 <button type="button" onClick={addImage}
                   className="btn-secondary px-4" disabled={!newImage || images.length >= 5}>
