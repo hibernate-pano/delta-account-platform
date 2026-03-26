@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface LoadingContextType {
@@ -16,29 +16,6 @@ export const useGlobalLoading = () => {
     throw new Error('useGlobalLoading must be used within GlobalLoadingProvider');
   }
   return context;
-};
-
-// Hook to track API requests
-export const useRequestTracker = () => {
-  const { startLoading, stopLoading } = useGlobalLoading();
-  const requestCountRef = useRef(0);
-
-  const trackRequest = useCallback(
-    <T,>(promise: Promise<T>): Promise<T> => {
-      const key = `request_${Date.now()}`;
-      requestCountRef.current++;
-      startLoading(key);
-
-      return promise
-        .finally(() => {
-          requestCountRef.current--;
-          stopLoading(key);
-        });
-    },
-    [startLoading, stopLoading]
-  );
-
-  return { trackRequest };
 };
 
 interface GlobalLoadingProviderProps {

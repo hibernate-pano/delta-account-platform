@@ -40,7 +40,7 @@ const AccountEditPage: React.FC = () => {
   usePageTitle('编辑账号');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -71,7 +71,7 @@ const AccountEditPage: React.FC = () => {
           images: account.images || [],
         });
       } catch (error) {
-        toast('error', '账号不存在');
+        showToast('账号不存在', 'error');
         navigate('/profile');
       } finally {
         setLoading(false);
@@ -108,10 +108,10 @@ const AccountEditPage: React.FC = () => {
         description: formData.description || undefined,
         images: formData.images,
       });
-      toast('success', '账号信息已更新');
+      showToast('账号信息已更新', 'success');
       navigate('/profile');
     } catch (error: any) {
-      toast('error', error.response?.data?.message || '保存失败');
+      showToast(error.response?.data?.message || '保存失败', 'error');
     } finally {
       setSaving(false);
     }
