@@ -26,6 +26,14 @@ export const useToast = () => {
   return context;
 };
 
+const TOAST_DURATION = 4000;
+
+const getAriaRole = (type: ToastType) =>
+  type === 'error' || type === 'warning' ? 'alert' : 'status';
+
+const getAriaLive = (type: ToastType) =>
+  type === 'error' || type === 'warning' ? 'assertive' : 'polite';
+
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -35,7 +43,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    }, TOAST_DURATION);
   }, []);
 
   const toast = useCallback((type: ToastType, message: string) => {
@@ -54,7 +62,6 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
-const TOAST_DURATION = 4000;
 
 const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void }> = ({
   toasts,
@@ -90,6 +97,8 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
       {toasts.map((toast) => (
         <div
           key={toast.id}
+          role={getAriaRole(toast.type)}
+          aria-live={getAriaLive(toast.type)}
           className={`toast-enter flex flex-col bg-dark-card border border-dark-border border-l-4 ${
             toast.type === 'success' ? 'border-l-green-400' :
             toast.type === 'error'   ? 'border-l-red-400'   :
