@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -809,15 +809,18 @@ const OrdersPage: React.FC = () => {
   });
 
   // Group by month
-  const groupedOrders: Record<string, Order[]> = {};
-  for (const order of filteredOrders) {
-    const month = formatMonth(order.createdAt);
-    if (!groupedOrders[month]) groupedOrders[month] = [];
-    groupedOrders[month].push(order);
-  }
+  const groupedOrders = useMemo(() => {
+    const groups: Record<string, Order[]> = {};
+    for (const order of filteredOrders) {
+      const month = formatMonth(order.createdAt);
+      if (!groups[month]) groups[month] = [];
+      groups[month].push(order);
+    }
+    return groups;
+  }, [filteredOrders]);
   const months = Object.keys(groupedOrders);
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: orders.length,
     completed: orders.filter(o => o.status === 'COMPLETED').length,
     pending: orders.filter(o => o.status === 'PENDING').length,
@@ -826,7 +829,7 @@ const OrdersPage: React.FC = () => {
     totalSpent: orders
       .filter(o => o.status === 'COMPLETED' && o.type === 'BUY')
       .reduce((sum, o) => sum + o.amount, 0),
-  };
+  }), [orders]);
 
   if (isLoading) {
     return (

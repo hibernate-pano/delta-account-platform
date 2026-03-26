@@ -289,8 +289,8 @@ const MessagesPage: React.FC = () => {
                   <User className="w-5 h-5 text-primary" />
                 </div>
               )}
-              {/* Online indicator */}
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-dark" />
+              {/* Status dot — no real-time presence data from backend, use neutral */}
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-slate-600 rounded-full border-2 border-dark" />
             </div>
             <div className="min-w-0">
               <h1 className="text-base font-bold truncate">

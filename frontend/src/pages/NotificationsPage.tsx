@@ -486,15 +486,20 @@ const NotificationsPage: React.FC = () => {
               <BellOff className="w-10 h-10 text-slate-700" />
             </div>
             <h3 className="text-lg font-medium mb-2 text-slate-400">
-              {activeFilter === 'UNREAD' ? '没有未读通知'
+              {activeFilter === 'UNREAD' ? '太棒了！全部已读'
                : activeTypeFilter !== 'all' ? '该分类暂无通知'
                : '暂无通知'}
             </h3>
             <p className="text-slate-600 text-sm mb-6">
-              {activeFilter === 'all' && activeTypeFilter === 'all' ? '有新消息时会在这里显示' : '切换到全部查看'}
+              {activeFilter === 'UNREAD' ? '没有遗漏任何重要消息'
+               : activeFilter === 'all' && activeTypeFilter === 'all' ? '有新消息时会在这里显示'
+               : '切换到全部查看'}
             </p>
             {(activeFilter !== 'all' || activeTypeFilter !== 'all') && (
               <button onClick={() => { setActiveFilter('all'); setActiveTypeFilter('all'); }} className="btn-secondary text-sm">查看全部</button>
+            )}
+            {activeFilter === 'UNREAD' && (
+              <button onClick={() => navigate('/accounts')} className="btn-primary text-sm mt-2">去逛逛账号市场</button>
             )}
           </div>
         ) : (
