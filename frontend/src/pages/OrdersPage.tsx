@@ -489,6 +489,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
 
           {/* Account details */}
           <div className="mt-3 grid grid-cols-2 gap-2">
+            {order.account?.gameType && (
+              <div className="bg-dark rounded-lg px-3 py-2">
+                <p className="text-[10px] text-slate-500 mb-0.5">游戏</p>
+                <p className="text-xs font-medium text-slate-300">{order.account.gameType}</p>
+              </div>
+            )}
             {order.account?.gameRank && (
               <div className="bg-dark rounded-lg px-3 py-2">
                 <p className="text-[10px] text-slate-500 mb-0.5">段位</p>
