@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
-import { useAuthProfile, useMyOrders, useSellerAccounts } from '../hooks/useQueries';
-import { WishlistButton } from '../components/ui/WishlistButton';
+import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount } from '../hooks/useQueries';
 import {
   User, Package, FileText, LogOut, ChevronRight,
-  Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X
+  Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
+  MessageCircle, Bell, Wallet, Edit2, BarChart2
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
@@ -18,6 +18,7 @@ const ProfilePage: React.FC = () => {
 
   const { data: profileData, isLoading: profileLoading } = useAuthProfile();
   const { data: ordersData, isLoading: ordersLoading } = useMyOrders();
+  const { data: unreadData } = useUnreadCount();
 
   const profile = profileData?.data?.data;
   const profileId = profile?.id ?? user?.id;
@@ -67,8 +68,23 @@ const ProfilePage: React.FC = () => {
       <div className="card mb-6 bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/20">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-2xl flex items-center justify-center">
-              <User className="w-8 h-8 md:w-10 md:h-10 text-primary" />
+            <div className="relative">
+              {profile?.avatar || user?.avatar ? (
+                <img
+                  src={profile?.avatar || user?.avatar}
+                  alt=""
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-primary/30"
+                />
+              ) : (
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/20 rounded-2xl flex items-center justify-center border-2 border-primary/30">
+                  <User className="w-8 h-8 md:w-10 md:h-10 text-primary" />
+                </div>
+              )}
+              {profile?.role === 'ADMIN' && (
+                <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center border-2 border-dark-card">
+                  <Shield className="w-3 h-3 text-white" />
+                </span>
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -184,7 +200,7 @@ const ProfilePage: React.FC = () => {
                       className="card hover:border-primary/50 transition-all cursor-pointer group"
                       onClick={() => navigate(`/accounts/${account.id}`)}
                     >
-                      <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden">
+                      <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative">
                         {account.images?.[0] ? (
                           <img
                             src={account.images[0]}
@@ -195,6 +211,20 @@ const ProfilePage: React.FC = () => {
                           <div className="w-full h-full flex items-center justify-center">
                             <Gamepad2 className="w-8 h-8 text-slate-700" />
                           </div>
+                        )}
+                        {/* Edit button */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/accounts/${account.id}/edit`); }}
+                          className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-primary/80 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                          title="编辑账号"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-white" />
+                        </button>
+                        {/* Status badge */}
+                        {account.verificationStatus === 'VERIFIED' && (
+                          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-emerald-500/90 text-white text-[10px] rounded flex items-center gap-0.5">
+                            <CheckCircle className="w-3 h-3" /> 已认证
+                          </span>
                         )}
                       </div>
                       <h4 className="font-medium mb-2 line-clamp-1 group-hover:text-primary transition-colors">
@@ -246,7 +276,7 @@ const ProfilePage: React.FC = () => {
                     <div
                       key={order.id}
                       className="card flex items-center gap-4 hover:border-primary/50 transition-all cursor-pointer group"
-                      onClick={() => navigate(`/accounts/${order.accountId}`)}
+                      onClick={() => navigate('/orders')}
                     >
                       <div className="w-12 h-12 bg-dark rounded-lg flex items-center justify-center">
                         <Package className="w-5 h-5 text-slate-500" />
@@ -419,12 +449,30 @@ const ProfilePage: React.FC = () => {
         <h3 className="text-sm text-slate-500 mb-4">快捷操作</h3>
         <div className="flex flex-wrap gap-3">
           <Link to="/wallet" className="btn-secondary text-sm flex items-center gap-2">
-            <Package className="w-4 h-4" />
-            充值
+            <Wallet className="w-4 h-4" />
+            钱包充值
           </Link>
-          <Link to="/accounts" className="btn-secondary text-sm flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4" />
-            浏览市场
+          <Link to="/messages" className="btn-secondary text-sm flex items-center gap-2 relative">
+            <MessageCircle className="w-4 h-4" />
+            消息中心
+            {unreadData?.data?.messageCount ? (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-white font-bold">
+                {(unreadData.data.messageCount ?? 0) > 9 ? '9+' : unreadData.data.messageCount}
+              </span>
+            ) : null}
+          </Link>
+          <Link to="/notifications" className="btn-secondary text-sm flex items-center gap-2 relative">
+            <Bell className="w-4 h-4" />
+            通知中心
+            {unreadData?.data?.notificationCount ? (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
+                {(unreadData.data.notificationCount ?? 0) > 9 ? '9+' : unreadData.data.notificationCount}
+              </span>
+            ) : null}
+          </Link>
+          <Link to="/refunds" className="btn-secondary text-sm flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            退款记录
           </Link>
           <button
             onClick={handleLogout}
