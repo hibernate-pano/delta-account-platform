@@ -229,7 +229,7 @@ const NotificationsPage: React.FC = () => {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
 
-  const { data, isLoading, refetch } = useNotifications();
+  const { data, isLoading, refetch, dataUpdatedAt } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
 
@@ -316,15 +316,16 @@ const NotificationsPage: React.FC = () => {
           )}
         </div>
         {/* Keyword search */}
-        <div className="relative mb-5">
-          <Bell className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="搜索通知..."
-            className="input w-full !pl-10 !py-2.5 !text-sm"
-          />
+        <div className="flex items-start gap-3">
+          <div className="relative">
+            <Bell className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="搜索通知..."
+              className="input w-full !pl-10 !py-2.5 !text-sm"
+            />
           {keyword && (
             <button
               onClick={() => setKeyword('')}
@@ -346,6 +347,12 @@ const NotificationsPage: React.FC = () => {
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
+        {dataUpdatedAt && (
+          <p className="text-xs text-slate-600 mt-1 text-right flex items-center gap-1 justify-end">
+            <RefreshCw className="w-3 h-3" />
+            {(() => { const d = Math.floor((Date.now() - dataUpdatedAt) / 60000); return d < 1 ? '刚刚更新' : d < 60 ? `${d}分钟前更新` : `${Math.floor(d/60)}小时前更新`; })()}
+          </p>
+        )}
       </div>
 
       {/* Filter Tabs */}
