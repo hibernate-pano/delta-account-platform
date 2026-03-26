@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '../hooks/useQueries';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
-  BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap
+  BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X
 } from 'lucide-react';
 
 interface Notification {
@@ -73,8 +73,9 @@ const NotificationItem: React.FC<{
   notification: Notification;
   onMarkRead: (id: number) => void;
   onDelete: (id: number) => void;
+  onView: (n: Notification) => void;
   markReadPending: boolean;
-}> = ({ notification, onMarkRead, onDelete, markReadPending }) => {
+}> = ({ notification, onMarkRead, onDelete, onView, markReadPending }) => {
   const [swipeX, setSwipeX] = useState(0);
   const [swiping, setSwiping] = useState(false);
   const touchStartX = useRef(0);
@@ -119,11 +120,8 @@ const NotificationItem: React.FC<{
       >
         <div className="px-4 py-4 flex items-start gap-3 hover:bg-dark-lighter/40 transition-colors cursor-pointer active:bg-dark-lighter/60"
           onClick={() => {
+            onView(notification);
             if (isUnread) onMarkRead(notification.id);
-            // Navigate based on type
-            if (notification.type.includes('ORDER')) navigate('/orders');
-            else if (notification.type.includes('MESSAGE')) navigate('/messages');
-            else if (notification.type.includes('WALLET')) navigate('/wallet');
           }}
         >
           {/* Icon */}
@@ -192,13 +190,14 @@ const NotificationItem: React.FC<{
 };
 
 // need ref imported
-import { useRef } from 'react';
 
 const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
   const [activeFilter, setActiveFilter] = useState<'all' | 'UNREAD' | 'READ'>('all');
+  const [keyword, setKeyword] = useState('');
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
 
   const { data, isLoading, refetch } = useNotifications();
@@ -225,7 +224,12 @@ const NotificationsPage: React.FC = () => {
     if (activeFilter === 'UNREAD') return n.status === 'UNREAD';
     if (activeFilter === 'READ') return n.status === 'READ';
     return true;
-  });
+  }).filter((n) =>
+    keyword.trim()
+      ? n.title.toLowerCase().includes(keyword.toLowerCase()) ||
+        n.content.toLowerCase().includes(keyword.toLowerCase())
+      : true
+  );
 
   const grouped = groupByDate(filteredNotifications);
   const unreadCount = notifications.filter((n) => n.status === 'UNREAD').length;
@@ -264,6 +268,25 @@ const NotificationsPage: React.FC = () => {
           )}
           {unreadCount > 0 && (
             <p className="text-sm text-slate-500 mt-0.5">{unreadCount} 条未读</p>
+          )}
+        </div>
+        {/* Keyword search */}
+        <div className="relative mb-5">
+          <Bell className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="搜索通知..."
+            className="input w-full !pl-10 !py-2.5 !text-sm"
+          />
+          {keyword && (
+            <button
+              onClick={() => setKeyword('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center text-slate-500 hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -339,6 +362,7 @@ const NotificationsPage: React.FC = () => {
                       notification={notification}
                       onMarkRead={handleMarkAsRead}
                       onDelete={handleDelete}
+                      onView={setSelectedNotification}
                       markReadPending={markReadMutation.isPending}
                     />
                   ))}
@@ -348,6 +372,47 @@ const NotificationsPage: React.FC = () => {
           </div>
         )}
       </div>
+      {/* Notification Detail Modal */}
+      {selectedNotification && (() => {
+        const n = selectedNotification;
+        const cfg = typeConfig[n.type] || getDefault();
+        const Icon = cfg.icon;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedNotification(null)}>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
+            <div className="relative w-full max-w-sm bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-slide-up overflow-hidden"
+              onClick={(e) => e.stopPropagation()}>
+              <div className="px-6 py-5 border-b border-dark-border flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cfg.bg}`}>
+                  <Icon className={`w-5 h-5 ${cfg.color}`} />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-base font-bold">{n.title}</h2>
+                  <p className="text-xs text-slate-500">{new Date(n.createdAt).toLocaleString('zh-CN')}</p>
+                </div>
+                <button onClick={() => setSelectedNotification(null)} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-500 hover:text-white transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{n.content}</p>
+                <div className="mt-5 flex gap-2">
+                  {n.type.includes('ORDER') && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
+                  )}
+                  {n.type.includes('MESSAGE') && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/messages'); }} className="btn-primary flex-1 text-sm">查看消息</button>
+                  )}
+                  {n.type.includes('WALLET') && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/wallet'); }} className="btn-primary flex-1 text-sm">查看钱包</button>
+                  )}
+                  <button onClick={() => setSelectedNotification(null)} className="btn-secondary flex-1 text-sm">关闭</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
