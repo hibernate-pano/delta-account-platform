@@ -757,6 +757,7 @@ const OrdersPage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'all' | 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED'>('all');
   const [activeType, setActiveType] = useState<'all' | 'BUY' | 'RENT'>('all');
+  const [keyword, setKeyword] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
 
@@ -771,7 +772,11 @@ const OrdersPage: React.FC = () => {
       (activeTab === 'COMPLETED' && o.status === 'COMPLETED') ||
       (activeTab === 'CANCELLED' && ['CANCELLED', 'REFUNDED'].includes(o.status));
     const typeMatch = activeType === 'all' || o.type === activeType;
-    return statusMatch && typeMatch;
+    const kw = keyword.trim().toLowerCase();
+    const keywordMatch = !kw ||
+      o.orderNo.toLowerCase().includes(kw) ||
+      (o.account?.title?.toLowerCase().includes(kw) ?? false);
+    return statusMatch && typeMatch && keywordMatch;
   });
 
   // Group by month
@@ -852,8 +857,30 @@ const OrdersPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Status + Type Filter */}
+      {/* Search + Status + Type Filter */}
       <div className="mb-6 space-y-3">
+        {/* Search input */}
+        {orders.length > 3 && (
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="搜索订单号或账号名称..."
+              className="input w-full !pl-10 !pr-10 !py-2.5 !text-sm"
+            />
+            {keyword && (
+              <button
+                onClick={() => setKeyword('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Status pills */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           {([

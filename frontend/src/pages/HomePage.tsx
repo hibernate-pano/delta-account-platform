@@ -124,6 +124,7 @@ const HomePage: React.FC = () => {
 
   const { data, isLoading, isError } = useAccounts({ size: 8 });
   const accounts: Account[] = data?.data?.data?.records || [];
+  const { items: recentItems } = useRecentStore();
 
   // Featured = verified accounts
   const featuredAccounts = accounts.filter((a) => a.verificationStatus === 'VERIFIED').slice(0, 4);
@@ -321,7 +322,6 @@ const HomePage: React.FC = () => {
 
       {/* Recently Viewed */}
       {(() => {
-        const { items: recentItems } = useRecentStore();
         const recentAccounts = recentItems.slice(0, 8).map((item: any) => item.account);
         if (recentAccounts.length === 0) return null;
         return (
@@ -348,7 +348,7 @@ const HomePage: React.FC = () => {
                         <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Gamepad2 className="w-6 h-6 text-gray-700" />
+                          <Gamepad2 className="w-6 h-6 text-slate-700" />
                         </div>
                       )}
                     </div>
