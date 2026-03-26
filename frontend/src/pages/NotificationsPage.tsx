@@ -68,6 +68,24 @@ const groupByDate = (notifications: Notification[]) => {
   return groups;
 };
 
+// Smart navigation map per notification type
+const getNavTarget = (notification: Notification): { to: string; label: string } | null => {
+  switch (notification.type) {
+    case 'ORDER_PAID':
+    case 'ORDER_COMPLETED':
+    case 'REFUND':
+      return { to: '/orders', label: '查看订单' };
+    case 'NEW_MESSAGE':
+      return { to: '/messages', label: '查看消息' };
+    case 'WALLET':
+      return { to: '/wallet', label: '查看钱包' };
+    case 'ACCOUNT_VERIFIED':
+      return { to: '/profile', label: '查看详情' };
+    default:
+      return null;
+  }
+};
+
 // Single notification item
 const NotificationItem: React.FC<{
   notification: Notification;
@@ -120,8 +138,15 @@ const NotificationItem: React.FC<{
       >
         <div className="px-4 py-4 flex items-start gap-3 hover:bg-dark-lighter/40 transition-colors cursor-pointer active:bg-dark-lighter/60"
           onClick={() => {
-            onView(notification);
-            if (isUnread) onMarkRead(notification.id);
+            // Smart navigate on click
+            const target = getNavTarget(notification);
+            if (target) {
+              onView(notification); // still mark read
+              if (isUnread) onMarkRead(notification.id);
+              setTimeout(() => navigate(target.to), 100);
+            } else {
+              onView(notification); // open modal
+            }
           }}
         >
           {/* Icon */}
@@ -163,8 +188,11 @@ const NotificationItem: React.FC<{
             </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col gap-1 flex-shrink-0">
+          {/* Nav indicator + Actions */}
+          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            {getNavTarget(notification) && (
+              <ChevronRight className="w-4 h-4 text-slate-600 mb-1" />
+            )}
             {isUnread && (
               <button
                 onClick={(e) => { e.stopPropagation(); onMarkRead(notification.id); }}
@@ -189,13 +217,12 @@ const NotificationItem: React.FC<{
   );
 };
 
-// need ref imported
-
 const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
   const [activeFilter, setActiveFilter] = useState<'all' | 'UNREAD' | 'READ'>('all');
+  const [activeTypeFilter, setActiveTypeFilter] = useState<string>('all');
   const [keyword, setKeyword] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
@@ -225,6 +252,8 @@ const NotificationsPage: React.FC = () => {
     if (activeFilter === 'READ') return n.status === 'READ';
     return true;
   }).filter((n) =>
+    activeTypeFilter === 'all' || n.type === activeTypeFilter
+  ).filter((n) =>
     keyword.trim()
       ? n.title.toLowerCase().includes(keyword.toLowerCase()) ||
         n.content.toLowerCase().includes(keyword.toLowerCase())
@@ -304,7 +333,7 @@ const NotificationsPage: React.FC = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-1 mb-6 bg-dark-lighter rounded-lg p-1 w-fit">
+      <div className="flex gap-1 mb-3 bg-dark-lighter rounded-lg p-1 w-fit">
         {[
           { key: 'all', label: '全部', count: notifications.length },
           { key: 'UNREAD', label: '未读', count: unreadCount, highlight: unreadCount > 0 },
@@ -329,6 +358,42 @@ const NotificationsPage: React.FC = () => {
         ))}
       </div>
 
+      {/* Type filter pills */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide">
+        {[
+          { key: 'all', label: '全部' },
+          { key: 'ORDER_PAID', label: '💳 订单' },
+          { key: 'ORDER_COMPLETED', label: '✅ 完成' },
+          { key: 'NEW_MESSAGE', label: '💬 消息' },
+          { key: 'WALLET', label: '💰 钱包' },
+          { key: 'REFUND', label: '🔄 退款' },
+          { key: 'ACCOUNT_VERIFIED', label: '🛡️ 认证' },
+          { key: 'SYSTEM', label: '⚡ 系统' },
+        ].map((tab) => {
+          const count = tab.key === 'all' ? notifications.length : notifications.filter((n) => n.type === tab.key).length;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTypeFilter(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all ${
+                activeTypeFilter === tab.key
+                  ? 'bg-primary/20 text-primary border border-primary/40'
+                  : 'bg-dark-lighter text-slate-400 hover:text-white border border-transparent'
+              }`}
+            >
+              {tab.label}
+              {count > 0 && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                  activeTypeFilter === tab.key ? 'bg-primary/30' : 'bg-dark'
+                }`}>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Notifications */}
       <div className="card p-0 overflow-hidden">
         {filteredNotifications.length === 0 ? (
@@ -337,12 +402,16 @@ const NotificationsPage: React.FC = () => {
               <BellOff className="w-10 h-10 text-slate-700" />
             </div>
             <h3 className="text-lg font-medium mb-2 text-slate-400">
-              {activeFilter === 'UNREAD' ? '没有未读通知' : '暂无通知'}
+              {activeFilter === 'UNREAD' ? '没有未读通知'
+               : activeTypeFilter !== 'all' ? '该分类暂无通知'
+               : '暂无通知'}
             </h3>
             <p className="text-slate-600 text-sm mb-6">
-              {activeFilter === 'all' ? '有新消息时会在这里显示' : '切换到全部查看'}
+              {activeFilter === 'all' && activeTypeFilter === 'all' ? '有新消息时会在这里显示' : '切换到全部查看'}
             </p>
-            <button onClick={() => setActiveFilter('all')} className="btn-secondary text-sm">查看全部</button>
+            {(activeFilter !== 'all' || activeTypeFilter !== 'all') && (
+              <button onClick={() => { setActiveFilter('all'); setActiveTypeFilter('all'); }} className="btn-secondary text-sm">查看全部</button>
+            )}
           </div>
         ) : (
           <div>
@@ -396,15 +465,24 @@ const NotificationsPage: React.FC = () => {
               </div>
               <div className="p-6">
                 <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{n.content}</p>
-                <div className="mt-5 flex gap-2">
-                  {n.type.includes('ORDER') && (
+                <div className="mt-5 flex gap-2 flex-wrap">
+                  {n.type === 'ORDER_PAID' && (
                     <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
                   )}
-                  {n.type.includes('MESSAGE') && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/messages'); }} className="btn-primary flex-1 text-sm">查看消息</button>
+                  {n.type === 'ORDER_COMPLETED' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
                   )}
-                  {n.type.includes('WALLET') && (
+                  {n.type === 'NEW_MESSAGE' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/messages'); }} className="btn-primary flex-1 text-sm">回复消息</button>
+                  )}
+                  {n.type === 'WALLET' && (
                     <button onClick={() => { setSelectedNotification(null); navigate('/wallet'); }} className="btn-primary flex-1 text-sm">查看钱包</button>
+                  )}
+                  {n.type === 'REFUND' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/refunds'); }} className="btn-primary flex-1 text-sm">查看退款</button>
+                  )}
+                  {n.type === 'ACCOUNT_VERIFIED' && (
+                    <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">查看主页</button>
                   )}
                   <button onClick={() => setSelectedNotification(null)} className="btn-secondary flex-1 text-sm">关闭</button>
                 </div>

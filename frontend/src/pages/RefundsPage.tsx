@@ -155,7 +155,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
                   <p className="text-xs text-slate-500">{refund.order.type === 'BUY' ? '购买账号' : '租赁使用'}</p>
                 </div>
                 <Link
-                  to={`/accounts/${refund.orderId}`}
+                  to={`/orders`}
                   onClick={onClose}
                   className="p-2 text-slate-500 hover:text-white hover:bg-dark rounded-lg transition-colors"
                 >
@@ -472,7 +472,18 @@ const RefundsPage: React.FC = () => {
               )}
 
               <div>
-                <label className="block text-sm text-slate-400 mb-2">退款金额 <span className="text-red-400">*</span></label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm text-slate-400">退款金额 <span className="text-red-400">*</span></label>
+                  {selectedOrder && (
+                    <button
+                      type="button"
+                      onClick={() => setRefundAmount(selectedOrder.amount?.toFixed(2) || '')}
+                      className="text-xs text-primary hover:text-primary-light transition-colors"
+                    >
+                      全部退款 ¥{selectedOrder.amount?.toFixed(2)}
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
                   <input
@@ -500,6 +511,23 @@ const RefundsPage: React.FC = () => {
                   placeholder="请详细描述退款原因..."
                   required
                 />
+                {/* Quick reason templates */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {['账号与描述不符', '卖家无法交付', '临时不想买了', '其他原因'].map((reason) => (
+                    <button
+                      key={reason}
+                      type="button"
+                      onClick={() => setRefundReason(reason)}
+                      className={`px-3 py-1 rounded-full text-xs transition-all border ${
+                        refundReason === reason
+                          ? 'bg-primary/20 border-primary/50 text-primary'
+                          : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
+                      }`}
+                    >
+                      {reason}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
