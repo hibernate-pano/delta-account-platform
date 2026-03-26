@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -79,7 +79,7 @@ const AccountsPage: React.FC = () => {
     return () => document.removeEventListener('keydown', handler);
   }, [quickViewAccount]);
 
-  const { data, isLoading, dataUpdatedAt } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
+  const { data, isLoading, isError, refetch, dataUpdatedAt } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
   const totalPages = data?.data?.data?.pages ?? 1;
   const totalRecords = data?.data?.data?.total ?? 0;
   const { items: recentItems } = useRecentStore();
@@ -387,6 +387,17 @@ const AccountsPage: React.FC = () => {
             <AccountCardSkeleton key={i} />
           ))}
         </div>
+      ) : isError ? (
+        <div className="text-center py-16">
+          <AlertCircle className="w-14 h-14 mx-auto mb-4 text-red-400/60" />
+          <p className="text-slate-400 mb-4">加载失败，请重试</p>
+          <button
+            onClick={() => refetch()}
+            className="btn-primary text-sm px-6"
+          >
+            重新加载
+          </button>
+        </div>
       ) : accounts.length === 0 ? (
         <div className="text-center py-20">
           <Gamepad2 className="w-16 h-16 mx-auto mb-4 text-gray-700" />
@@ -487,6 +498,23 @@ const AccountsPage: React.FC = () => {
                   <span className="text-xs text-gray-500">租 ¥{account.rentalPrice}/时</span>
                 )}
               </div>
+              {(account.sellerNickname || account.sellerUsername) && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  {account.sellerAvatar ? (
+                    <img src={account.sellerAvatar} alt="" className="w-4 h-4 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full bg-dark-lighter flex items-center justify-center">
+                      <User className="w-2.5 h-2.5 text-slate-600" />
+                    </div>
+                  )}
+                  <span className="text-[10px] text-slate-600 truncate max-w-[120px]">
+                    {account.sellerNickname || account.sellerUsername}
+                  </span>
+                  {account.verificationStatus === 'VERIFIED' && (
+                    <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0" />
+                  )}
+                </div>
+              )}
             </Link>
           ))}
         </div>
@@ -550,6 +578,22 @@ const AccountsPage: React.FC = () => {
                     <span className="text-sm text-gray-500">租 ¥{account.rentalPrice}/时</span>
                   )}
                 </div>
+                {/* Seller info */}
+                {(account.sellerNickname || account.sellerUsername) && (
+                  <div className="flex items-center gap-2 mt-2">
+                    {account.sellerAvatar ? (
+                      <img src={account.sellerAvatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-dark-lighter flex items-center justify-center">
+                        <User className="w-3 h-3 text-slate-500" />
+                      </div>
+                    )}
+                    <span className="text-xs text-slate-500">{account.sellerNickname || account.sellerUsername}</span>
+                    {account.verificationStatus === 'VERIFIED' && (
+                      <Shield className="w-3 h-3 text-primary flex-shrink-0" />
+                    )}
+                  </div>
+                )}
               </div>
             </Link>
           ))}
