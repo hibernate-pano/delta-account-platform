@@ -3,7 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { useCreateAccount } from '../hooks/useQueries';
-import { Gamepad2, Plus, X, Upload, Check, Sparkles, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
+  Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical
+} from 'lucide-react';
+
+const PLATFORM_FEE_RATE = 0.05; // 5%
+const TAX_RATE = 0.01; // 1%
+
+const gamePresets = [
+  { label: '王者荣耀', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '星耀', '王者', '荣耀王者', '百星王者'] },
+  { label: '英雄联盟', ranks: ['黑铁', '青铜', '白银', '黄金', '铂金', '钻石', '大师', '宗师', '王者'] },
+  { label: '和平精英', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '王牌', '无敌战神'] },
+];
 
 const SellPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +36,16 @@ const SellPage: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+
+  // Derived values
+  const price = parseFloat(formData.price) || 0;
+  const platformFee = price * PLATFORM_FEE_RATE;
+  const tax = price * TAX_RATE;
+  const youGet = price - platformFee - tax;
+  const activePreset = gamePresets.find((p) =>
+    formData.description?.toLowerCase().includes(p.label) || formData.title?.includes(p.label)
+  );
 
   if (!token) {
     navigate('/login');
@@ -31,21 +53,13 @@ const SellPage: React.FC = () => {
   }
 
   const validateStep1 = () => {
-    if (!formData.title.trim()) {
-      showToast('请填写账号标题', 'warning');
-      return false;
-    }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      showToast('请填写正确的售价', 'warning');
-      return false;
-    }
+    if (!formData.title.trim()) { showToast('请填写账号标题', 'warning'); return false; }
+    if (!formData.price || parseFloat(formData.price) <= 0) { showToast('请填写正确的售价', 'warning'); return false; }
     return true;
   };
 
   const handleNext = () => {
-    if (validateStep1()) {
-      setStep(2);
-    }
+    if (validateStep1()) setStep(step + 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,285 +96,403 @@ const SellPage: React.FC = () => {
     }
   };
 
-  const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
+  const removeImage = (index: number) => setImages(images.filter((_, i) => i !== index));
 
-  const handleImageKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addImage();
-    }
+  // Drag to reorder
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    setDraggedIdx(idx);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  const handleDrop = (e: React.DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === targetIdx) return;
+    const newImages = [...images];
+    const [moved] = newImages.splice(draggedIdx, 1);
+    newImages.splice(targetIdx, 0, moved);
+    setImages(newImages);
+    setDraggedIdx(null);
   };
 
   const isSubmitting = createMutation.isPending;
+  const ranks = activePreset?.ranks || ['青铜', '白银', '黄金', '铂金', '钻石', '星耀', '王者'];
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">发布账号</h1>
-        <p className="text-slate-500">填写账号信息，快速发布您的账号</p>
+        <h1 className="text-2xl font-bold mb-1">发布账号</h1>
+        <p className="text-slate-500 text-sm">填写信息，快速将账号变现</p>
       </div>
 
-      {/* Progress Steps */}
-      <div className="flex items-center gap-4 mb-8">
-        {[{ num: 1, label: '基础信息' }, { num: 2, label: '详细信息' }].map((item, idx) => (
-          <React.Fragment key={item.num}>
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium transition-all ${
-                  step >= item.num ? 'bg-primary text-white' : 'bg-dark-lighter text-slate-500'
-                }`}
-              >
-                {step > item.num ? <Check className="w-4 h-4" /> : item.num}
+      {/* 3-Step Progress */}
+      <div className="flex items-center gap-0 mb-10">
+        {[1, 2, 3].map((num, i) => {
+          const labels = ['账号信息', '上传图片', '确认发布'];
+          const done = step > num;
+          const active = step === num;
+          return (
+            <React.Fragment key={num}>
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center font-medium transition-all text-sm ${
+                    done ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                    : active ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                    : 'bg-dark-lighter text-slate-500'
+                  }`}
+                >
+                  {done ? <Check className="w-4 h-4" /> : num}
+                </div>
+                <span className={`text-[11px] mt-1.5 ${active ? 'text-primary font-medium' : 'text-slate-500'}`}>
+                  {labels[num - 1]}
+                </span>
               </div>
-              <span className={`text-sm ${step >= item.num ? 'text-white' : 'text-slate-500'}`}>
-                {item.label}
-              </span>
-            </div>
-            {idx < 1 && (
-              <div
-                className={`flex-1 h-0.5 ${step > item.num ? 'bg-primary' : 'bg-dark-lighter'}`}
-              />
-            )}
-          </React.Fragment>
-        ))}
+              {i < 2 && (
+                <div className={`flex-1 h-0.5 mx-3 mb-5 rounded-full transition-all ${step > num ? 'bg-green-500' : 'bg-dark-lighter'}`} />
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Step 1: Basic Info */}
+      <form onSubmit={handleSubmit}>
+        {/* ===== STEP 1: Account Info ===== */}
         {step === 1 && (
-          <div className="card space-y-5 animate-fade-in">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                账号标题 <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="input"
-                placeholder="例如：满皮肤史诗账号 · 钻石段位"
-                required
-                autoFocus
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">游戏段位</label>
-                <input
-                  type="text"
-                  value={formData.gameRank}
-                  onChange={(e) => setFormData({ ...formData, gameRank: e.target.value })}
-                  className="input"
-                  placeholder="例如：钻石、星耀"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">皮肤数量</label>
-                <input
-                  type="number"
-                  value={formData.skinCount || ''}
-                  onChange={(e) => setFormData({ ...formData, skinCount: parseInt(e.target.value) || 0 })}
-                  className="input"
-                  placeholder="0"
-                  min="0"
-                />
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-5 animate-fade-in">
+            <div className="card space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  售价 <span className="text-red-400">*</span>
+                  账号标题 <span className="text-red-400">*</span>
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
+                <input
+                  type="text" value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="input" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
+                  required autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">游戏段位</label>
+                  <select
+                    value={formData.gameRank}
+                    onChange={(e) => setFormData({ ...formData, gameRank: e.target.value })}
+                    className="input"
+                  >
+                    <option value="">选择段位</option>
+                    {ranks.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">皮肤数量</label>
                   <input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="input pl-10 text-xl font-bold"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="1"
-                    required
+                    type="number" value={formData.skinCount || ''}
+                    onChange={(e) => setFormData({ ...formData, skinCount: parseInt(e.target.value) || 0 })}
+                    className="input" placeholder="0" min="0"
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">时租价格</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
-                  <input
-                    type="number"
-                    value={formData.rentalPrice}
-                    onChange={(e) => setFormData({ ...formData, rentalPrice: e.target.value })}
-                    className="input pl-10 text-xl"
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">/小时</span>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    售价 <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
+                    <input
+                      type="number" value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      className="input pl-10 text-xl font-bold !text-white" placeholder="0.00" step="0.01" min="1" required
+                    />
+                  </div>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">时租价格</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
+                    <input
+                      type="number" value={formData.rentalPrice}
+                      onChange={(e) => setFormData({ ...formData, rentalPrice: e.target.value })}
+                      className="input pl-10 text-xl" placeholder="0.00" step="0.01"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">/时</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fee Breakdown */}
+              {price > 0 && (
+                <div className="bg-dark rounded-xl p-4 border border-dark-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <DollarSign className="w-4 h-4 text-green-400" />
+                    <span className="text-sm font-medium text-slate-300">收益计算</span>
+                    <span className="text-xs text-slate-600 ml-auto">售价 ¥{price.toFixed(2)}</span>
+                  </div>
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex justify-between text-slate-500">
+                      <span>平台服务费 (5%)</span>
+                      <span>-¥{platformFee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500">
+                      <span>税费 (1%)</span>
+                      <span>-¥{tax.toFixed(2)}</span>
+                    </div>
+                    <div className="h-px bg-dark-border my-1" />
+                    <div className="flex justify-between text-green-400 font-bold">
+                      <span>您将获得</span>
+                      <span>¥{youGet.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Tips */}
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex gap-3">
+              <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-400 space-y-1">
+                <p className="text-primary/80 font-medium">定价建议</p>
+                <p>段位越高价格越高，限定皮肤是加分项。建议参考同类账号定价。</p>
+                <p>支持同时设置购买价和时租价，一份账号两份收入。</p>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleNext}
-              className="btn-primary w-full py-4 flex items-center justify-center gap-2"
-            >
-              下一步
-              <ArrowRight className="w-5 h-5" />
+            <button type="button" onClick={handleNext} className="btn-primary w-full py-4 flex items-center justify-center gap-2">
+              下一步 <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         )}
 
-        {/* Step 2: Details */}
+        {/* ===== STEP 2: Images ===== */}
         {step === 2 && (
           <div className="space-y-5 animate-fade-in">
-            <div className="card space-y-5">
+            <div className="card space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">武器装备</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">武器装备</label>
                 <input
-                  type="text"
-                  value={formData.weapons}
+                  type="text" value={formData.weapons}
                   onChange={(e) => setFormData({ ...formData, weapons: e.target.value })}
-                  className="input"
-                  placeholder="主要武器和装备，用逗号分隔"
+                  className="input" placeholder="主要武器和装备，用逗号分隔"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">账号描述</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1">账号描述</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="input h-32 resize-none"
-                  placeholder="详细描述账号情况，包括：&#10;- 绑定信息（手机/邮箱）&#10;- 历史充值金额&#10;- 特殊角色或限定皮肤&#10;- 其他需要注意的事项"
+                  className="input h-28 resize-none" placeholder="详细描述：绑定信息、历史充值、特殊角色..."
                 />
               </div>
             </div>
 
             {/* Image Upload */}
             <div className="card">
-              <label className="block text-sm font-medium text-slate-300 mb-3">
-                账号截图 <span className="text-slate-500">（最多5张）</span>
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Camera className="w-4 h-4" />
+                  账号截图
+                  <span className="text-slate-500 text-xs font-normal">（最多5张）</span>
+                </label>
+                {images.length > 0 && (
+                  <span className="text-xs text-slate-500">{images.length}/5 已上传</span>
+                )}
+              </div>
 
+              {/* Drop zone */}
               <div
-                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors mb-4 ${
-                  dragOver ? 'border-primary bg-primary/5' : 'border-dark-border'
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-all mb-4 cursor-pointer ${
+                  dragOver ? 'border-primary bg-primary/5' : 'border-dark-border hover:border-slate-600'
                 }`}
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={(e) => {
-                  e.preventDefault();
-                  setDragOver(false);
-                  const url =
-                    e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                  e.preventDefault(); setDragOver(false);
+                  const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
                   if (url && images.length < 5) {
-                    try {
-                      new URL(url);
-                      setImages([...images, url]);
-                    } catch {}
+                    try { new URL(url); setImages([...images, url]); } catch {}
                   }
                 }}
+                onClick={() => document.getElementById('url-input')?.focus()}
               >
-                <Upload className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                <p className="text-sm text-slate-500 mb-2">拖拽图片到此处，或粘贴图片链接</p>
+                {dragOver ? (
+                  <p className="text-primary text-sm font-medium">松开以添加图片</p>
+                ) : (
+                  <>
+                    <Upload className="w-7 h-7 mx-auto mb-2 text-slate-600" />
+                    <p className="text-sm text-slate-500">拖拽图片到此处</p>
+                    <p className="text-xs text-slate-600 mt-1">或粘贴图片链接</p>
+                  </>
+                )}
               </div>
 
+              {/* URL input */}
               <div className="flex gap-2 mb-4">
                 <input
-                  type="url"
-                  value={newImage}
+                  id="url-input" type="url" value={newImage}
                   onChange={(e) => setNewImage(e.target.value)}
-                  onKeyDown={handleImageKeyDown}
-                  className="input flex-1"
-                  placeholder="输入图片URL"
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
+                  className="input flex-1" placeholder="输入图片URL"
                 />
-                <button
-                  type="button"
-                  onClick={addImage}
-                  className="btn-secondary px-4"
-                  disabled={!newImage || images.length >= 5}
-                >
+                <button type="button" onClick={addImage}
+                  className="btn-secondary px-4" disabled={!newImage || images.length >= 5}>
                   <Plus className="w-5 h-5" />
                 </button>
               </div>
 
+              {/* Image grid */}
               {images.length > 0 && (
-                <div className="grid grid-cols-5 gap-2">
-                  {images.map((img, index) => (
+                <div className="space-y-2">
+                  {images.map((img, idx) => (
                     <div
-                      key={index}
-                      className="relative aspect-video bg-dark rounded-lg overflow-hidden group"
+                      key={idx}
+                      className={`relative flex items-center gap-3 bg-dark rounded-xl overflow-hidden group transition-all ${
+                        draggedIdx === idx ? 'opacity-50' : ''
+                      }`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, idx)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleDrop(e, idx)}
+                      onDragEnd={() => setDraggedIdx(null)}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      {/* Drag handle */}
+                      <div className="px-3 py-3 text-slate-600 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      {/* Thumbnail */}
+                      <div className="w-16 h-12 flex-shrink-0 overflow-hidden">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-400 truncate">{img}</p>
+                        {idx === 0 && (
+                          <span className="text-[10px] text-primary bg-primary/20 px-1.5 py-0.5 rounded">封面</span>
+                        )}
+                      </div>
+                      {/* Reorder hint */}
+                      <span className="text-[10px] text-slate-600 pr-2">拖动排序</span>
                       <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
+                        type="button" onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <X className="w-3 h-3 text-white" />
                       </button>
-                      {index === 0 && (
-                        <span className="absolute bottom-1 left-1 bg-primary text-xs text-white px-1 rounded">
-                          封面
-                        </span>
-                      )}
                     </div>
                   ))}
                 </div>
               )}
+
+              {images.length === 0 && (
+                <div className="flex items-center justify-center gap-4 py-6 text-slate-600">
+                  <ImageIcon className="w-5 h-5" />
+                  <span className="text-sm">暂无图片，建议至少上传1张</span>
+                </div>
+              )}
             </div>
 
-            {/* Summary */}
-            <div className="card bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <span className="font-medium">发布预览</span>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
+                <ArrowLeft className="w-5 h-5" /> 返回
+              </button>
+              <button type="button" onClick={() => setStep(3)} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2">
+                下一步 <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ===== STEP 3: Confirm & Preview ===== */}
+        {step === 3 && (
+          <div className="space-y-5 animate-fade-in">
+            {/* Account card preview */}
+            <div className="card">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-slate-300">发布预览</span>
+                <span className="text-xs text-slate-600 ml-auto">买家将看到的效果</span>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">账号标题</span>
-                  <span className="font-medium">{formData.title || '-'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">售价</span>
-                  <span className="text-xl font-bold text-primary">¥{formData.price || '0'}</span>
-                </div>
-                {formData.rentalPrice && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">时租</span>
-                    <span>¥{formData.rentalPrice}/小时</span>
+
+              {/* Mini account card */}
+              <div className="bg-dark rounded-xl overflow-hidden">
+                {images[0] ? (
+                  <div className="aspect-video">
+                    <img src={images[0]} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-dark-lighter flex items-center justify-center">
+                    <Gamepad2 className="w-10 h-10 text-slate-700" />
                   </div>
                 )}
+                <div className="p-3">
+                  <h3 className="font-medium text-sm mb-2">{formData.title || '账号标题'}</h3>
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                    <span className="px-2 py-0.5 bg-dark-lighter rounded">{formData.gameRank || '段位'}</span>
+                    <span>{formData.skinCount} 皮肤</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-primary">¥{formData.price || '0'}</span>
+                    {formData.rentalPrice && (
+                      <span className="text-xs text-slate-500">租 ¥{formData.rentalPrice}/时</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Full summary */}
+            <div className="card space-y-3">
+              <h3 className="font-medium text-sm text-slate-300">填写信息汇总</h3>
+              {[
+                { label: '账号标题', value: formData.title },
+                { label: '游戏段位', value: formData.gameRank || '未填写' },
+                { label: '皮肤数量', value: `${formData.skinCount} 个` },
+                { label: '售价', value: `¥${formData.price}` },
+                { label: '时租价', value: formData.rentalPrice ? `¥${formData.rentalPrice}/时` : '未设置' },
+                { label: '武器装备', value: formData.weapons || '未填写' },
+                { label: '截图', value: images.length > 0 ? `${images.length} 张` : '未上传' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between text-sm py-1.5 border-b border-dark-border last:border-0">
+                  <span className="text-slate-500">{item.label}</span>
+                  <span className="text-slate-300 font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Fee summary */}
+            {price > 0 && (
+              <div className="card bg-green-500/5 border-green-500/20">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-slate-400">您的收益</span>
+                  <span className="text-xl font-bold text-green-400">¥{youGet.toFixed(2)}</span>
+                </div>
+                <div className="flex gap-4 text-xs text-slate-500">
+                  <span>售价 ¥{price.toFixed(2)}</span>
+                  <span>-平台5%</span>
+                  <span>-税费1%</span>
+                </div>
+              </div>
+            )}
+
+            {/* Notice */}
+            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex gap-3">
+              <Info className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-400">
+                <p className="text-yellow-400/80 font-medium mb-1">发布须知</p>
+                <p>账号发布后需经过审核，审核通过后将对买家展示。</p>
+                <p>请确保账号信息真实有效，虚假信息将导致账号下架。</p>
               </div>
             </div>
 
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="btn-secondary flex-1 py-4"
-              >
-                返回
+              <button type="button" onClick={() => setStep(2)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
+                <ArrowLeft className="w-5 h-5" /> 返回修改
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary flex-1 py-4 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
+              <button type="submit" disabled={isSubmitting}
+                className="btn-primary flex-1 py-4 flex items-center justify-center gap-2 disabled:opacity-50">
                 {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <>
-                    <Gamepad2 className="w-5 h-5" />
-                    发布账号
-                  </>
+                  <><Sparkles className="w-5 h-5" /> 发布账号</>
                 )}
               </button>
             </div>
