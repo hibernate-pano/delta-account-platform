@@ -198,10 +198,14 @@ const NotificationItem: React.FC<{
               <button
                 onClick={(e) => { e.stopPropagation(); onMarkRead(notification.id); }}
                 disabled={markReadPending}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-green-400 hover:bg-green-500/10 transition-all"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-green-400 hover:bg-green-500/10 transition-all disabled:opacity-50"
                 title="标记已读"
               >
-                <CheckCheck className="w-3.5 h-3.5" />
+                {markReadPending ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <CheckCheck className="w-3.5 h-3.5" />
+                )}
               </button>
             )}
             <button
@@ -228,6 +232,7 @@ const NotificationsPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
 
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
@@ -236,7 +241,10 @@ const NotificationsPage: React.FC = () => {
   const notifications: Notification[] = (data?.data?.data || []).filter((n: Notification) => !deletedIds.has(n.id));
 
   const handleMarkAsRead = async (id: number) => {
-    try { await markReadMutation.mutateAsync(id); } catch { showToast('操作失败', 'error'); }
+    setPendingIds((prev) => new Set([...prev, id]));
+    try { await markReadMutation.mutateAsync(id); }
+    catch { showToast('操作失败', 'error'); }
+    finally { setPendingIds((prev) => { const s = new Set(prev); s.delete(id); return s; }); }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -446,8 +454,8 @@ const NotificationsPage: React.FC = () => {
       {/* Notifications */}
       <div className="card p-0 overflow-hidden">
         {filteredNotifications.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-20 animate-fade-in">
+            <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4 animate-float">
               <BellOff className="w-10 h-10 text-slate-700" />
             </div>
             <h3 className="text-lg font-medium mb-2 text-slate-400">
@@ -481,7 +489,7 @@ const NotificationsPage: React.FC = () => {
                       onMarkRead={handleMarkAsRead}
                       onDelete={handleDelete}
                       onView={setSelectedNotification}
-                      markReadPending={markReadMutation.isPending}
+                      markReadPending={pendingIds.has(notification.id)}
                     />
                   ))}
                 </div>

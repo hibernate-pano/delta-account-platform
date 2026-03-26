@@ -453,8 +453,9 @@ const MessagesPage: React.FC = () => {
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="输入消息..."
-                className="input flex-1 !py-2.5 !px-4 bg-dark border-dark-border"
+                placeholder={sendMessageMutation.isPending ? '发送中...' : '输入消息...'}
+                disabled={sendMessageMutation.isPending}
+                className="input flex-1 !py-2.5 !px-4 bg-dark border-dark-border disabled:opacity-50"
                 autoComplete="off"
               />
               <button
