@@ -434,7 +434,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
 
         {/* Amount + Status */}
         <div className="text-right flex-shrink-0">
-          <div className="text-base font-bold text-white">¥{order.amount.toFixed(0)}</div>
+          <div className="text-base font-bold text-white">
+            ¥{order.amount.toFixed(0)}
+            {order.type === 'RENT' && order.deposit && order.deposit > 0 && (
+              <span className="text-xs font-normal text-slate-500 ml-1">+押金¥{order.deposit}</span>
+            )}
+          </div>
           <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${statusConfig[order.status]?.bg} ${statusConfig[order.status]?.color}`}>
             <StatusIcon className="w-2.5 h-2.5" />
             {statusConfig[order.status]?.label || order.status}

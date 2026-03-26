@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import {
   useMessageSessions, useSessionMessages, useSendMessage, useCreateSession, useAccount
 } from '../hooks/useQueries';
+import { messageApi } from '../api';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
@@ -87,6 +89,7 @@ const MessagesPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { token, user } = useAuthStore();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
   const accountId = searchParams.get('accountId');
   const sellerId = searchParams.get('sellerId');
@@ -195,6 +198,14 @@ const MessagesPage: React.FC = () => {
     pollRef.current = setInterval(() => refetch(), 5000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [currentSessionId, refetch]);
+
+  // Mark messages as read when chat is opened
+  useEffect(() => {
+    if (!currentSessionId) return;
+    messageApi.markAsRead(currentSessionId)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['messageSessions'] }))
+      .catch(() => {});
+  }, [currentSessionId, queryClient]);
 
   useEffect(() => {
     if (!token) { navigate('/login'); }
