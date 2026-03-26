@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { TransactionSkeleton } from '../components/ui/Skeleton';
-import { useMyOrders } from '../hooks/useQueries';
+import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder } from '../hooks/useQueries';
 import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, ArrowDownCircle, CreditCard, RefreshCw,
@@ -283,6 +283,8 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void }> = ({ ord
 const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void }> = ({ order, onViewDetail }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const payMutation = usePayOrder();
   const StatusIcon = statusConfig[order.status]?.icon || Clock;
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
   const isPending = order.status === 'PENDING';
@@ -400,8 +402,17 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void }
             </button>
             {isPending && (
               <button
-                onClick={(e) => { e.stopPropagation(); /* TODO: pay */ }}
-                className="btn-primary flex-1 !py-2 text-xs flex items-center justify-center gap-1.5"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    await payMutation.mutateAsync(order.id);
+                    showToast('支付成功！', 'success');
+                  } catch (err: any) {
+                    showToast(err.response?.data?.message || '支付失败', 'error');
+                  }
+                }}
+                disabled={payMutation.isPending}
+                className="btn-primary flex-1 !py-2 text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 <CreditCard className="w-3.5 h-3.5" />
                 立即支付
@@ -427,6 +438,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void }
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'all' | 'BUY' | 'RENT'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
