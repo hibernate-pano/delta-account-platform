@@ -187,7 +187,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
 
           {/* Tips */}
-          <p className="text-center text-xs text-gray-500 mt-4">
+          <p className="text-center text-xs text-slate-500 mt-4">
             点击支付即表示您同意我们的服务条款
           </p>
         </div>

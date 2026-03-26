@@ -148,7 +148,7 @@ export const NotificationBell: React.FC = () => {
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
+              <div className="p-4 text-center text-slate-500">
                 <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">暂无通知</p>
               </div>
@@ -183,7 +183,7 @@ export const NotificationBell: React.FC = () => {
                             {formatTime(n.createdAt)}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 truncate mt-0.5">{n.content}</p>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{n.content}</p>
                       </div>
                       {n.status === 'UNREAD' ? (
                         <div className="w-2 h-2 bg-primary rounded-full mt-1.5 flex-shrink-0" />

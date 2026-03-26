@@ -28,7 +28,7 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="text-center">
             <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
             <h2 className="text-xl font-bold mb-2">页面出了点问题</h2>
-            <p className="text-gray-500 mb-6">请刷新页面重试</p>
+            <p className="text-slate-500 mb-6">请刷新页面重试</p>
             <button
               onClick={() => {
                 this.setState({ hasError: false });
