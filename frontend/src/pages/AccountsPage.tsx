@@ -87,8 +87,8 @@ const AccountsPage: React.FC = () => {
 
   const allAccounts: Account[] = data?.data?.data?.records || [];
 
-  // Client-side price range + verified filter + rental filter
-  const accounts = allAccounts.filter((acc) => {
+  // Client-side price range + verified filter + rental filter + sort
+  let accounts = allAccounts.filter((acc) => {
     if (verifiedOnly && acc.verificationStatus !== 'VERIFIED') return false;
     if (rentalOnly && !acc.rentalPrice) return false;
     if (selectedPriceRange) {
@@ -98,6 +98,13 @@ const AccountsPage: React.FC = () => {
     }
     return true;
   });
+
+  // Client-side seller credit sort (sort happens after filter, before display)
+  if (sort === 'seller_credit') {
+    accounts = [...accounts].sort((a, b) =>
+      (b.sellerCreditScore ?? 0) - (a.sellerCreditScore ?? 0)
+    );
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,6 +157,7 @@ const AccountsPage: React.FC = () => {
     { key: 'price_asc', label: '价格从低到高', icon: '⬆️' },
     { key: 'price_desc', label: '价格从高到低', icon: '⬇️' },
     { key: 'skin_count', label: '皮肤数量', icon: '🎨' },
+    { key: 'seller_credit', label: '卖家信誉', icon: '⭐' },
   ];
 
   const priceRanges = [

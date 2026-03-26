@@ -460,6 +460,49 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             )}
           </div>
 
+          {/* Seller info for PAID/PROCESSING — buyer needs to know who to contact */}
+          {(order.status === 'PAID' || order.status === 'PROCESSING') && (
+            <div className="mt-3 p-3 bg-dark rounded-xl border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-primary/30 to-purple-500/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  {order.account?.sellerAvatar ? (
+                    <img src={order.account.sellerAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <User className="w-4 h-4 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-medium text-white truncate">
+                      {order.account?.sellerNickname || order.account?.sellerUsername || '卖家'}
+                    </p>
+                    {order.account?.verificationStatus === 'VERIFIED' && (
+                      <span className="flex-shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex items-center gap-0.5">
+                        <CheckCircle className="w-2.5 h-2.5" /> 已认证
+                      </span>
+                    )}
+                    {order.account?.sellerCreditScore != null && (
+                      <span className="flex-shrink-0 flex items-center gap-0.5 text-[10px] text-yellow-400">
+                        <Star className="w-2.5 h-2.5 fill-yellow-400" />
+                        {(order.account.sellerCreditScore / 20).toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-0.5">
+                    {order.status === 'PROCESSING' ? '账号交付中，请耐心等待' : '等待卖家交付账号，请保持在线'}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/messages?accountId=${order.accountId}`); }}
+                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-primary text-xs font-medium transition-all"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  联系
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-2 mt-3">
             <button
