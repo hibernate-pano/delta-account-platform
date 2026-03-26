@@ -42,7 +42,8 @@ export const queryKeys = {
 // Default query options
 export const defaultQueryOptions = {
   staleTime: 1000 * 60 * 5, // 5 minutes
-  retry: 1,
+  retry: 3,
+  retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 10000),
   refetchOnWindowFocus: false,
 };
 

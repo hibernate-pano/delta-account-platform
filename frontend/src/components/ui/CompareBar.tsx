@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Account } from '../../types';
 import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus } from 'lucide-react';
 
@@ -28,7 +28,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
 
   return (
     <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-40 animate-slide-up">
-      <div className="glass border border-primary/30 shadow-2xl shadow-primary/10 rounded-2xl px-5 py-3 flex items-center gap-4">
+      <div className="glass border border-primary/30 shadow-2xl shadow-primary/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 flex-wrap justify-center max-w-[95vw]">
         <div className="flex items-center gap-2">
           <Scale className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-white">
@@ -128,6 +128,12 @@ interface CompareModalProps {
 export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onViewAccount }) => {
   const accounts = items.map((i) => i.account);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   // Find best values
   const prices = accounts.map((a) => a.price);
   const priceBest = prices.map((p, i) => p === Math.min(...prices) && prices.filter(x => x === p).length === 1 ? i : -1);
@@ -212,8 +218,8 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
         </div>
 
         {/* Comparison table */}
-        <div className="flex-1 overflow-y-auto">
-          <table className="w-full">
+        <div className="flex-1 overflow-y-auto overflow-x-auto">
+          <table className="w-full min-w-[400px]">
             <tbody>
               {fields.map((field) => (
                 <CompareRow
