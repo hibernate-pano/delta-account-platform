@@ -1,14 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { CompareBar, CompareModal } from '../components/ui/CompareBar';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAccounts } from '../hooks/useQueries';
 import { useRecentStore } from '../store/recent';
 
 const AccountsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || '');
@@ -16,6 +18,8 @@ const AccountsPage: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [compareItems, setCompareItems] = useState<Array<{ account: Account; addedAt: number }>>([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const debouncedKeyword = useDebounce(keyword, 400);
@@ -75,6 +79,17 @@ const AccountsPage: React.FC = () => {
 
   const hasActiveFilters = keyword || sort || selectedPriceRange;
   const isSearching = keyword !== debouncedKeyword;
+
+  const toggleCompare = (account: Account) => {
+    setCompareItems((prev) => {
+      const exists = prev.find((i) => i.account.id === account.id);
+      if (exists) return prev.filter((i) => i.account.id !== account.id);
+      if (prev.length >= 4) return prev; // max 4
+      return [...prev, { account, addedAt: Date.now() }];
+    });
+  };
+
+  const isCompareSelected = (id: number) => compareItems.some((i) => i.account.id === id);
 
   const sortOptions = [
     { key: '', label: '最新', icon: '✨' },
@@ -184,6 +199,16 @@ const AccountsPage: React.FC = () => {
               <List className="w-5 h-5" />
             </button>
           </div>
+          <button
+            onClick={() => { setCompareItems([]); }}
+            className={`btn-secondary px-4 ${compareItems.length > 0 ? 'border-primary text-primary' : ''}`}
+            title="账号对比"
+          >
+            <Scale className="w-5 h-5" />
+            {compareItems.length > 0 && (
+              <span className="ml-1 text-xs font-bold">{compareItems.length}</span>
+            )}
+          </button>
         </form>
 
         {/* Expanded Filters */}
@@ -295,6 +320,18 @@ const AccountsPage: React.FC = () => {
                 <div className="absolute top-2 right-2">
                   <WishlistButton account={account} size="sm" />
                 </div>
+                {/* Compare toggle */}
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(account); }}
+                  className={`absolute top-2 left-2 w-7 h-7 rounded-lg flex items-center justify-center transition-all z-10 ${
+                    isCompareSelected(account.id)
+                      ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                      : 'bg-black/40 text-white opacity-0 group-hover:opacity-100'
+                  }`}
+                  title={isCompareSelected(account.id) ? '取消对比' : '加入对比'}
+                >
+                  {isCompareSelected(account.id) ? <Check className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
+                </button>
               </div>
               <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-1">
                 {account.title}
@@ -335,6 +372,18 @@ const AccountsPage: React.FC = () => {
                 <div className="absolute top-2 right-2">
                   <WishlistButton account={account} size="sm" />
                 </div>
+                {/* Compare toggle */}
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(account); }}
+                  className={`absolute top-2 left-2 w-7 h-7 rounded-lg flex items-center justify-center transition-all z-10 ${
+                    isCompareSelected(account.id)
+                      ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                      : 'bg-black/40 text-white opacity-0 group-hover:opacity-100'
+                  }`}
+                  title={isCompareSelected(account.id) ? '取消对比' : '加入对比'}
+                >
+                  {isCompareSelected(account.id) ? <Check className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
+                </button>
               </div>
               <div className="flex-1 py-1">
                 <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
@@ -357,6 +406,24 @@ const AccountsPage: React.FC = () => {
             </Link>
           ))}
         </div>
+      )}
+
+      {/* Compare floating bar */}
+      <CompareBar
+        items={compareItems}
+        onRemove={(id) => setCompareItems((prev) => prev.filter((i) => i.account.id !== id))}
+        onClear={() => setCompareItems([])}
+        onCompare={() => setShowCompareModal(true)}
+        maxItems={4}
+      />
+
+      {/* Compare modal */}
+      {showCompareModal && compareItems.length >= 2 && (
+        <CompareModal
+          items={compareItems}
+          onClose={() => setShowCompareModal(false)}
+          onViewAccount={(id) => navigate(`/accounts/${id}`)}
+        />
       )}
     </div>
   );
