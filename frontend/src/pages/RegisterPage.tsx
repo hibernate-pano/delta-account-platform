@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
 import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, Check, X, Sparkles } from 'lucide-react';
+import AuthBackground from '../components/ui/AuthBackground';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -94,10 +95,7 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-dark">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
+      <AuthBackground />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
