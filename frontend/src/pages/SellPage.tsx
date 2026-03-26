@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -65,6 +65,23 @@ const SellPage: React.FC = () => {
   const [newImage, setNewImage] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach((file) => {
+      if (images.length >= 5) { showToast('最多只能上传5张图片', 'warning'); return; }
+      if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const result = ev.target?.result as string;
+        setImages((prev) => [...prev, result]);
+      };
+      reader.readAsDataURL(file);
+    });
+    // Reset so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   // Derived values
   const price = parseFloat(formData.price) || 0;
@@ -453,6 +470,21 @@ const SellPage: React.FC = () => {
                 onDragLeave={() => setDragOver(false)}
                 onDrop={(e) => {
                   e.preventDefault(); setDragOver(false);
+                  // Try to read dropped files first
+                  const files = Array.from(e.dataTransfer.files);
+                  const imageFiles = files.filter(f => f.type.startsWith('image/'));
+                  if (imageFiles.length > 0) {
+                    imageFiles.slice(0, 5 - images.length).forEach((file) => {
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const result = ev.target?.result as string;
+                        setImages((prev) => [...prev, result]);
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                    return;
+                  }
+                  // Fallback: URL drop
                   const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
                   if (url && images.length < 5) {
                     try { new URL(url); setImages([...images, url]); } catch {}
@@ -465,13 +497,23 @@ const SellPage: React.FC = () => {
                 ) : (
                   <>
                     <Upload className="w-7 h-7 mx-auto mb-2 text-slate-600" />
-                    <p className="text-sm text-slate-500">拖拽图片到此处</p>
+                    <p className="text-sm text-slate-500">拖拽图片文件到此处</p>
                     <p className="text-xs text-slate-600 mt-1">或粘贴图片链接</p>
                   </>
                 )}
               </div>
 
-              {/* URL input */}
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+
+              {/* URL input row */}
               <div className="flex gap-2 mb-4">
                 <input
                   id="url-input" type="url" value={newImage}
@@ -489,6 +531,13 @@ const SellPage: React.FC = () => {
                 <button type="button" onClick={addImage}
                   className="btn-secondary px-4" disabled={!newImage || images.length >= 5}>
                   <Plus className="w-5 h-5" />
+                </button>
+                <button type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={images.length >= 5}
+                  className="btn-secondary px-4 flex items-center gap-1 disabled:opacity-50"
+                  title="从本地上传">
+                  <ImageIcon className="w-5 h-5" />
                 </button>
               </div>
 
@@ -546,7 +595,13 @@ const SellPage: React.FC = () => {
               <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
                 <ArrowLeft className="w-5 h-5" /> 返回
               </button>
-              <button type="button" onClick={() => setStep(3)} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2">
+              <button type="button" onClick={() => {
+                if (images.length === 0) {
+                  showToast('请至少上传1张图片', 'warning');
+                  return;
+                }
+                setStep(3);
+              }} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2">
                 下一步 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
