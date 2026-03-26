@@ -1,10 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WalletSkeleton } from '../components/ui/Skeleton';
 import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } from '../hooks/useQueries';
-import { Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3, RefreshCw } from 'lucide-react';
+import {
+  Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
+  RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X
+} from 'lucide-react';
 
 interface Transaction {
   id: number;
@@ -17,6 +20,151 @@ interface Transaction {
   createdAt: string;
 }
 
+const typeConfig: Record<string, { label: string; positive: boolean; icon: React.ElementType; color: string; bg: string }> = {
+  RECHARGE:  { label: '充值',       positive: true,  icon: Plus,             color: 'text-green-400', bg: 'bg-green-500/20'   },
+  WITHDRAW:  { label: '提现',       positive: false, icon: Minus,            color: 'text-red-400',   bg: 'bg-red-500/20'     },
+  BUY:       { label: '购买账号',    positive: false, icon: ArrowRightLeft,   color: 'text-red-400',   bg: 'bg-red-500/20'     },
+  SELL:      { label: '出售账号',    positive: true,  icon: ArrowRightLeft,   color: 'text-green-400', bg: 'bg-green-500/20'   },
+  RENT:      { label: '租赁',        positive: false, icon: ArrowRightLeft,   color: 'text-red-400',   bg: 'bg-red-500/20'     },
+  REFUND:    { label: '退款',        positive: true,  icon: CheckCircle,      color: 'text-green-400', bg: 'bg-green-500/20'   },
+};
+
+const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
+  COMPLETED: { label: '已完成', color: 'text-green-400', bg: 'bg-green-500/20', icon: CheckCircle },
+  PENDING:   { label: '处理中', color: 'text-yellow-400', bg: 'bg-yellow-500/20', icon: Clock },
+  FAILED:    { label: '已失败', color: 'text-red-400',   bg: 'bg-red-500/20',   icon: XCircle   },
+};
+
+// SVG Sparkline for balance trend
+const BalanceSparkline: React.FC<{ transactions: Transaction[] }> = ({ transactions }) => {
+  const data = useMemo(() => {
+    if (transactions.length < 2) return null;
+    const sorted = [...transactions].reverse().slice(-14);
+    let balance = sorted[0]?.balanceBefore || 0;
+    return sorted.map((t) => { balance = t.balanceAfter; return balance; });
+  }, [transactions]);
+
+  if (!data || data.length < 2) {
+    return (
+      <div className="flex items-center justify-center h-24 text-gray-500 gap-2">
+        <BarChart3 className="w-5 h-5" />
+        <span className="text-sm">暂无足够数据生成图表</span>
+      </div>
+    );
+  }
+
+  const W = 400, H = 80, P = 8;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) => ({
+    x: P + (i / (data.length - 1)) * (W - P * 2),
+    y: P + ((max - v) / range) * (H - P * 2),
+  }));
+  const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaD = `${pathD} L${pts[pts.length - 1].x.toFixed(1)},${H} L${pts[0].x.toFixed(1)},${H} Z`;
+  const last = pts[pts.length - 1];
+  const isUp = data[data.length - 1] >= data[0];
+
+  return (
+    <div className="mt-4 pt-4 border-t border-dark-border">
+      <p className="text-xs text-gray-500 mb-3">余额趋势（近14笔交易）</p>
+      <div className="overflow-hidden">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-20" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={isUp ? '#22c55e' : '#ef4444'} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={isUp ? '#22c55e' : '#ef4444'} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={areaD} fill="url(#spark-fill)" />
+          <path d={pathD} fill="none" stroke={isUp ? '#22c55e' : '#ef4444'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={last.x.toFixed(1)} cy={last.y.toFixed(1)} r="3" fill={isUp ? '#22c55e' : '#ef4444'} />
+          <circle cx={last.x.toFixed(1)} cy={last.y.toFixed(1)} r="5" fill={isUp ? '#22c55e' : '#ef4444'} opacity="0.3" />
+        </svg>
+      </div>
+      <div className="flex justify-between mt-1">
+        <span className="text-xs text-gray-600">¥{Math.min(...data).toFixed(2)}</span>
+        <span className={`text-xs font-medium ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+          {isUp ? '↑' : '↓'} ¥{Math.abs(data[data.length - 1] - data[0]).toFixed(2)}
+        </span>
+        <span className="text-xs text-gray-600">¥{Math.max(...data).toFixed(2)}</span>
+      </div>
+    </div>
+  );
+};
+
+// Transaction Detail Modal
+const TransactionDetailModal: React.FC<{ tx: Transaction; onClose: () => void }> = ({ tx, onClose }) => {
+  const cfg = typeConfig[tx.type] || typeConfig.RECHARGE;
+  const sCfg = statusConfig[tx.status] || statusConfig.PENDING;
+  const TypeIcon = cfg.icon;
+  const StatusIcon = sCfg.icon;
+  const isUp = cfg.positive;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
+      <div className="relative w-full max-w-sm bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-slide-up overflow-hidden">
+        <div className="px-6 py-5 border-b border-dark-border flex items-center justify-between">
+          <h2 className="text-lg font-bold">交易详情</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-500 hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-6 space-y-5">
+          {/* Amount */}
+          <div className={`text-center py-5 rounded-2xl ${isUp ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+            <p className={`text-4xl font-bold ${isUp ? 'text-green-400' : 'text-red-400'}`}>
+              {isUp ? '+' : '-'}¥{tx.amount.toFixed(2)}
+            </p>
+            <div className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-medium ${sCfg.bg} ${sCfg.color}`}>
+              <StatusIcon className="w-3 h-3" />
+              {sCfg.label}
+            </div>
+          </div>
+
+          {/* Info grid */}
+          <div className="space-y-3">
+            {[
+              { label: '交易类型', value: cfg.label, icon: TypeIcon, iconColor: cfg.color, iconBg: cfg.bg },
+              { label: '交易时间', value: new Date(tx.createdAt).toLocaleString('zh-CN') },
+              { label: '交易前余额', value: `¥${tx.balanceBefore.toFixed(2)}` },
+              { label: '交易后余额', value: `¥${tx.balanceAfter.toFixed(2)}` },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center justify-between py-2 border-b border-dark-border last:border-0">
+                <span className="text-sm text-slate-500">{row.label}</span>
+                {'icon' in row && row.icon ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-300">{row.value}</span>
+                    <div className={`w-6 h-6 rounded flex items-center justify-center ${row.iconBg}`}>
+                      <row.icon className={`w-3.5 h-3.5 ${row.iconColor}`} />
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-sm font-medium">{row.value}</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Description */}
+          {tx.description && (
+            <div className="bg-dark rounded-xl p-4">
+              <p className="text-xs text-slate-500 mb-1.5">备注</p>
+              <p className="text-sm text-slate-300">{tx.description}</p>
+            </div>
+          )}
+
+          <button onClick={onClose} className="w-full btn-secondary">
+            关闭
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const WalletPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
@@ -24,6 +172,7 @@ const WalletPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'balance' | 'recharges' | 'withdrawals' | 'transactions'>('balance');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [rechargeAmount, setRechargeAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [accountNo, setAccountNo] = useState('');
@@ -113,71 +262,6 @@ const WalletPage: React.FC = () => {
     return { income, expense, monthlyIncome, monthlyExpense };
   }, [transactions]);
 
-  const BalanceChart: React.FC = () => {
-    const chartData = useMemo(() => {
-      if (transactions.length === 0) return [];
-      const sorted = [...transactions].reverse().slice(-7);
-      let runningBalance = sorted[0]?.balanceBefore || 0;
-      return sorted.map((t) => {
-        runningBalance = t.balanceAfter;
-        return {
-          date: new Date(t.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }),
-          balance: runningBalance,
-        };
-      });
-    }, [transactions]);
-
-    if (chartData.length < 2) {
-      return (
-        <div className="flex items-center justify-center h-32 text-gray-500 gap-2">
-          <BarChart3 className="w-5 h-5" />
-          <span className="text-sm">暂无足够数据生成图表</span>
-        </div>
-      );
-    }
-
-    const maxBalance = Math.max(...chartData.map((d) => d.balance));
-    const minBalance = Math.min(...chartData.map((d) => d.balance));
-    const range = maxBalance - minBalance || 1;
-    const height = 120;
-
-    return (
-      <div className="mt-4 pt-4 border-t border-dark-border">
-        <p className="text-xs text-gray-500 mb-3">余额趋势（近7笔交易）</p>
-        <div className="flex items-end gap-2 h-32">
-          {chartData.map((d, i) => {
-            const barHeight = ((d.balance - minBalance) / range) * height + 10;
-            const isUp = i > 0 && d.balance >= chartData[i - 1].balance;
-            return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-xs text-gray-500">¥{d.balance.toFixed(0)}</span>
-                <div
-                  className={`w-full rounded-t transition-all hover:opacity-80 ${
-                    isUp ? 'bg-green-500/60' : 'bg-red-500/60'
-                  }`}
-                  style={{ height: `${barHeight}px` }}
-                />
-                <span className="text-xs text-gray-600">{d.date}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      RECHARGE: '充值',
-      WITHDRAW: '提现',
-      BUY: '购买账号',
-      SELL: '出售账号',
-      RENT: '租赁',
-      REFUND: '退款',
-    };
-    return labels[type] || type;
-  };
-
   const filteredTransactions = transactions.filter((tx) => {
     if (activeTab === 'recharges') return tx.type === 'RECHARGE';
     if (activeTab === 'withdrawals') return tx.type === 'WITHDRAW';
@@ -256,7 +340,7 @@ const WalletPage: React.FC = () => {
             <p className="text-xs text-gray-500">本月支出</p>
           </div>
         </div>
-        <BalanceChart />
+        <BalanceSparkline transactions={transactions} />
       </div>
 
       {/* Tabs */}
@@ -297,42 +381,34 @@ const WalletPage: React.FC = () => {
           </div>
         ) : (
           <div className="divide-y divide-slate-800">
-            {filteredTransactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors rounded-lg"
-              >
-                <div className="flex items-center gap-3">
+            {filteredTransactions.map((tx) => {
+              const cfg = typeConfig[tx.type] || typeConfig.RECHARGE;
+              const TypeIcon = cfg.icon;
+              return (
+                <div
+                  key={tx.id}
+                  onClick={() => setSelectedTx(tx)}
+                  className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors rounded-lg cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${cfg.bg}`}>
+                      <TypeIcon className={`w-5 h-5 ${cfg.color}`} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{cfg.label}</p>
+                      <p className="text-sm text-slate-500">{tx.createdAt}</p>
+                    </div>
+                  </div>
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                      ['RECHARGE', 'SELL', 'REFUND'].includes(tx.type)
-                        ? 'bg-green-500/20'
-                        : 'bg-red-500/20'
+                    className={`text-right font-medium ${
+                      cfg.positive ? 'text-green-400' : 'text-red-400'
                     }`}
                   >
-                    {['RECHARGE', 'SELL', 'REFUND'].includes(tx.type) ? (
-                      <TrendingUp className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <TrendingDown className="w-5 h-5 text-red-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium">{getTypeLabel(tx.type)}</p>
-                    <p className="text-sm text-slate-500">{tx.createdAt}</p>
+                    {cfg.positive ? '+' : '-'}¥{tx.amount.toFixed(2)}
                   </div>
                 </div>
-                <div
-                  className={`text-right font-medium ${
-                    ['RECHARGE', 'SELL', 'REFUND'].includes(tx.type)
-                      ? 'text-green-400'
-                      : 'text-red-400'
-                  }`}
-                >
-                  {['RECHARGE', 'SELL', 'REFUND'].includes(tx.type) ? '+' : '-'}¥
-                  {tx.amount.toFixed(2)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -490,6 +566,10 @@ const WalletPage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+      {/* Transaction Detail Modal */}
+      {selectedTx && (
+        <TransactionDetailModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
       )}
     </div>
   );
