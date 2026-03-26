@@ -266,18 +266,36 @@ const HomePage: React.FC = () => {
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-            <div className="text-center">
-              <AnimatedCounter end={verifiedCount} suffix="+" />
-              <div className="text-slate-500 text-sm mt-1">精选认证账号</div>
-            </div>
-            <div className="text-center">
-              <AnimatedCounter end={onSaleCount} suffix="+" />
-              <div className="text-slate-500 text-sm mt-1">正在出售</div>
-            </div>
-            <div className="text-center">
-              <AnimatedCounter end={avgPrice} prefix="¥" />
-              <div className="text-slate-500 text-sm mt-1">平均价格</div>
-            </div>
+            {isLoading ? (
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="text-center space-y-2">
+                    <div className="w-16 h-8 skeleton rounded mx-auto" />
+                    <div className="w-20 h-4 skeleton rounded mx-auto" />
+                  </div>
+                ))}
+              </>
+            ) : isError ? (
+              <div className="flex items-center gap-2 text-slate-500 text-sm py-2">
+                <AlertCircle className="w-4 h-4 text-red-500/60" />
+                数据加载失败
+              </div>
+            ) : (
+              <>
+                <div className="text-center">
+                  <AnimatedCounter end={verifiedCount} suffix="+" />
+                  <div className="text-slate-500 text-sm mt-1">精选认证账号</div>
+                </div>
+                <div className="text-center">
+                  <AnimatedCounter end={onSaleCount} suffix="+" />
+                  <div className="text-slate-500 text-sm mt-1">正在出售</div>
+                </div>
+                <div className="text-center">
+                  <AnimatedCounter end={avgPrice} prefix="¥" />
+                  <div className="text-slate-500 text-sm mt-1">平均价格</div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

@@ -20,6 +20,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const { token } = useAuthStore();
   const { showToast } = useToast();
   const wishlisted = isWishlisted(account.id);
+  const [bursting, setBursting] = React.useState(false);
 
   const sizeClasses = {
     sm: 'w-8 h-8',
@@ -45,6 +46,8 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
       showToast('已取消收藏', 'info');
     } else {
       addItem(account);
+      setBursting(true);
+      setTimeout(() => setBursting(false), 450);
       showToast('已添加到收藏夹', 'success');
     }
   };
@@ -67,8 +70,8 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
     >
       <Heart
         className={`${iconSizes[size]} transition-all duration-200 ${
-          wishlisted ? 'fill-red-400 scale-110' : 'scale-100'
-        }`}
+          wishlisted ? 'fill-red-400' : ''
+        } ${bursting ? 'heart-burst text-red-400' : ''}`}
       />
     </button>
   );

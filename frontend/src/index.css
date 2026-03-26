@@ -282,6 +282,18 @@ body {
   }
 }
 
+@keyframes heart-burst {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.4); }
+  50%  { transform: scale(0.9); }
+  75%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.heart-burst {
+  animation: heart-burst 0.45s ease-out forwards;
+}
+
 /* Nav */
 .nav-link {
   position: relative;
