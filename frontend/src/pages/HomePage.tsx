@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 
 // Animated counter
-const AnimatedCounter: React.FC<{ end: number; suffix?: string; duration?: number }> = ({
-  end, suffix = '', duration = 2000,
+const AnimatedCounter: React.FC<{ end: number; suffix?: string; prefix?: string; duration?: number }> = ({
+  end, suffix = '', prefix = '', duration = 2000,
 }) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -41,7 +41,7 @@ const AnimatedCounter: React.FC<{ end: number; suffix?: string; duration?: numbe
 
   return (
     <div ref={ref} className="text-3xl font-bold text-white">
-      {count.toLocaleString()}{suffix}
+      {prefix}{count.toLocaleString()}{suffix}
     </div>
   );
 };
@@ -124,6 +124,14 @@ const HomePage: React.FC = () => {
   // Featured = verified accounts
   const featuredAccounts = accounts.filter((a) => a.verificationStatus === 'VERIFIED').slice(0, 4);
   const displayAccounts = accounts.slice(0, 6);
+
+  // Real stats derived from fetched accounts
+  const verifiedCount = accounts.filter(a => a.verificationStatus === 'VERIFIED').length;
+  const onSaleCount = accounts.filter(a => a.status === 'ON_SALE').length;
+  const avgPrice = accounts.length > 0
+    ? Math.round(accounts.reduce((s, a) => s + a.price, 0) / accounts.length)
+    : 0;
+  const maxSkins = accounts.length > 0 ? Math.max(...accounts.map(a => a.skinCount || 0)) : 0;
 
   const categories = [
     { label: '🌟 新手入门', range: '0-50', desc: '低价优质入门号', count: accounts.filter(a => a.price < 50).length },
@@ -255,16 +263,16 @@ const HomePage: React.FC = () => {
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <div className="text-center">
-              <AnimatedCounter end={12847} suffix="+" />
-              <div className="text-slate-500 text-sm mt-1">注册用户</div>
+              <AnimatedCounter end={verifiedCount} suffix="+" />
+              <div className="text-slate-500 text-sm mt-1">精选认证账号</div>
             </div>
             <div className="text-center">
-              <AnimatedCounter end={5632} suffix="+" />
-              <div className="text-slate-500 text-sm mt-1">交易账号</div>
+              <AnimatedCounter end={onSaleCount} suffix="+" />
+              <div className="text-slate-500 text-sm mt-1">正在出售</div>
             </div>
             <div className="text-center">
-              <AnimatedCounter end={99} suffix="%" />
-              <div className="text-slate-500 text-sm mt-1">满意度</div>
+              <AnimatedCounter end={avgPrice} prefix="¥" />
+              <div className="text-slate-500 text-sm mt-1">平均价格</div>
             </div>
           </div>
         </div>

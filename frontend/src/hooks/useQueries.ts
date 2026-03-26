@@ -500,6 +500,26 @@ export const useCancelRefund = () => {
   });
 };
 
+// ==================== Review Hooks ====================
+
+export const useSellerReviewStats = (sellerId: number | undefined) => {
+  return useQuery({
+    queryKey: ['reviews', 'user', sellerId, 'stats'],
+    queryFn: () => reviewApi.getUserStats(sellerId!),
+    enabled: !!sellerId,
+    ...defaultQueryOptions,
+  });
+};
+
+export const useSellerReviews = (sellerId: number | undefined) => {
+  return useQuery({
+    queryKey: ['reviews', 'user', sellerId],
+    queryFn: () => reviewApi.getUserReviews(sellerId!),
+    enabled: !!sellerId,
+    ...defaultQueryOptions,
+  });
+};
+
 // ==================== Query Client Factory ====================
 
 export const createQueryClient = () => new QueryClient({

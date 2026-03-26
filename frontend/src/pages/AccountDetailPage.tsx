@@ -7,7 +7,7 @@ import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
-import { useAccount, useBuyAccount, useRentAccount, useCreateSession } from '../hooks/useQueries';
+import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats } from '../hooks/useQueries';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
@@ -26,6 +26,8 @@ const AccountDetailPage: React.FC = () => {
   const buyMutation = useBuyAccount();
   const rentMutation = useRentAccount();
   const createSessionMutation = useCreateSession();
+  const { data: reviewStatsData } = useSellerReviewStats(account?.sellerId);
+  const reviewStats = reviewStatsData?.data?.data;
 
   const account: Account | undefined = data?.data?.data;
 
@@ -273,24 +275,48 @@ const AccountDetailPage: React.FC = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Star rating */}
+                    {/* Star rating from real review stats */}
                     <div className="flex items-center gap-0.5">
-                      {[1,2,3,4,5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-3 h-3 ${
-                            s <= Math.round((account.sellerCreditScore || 50) / 20)
-                              ? 'text-yellow-400 fill-yellow-400'
-                              : 'text-slate-600'
-                          }`}
-                        />
-                      ))}
+                      {[1,2,3,4,5].map((s) => {
+                        const avg = reviewStats?.avgRating ?? (account.sellerCreditScore || 50) / 20;
+                        return (
+                          <Star
+                            key={s}
+                            className={`w-3 h-3 ${
+                              s <= Math.round(avg)
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-slate-600'
+                            }`}
+                          />
+                        );
+                      })}
                     </div>
-                    <span className="text-xs text-yellow-400 font-medium">
-                      {account.sellerCreditScore || '—'}
-                    </span>
-                    <span className="text-xs text-slate-500">分</span>
+                    {reviewStats ? (
+                      <span className="text-xs text-yellow-400 font-medium">
+                        {(reviewStats.avgRating || 0).toFixed(1)}
+                        <span className="text-slate-500 ml-1">({reviewStats.totalCount}条评价)</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-500">暂无评价</span>
+                    )}
                   </div>
+                  {/* Review breakdown bar */}
+                  {reviewStats && reviewStats.totalCount > 0 && (
+                    <div className="flex items-center gap-1 mt-1.5">
+                      {['fiveStar', 'fourStar', 'threeStar', 'twoStar', 'oneStar'].map((star, i) => {
+                        const count = reviewStats[star as keyof typeof reviewStats] as number;
+                        const pct = reviewStats.totalCount > 0 ? (count / reviewStats.totalCount * 100) : 0;
+                        return pct > 0 && (
+                          <div
+                            key={star}
+                            className="h-1 rounded-full bg-yellow-400/60"
+                            style={{ width: `${Math.max(pct, 3)}%` }}
+                            title={`${['5','4','3','2','1'][i]}星: ${count}条`}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 {!isOwner && (
                   <button
