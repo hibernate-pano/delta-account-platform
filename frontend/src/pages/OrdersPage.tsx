@@ -6,7 +6,7 @@ import { TransactionSkeleton } from '../components/ui/Skeleton';
 import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder, useReviewOrder } from '../hooks/useQueries';
 import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
-  AlertCircle, ShoppingBag, ArrowDownCircle, CreditCard, RefreshCw,
+  AlertCircle, ShoppingBag, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
   Shield, User, Star
 } from 'lucide-react';
@@ -592,14 +592,24 @@ const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'all' | 'BUY' | 'RENT'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED'>('all');
+  const [activeType, setActiveType] = useState<'all' | 'BUY' | 'RENT'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [reviewingOrder, setReviewingOrder] = useState<Order | null>(null);
 
   const { data, isLoading } = useMyOrders();
   const orders: Order[] = data?.data?.data?.records || [];
 
-  const filteredOrders = activeTab === 'all' ? orders : orders.filter(o => o.type === activeTab);
+  const filteredOrders = orders.filter(o => {
+    const statusMatch =
+      activeTab === 'all' ||
+      (activeTab === 'PENDING' && o.status === 'PENDING') ||
+      (activeTab === 'PROCESSING' && ['PAID', 'PROCESSING'].includes(o.status)) ||
+      (activeTab === 'COMPLETED' && o.status === 'COMPLETED') ||
+      (activeTab === 'CANCELLED' && ['CANCELLED', 'REFUNDED'].includes(o.status));
+    const typeMatch = activeType === 'all' || o.type === activeType;
+    return statusMatch && typeMatch;
+  });
 
   // Group by month
   const groupedOrders: Record<string, Order[]> = {};
@@ -613,7 +623,9 @@ const OrdersPage: React.FC = () => {
   const stats = {
     total: orders.length,
     completed: orders.filter(o => o.status === 'COMPLETED').length,
-    pending: orders.filter(o => ['PENDING', 'PROCESSING'].includes(o.status)).length,
+    pending: orders.filter(o => o.status === 'PENDING').length,
+    processing: orders.filter(o => ['PAID', 'PROCESSING'].includes(o.status)).length,
+    cancelled: orders.filter(o => ['CANCELLED', 'REFUNDED'].includes(o.status)).length,
     totalSpent: orders
       .filter(o => o.status === 'COMPLETED' && o.type === 'BUY')
       .reduce((sum, o) => sum + o.amount, 0),
@@ -634,10 +646,10 @@ const OrdersPage: React.FC = () => {
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">我的订单</h1>
-        {stats.pending > 0 && (
+        {stats.pending + stats.processing > 0 && (
           <div className="flex items-center gap-2 text-xs text-yellow-400 bg-yellow-500/10 px-3 py-1.5 rounded-full">
             <Clock className="w-3.5 h-3.5" />
-            {stats.pending} 个订单待处理
+            {stats.pending + stats.processing} 个订单待处理
           </div>
         )}
       </div>
@@ -646,9 +658,9 @@ const OrdersPage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: '总订单', value: stats.total, icon: Package, color: 'text-white' },
+          { label: '待支付', value: stats.pending, icon: CreditCard, color: 'text-yellow-400' },
+          { label: '进行中', value: stats.processing, icon: Clock, color: 'text-blue-400' },
           { label: '已完成', value: stats.completed, icon: CheckCircle, color: 'text-green-400' },
-          { label: '进行中', value: stats.pending, icon: Clock, color: 'text-yellow-400' },
-          { label: '累计消费', value: `¥${stats.totalSpent.toFixed(0)}`, icon: ArrowDownCircle, color: 'text-primary' },
         ].map((stat, idx) => (
           <div key={idx} className="card p-4 text-center">
             <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
@@ -658,29 +670,57 @@ const OrdersPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-        {[
-          { key: 'all', label: '全部', count: stats.total },
-          { key: 'BUY', label: '购买', icon: ShoppingBag, count: orders.filter(o => o.type === 'BUY').length },
-          { key: 'RENT', label: '租赁', icon: Calendar, count: orders.filter(o => o.type === 'RENT').length },
-        ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key as typeof activeTab)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              activeTab === tab.key
-                ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                : 'bg-dark-lighter text-slate-400 hover:text-white'
-            }`}
-          >
-            {tab.icon && <tab.icon className="w-4 h-4" />}
-            {tab.label}
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === tab.key ? 'bg-white/20' : 'bg-dark'}`}>
-              {tab.count}
-            </span>
-          </button>
-        ))}
+      {/* Status + Type Filter */}
+      <div className="mb-6 space-y-3">
+        {/* Status pills */}
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {([
+            { key: 'all', label: '全部', count: stats.total, color: 'text-white' },
+            { key: 'PENDING', label: '待支付', count: orders.filter(o => o.status === 'PENDING').length, color: 'text-yellow-400' },
+            { key: 'PROCESSING', label: '进行中', count: orders.filter(o => ['PAID', 'PROCESSING'].includes(o.status)).length, color: 'text-blue-400' },
+            { key: 'COMPLETED', label: '已完成', count: orders.filter(o => o.status === 'COMPLETED').length, color: 'text-green-400' },
+            { key: 'CANCELLED', label: '已取消/退款', count: orders.filter(o => ['CANCELLED', 'REFUNDED'].includes(o.status)).length, color: 'text-slate-400' },
+          ] as const).map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as typeof activeTab)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg whitespace-nowrap transition-all flex-shrink-0 ${
+                activeTab === tab.key
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                  : 'bg-dark-lighter text-slate-400 hover:text-white hover:bg-dark-lighter/80'
+              }`}
+            >
+              <span className={activeTab === tab.key ? '' : `text-xs ${tab.color}`}>{tab.label}</span>
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeTab === tab.key ? 'bg-white/20' : 'bg-dark'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+        {/* Type quick-filters */}
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <span className="text-xs text-slate-600 self-center px-1">类型:</span>
+          {([
+            { key: 'all', label: '全部', icon: null },
+            { key: 'BUY', label: '购买', icon: ShoppingBag },
+            { key: 'RENT', label: '租赁', icon: Calendar },
+          ] as const).map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveType(tab.key as typeof activeType)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all text-xs flex-shrink-0 ${
+                activeType === tab.key
+                  ? 'bg-primary/20 text-primary border border-primary/30'
+                  : 'bg-dark-lighter text-slate-500 hover:text-slate-300 border border-transparent'
+              }`}
+            >
+              {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Orders */}

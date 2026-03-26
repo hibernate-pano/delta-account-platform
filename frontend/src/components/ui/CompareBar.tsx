@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Account } from '../../types';
-import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus } from 'lucide-react';
+import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus, Star, Zap } from 'lucide-react';
 
 interface CompareItem {
   account: Account;
@@ -89,13 +89,14 @@ export const CompareBar: React.FC<CompareBarProps> = ({
 };
 
 // Comparison field row
-const CompareRow: React.FC<{ label: string; values: string[]; isWinner?: boolean[] }> = ({
+const CompareRow: React.FC<{ label: string; values: string[]; isWinner?: boolean[]; highlight?: boolean }> = ({
   label,
   values,
   isWinner,
+  highlight,
 }) => (
-  <tr>
-    <td className="py-3 px-4 text-sm text-slate-500 w-28 border-r border-dark-border align-top">
+  <tr className={highlight ? 'bg-primary/5' : ''}>
+    <td className={`py-3 px-4 text-sm w-28 border-r border-dark-border align-top ${highlight ? 'text-primary font-medium' : 'text-slate-500'}`}>
       {label}
     </td>
     {values.map((val, i) => (
@@ -103,9 +104,9 @@ const CompareRow: React.FC<{ label: string; values: string[]; isWinner?: boolean
         key={i}
         className={`py-3 px-4 text-sm text-center align-top ${
           isWinner?.[i] ? 'bg-green-500/5' : ''
-        }`}
+        } ${highlight ? (isWinner?.[i] ? 'text-green-400 font-semibold' : 'text-slate-300') : ''}`}
       >
-        <span className={isWinner?.[i] ? 'text-green-400 font-semibold' : 'text-slate-300'}>
+        <span className={isWinner?.[i] && !highlight ? 'text-green-400 font-semibold' : ''}>
           {val}
         </span>
         {isWinner?.[i] && (
@@ -139,6 +140,20 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
   const priceBest = prices.map((p, i) => p === Math.min(...prices) && prices.filter(x => x === p).length === 1 ? i : -1);
   const skins = accounts.map((a) => a.skinCount || 0);
   const skinBest = skins.map((s, i) => s === Math.max(...skins) && skins.filter(x => x === s).length === 1 ? i : -1);
+  const credits = accounts.map((a) => a.sellerCreditScore || 0);
+  const creditBest = credits.map((c, i) => c > 0 && c === Math.max(...credits) && credits.filter(x => x === c).length === 1 ? i : -1);
+  // Value = skins per 1000 yuan (higher = better deal)
+  const valueScores = accounts.map((a) => a.price > 0 ? ((a.skinCount || 0) / a.price * 1000) : 0);
+  const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores) && valueScores.filter(x => x === v).length === 1 ? i : -1);
+
+  const freshnessLabel = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d < 1) return '今日';
+    if (d < 7) return `${d}天前`;
+    if (d < 30) return `${Math.floor(d / 7)}周前`;
+    return `${Math.floor(d / 30)}月前`;
+  };
 
   const fields = [
     { label: '价格', values: accounts.map((a) => `¥${a.price}`), bestIdx: priceBest },
@@ -147,6 +162,21 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
     { label: '所属英雄', values: accounts.map((a) => a.weapons || '未填写') },
     { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '✅ 已认证' : '⏳ 待认证') },
     { label: '时租价', values: accounts.map((a) => a.rentalPrice ? `¥${a.rentalPrice}/时` : '不支持') },
+    {
+      label: '💎 性价比',
+      values: accounts.map((a, i) => a.price > 0 ? `${((a.skinCount || 0) / a.price * 1000).toFixed(1)} 皮肤/千元` : '—'),
+      bestIdx: valueBest,
+      highlight: true,
+    },
+    {
+      label: '⭐ 卖家信用',
+      values: accounts.map((a) => a.sellerCreditScore ? `${a.sellerCreditScore} 分` : '—'),
+      bestIdx: creditBest,
+    },
+    {
+      label: '🕐 上架时间',
+      values: accounts.map((a) => freshnessLabel(a.createdAt)),
+    },
     { label: '描述', values: accounts.map((a) => a.description?.slice(0, 60) || '暂无') },
   ];
 
@@ -227,6 +257,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
                   label={field.label}
                   values={field.values}
                   isWinner={field.bestIdx?.map((idx) => idx >= 0)}
+                  highlight={field.highlight}
                 />
               ))}
             </tbody>
@@ -236,19 +267,31 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
         {/* Recommendation */}
         {accounts.length >= 2 && (
           <div className="px-6 py-4 border-t border-dark-border flex-shrink-0 bg-gradient-to-r from-green-500/5 to-transparent">
-            <p className="text-xs text-slate-500 mb-1">智能推荐</p>
+            <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+              <Zap className="w-3 h-3" /> 智能推荐
+            </p>
             <p className="text-sm text-slate-300">
               {(() => {
                 const lowestPriceIdx = prices.indexOf(Math.min(...prices));
                 const mostSkinsIdx = skins.indexOf(Math.max(...skins));
-                if (lowestPriceIdx === mostSkinsIdx) {
-                  return `推荐「${accounts[lowestPriceIdx].title}」— 价格最低且皮肤数量最多！`;
-                }
+                const bestValueIdx = valueScores.indexOf(Math.max(...valueScores));
+                const bestCreditIdx = credits.indexOf(Math.max(...credits));
+                const recommendations = [];
+                if (lowestPriceIdx >= 0) recommendations.push({ idx: lowestPriceIdx, label: '价格最优', color: 'text-primary' });
+                if (bestValueIdx >= 0 && valueScores[bestValueIdx] > 0) recommendations.push({ idx: bestValueIdx, label: '性价比最高', color: 'text-yellow-400' });
+                if (bestCreditIdx >= 0 && credits[bestCreditIdx] > 0) recommendations.push({ idx: bestCreditIdx, label: '卖家信用最佳', color: 'text-blue-400' });
+
+                if (recommendations.length === 0) return null;
                 return (
                   <>
-                    价格最优: <span className="text-primary">{accounts[lowestPriceIdx].title}</span>
-                    {' · '}
-                    皮肤最多: <span className="text-green-400">{accounts[mostSkinsIdx].title}</span>
+                    {recommendations.map((r, i) => (
+                      <span key={r.label}>
+                        {i > 0 && ' · '}
+                        <span className={r.color}>{r.label}</span>
+                        {': '}
+                        <span className="text-white">{accounts[r.idx].title}</span>
+                      </span>
+                    ))}
                   </>
                 );
               })()}
