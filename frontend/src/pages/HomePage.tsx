@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { useRecentStore } from '../store/recent';
+import { useAuthStore } from '../store/auth';
 import { useAccounts } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
-  ChevronDown, MessageSquare, ThumbsUp, AlertCircle
+  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History
 } from 'lucide-react';
 
 // Animated counter
@@ -279,6 +281,54 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Recently Viewed */}
+      {(() => {
+        const { items: recentItems } = useRecentStore();
+        const recentAccounts = recentItems.slice(0, 8).map((item: any) => item.account);
+        if (recentAccounts.length === 0) return null;
+        return (
+          <section className="py-10 bg-dark-darker border-y border-dark-border">
+            <div className="max-w-6xl mx-auto px-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-semibold flex items-center gap-2 text-slate-300">
+                  <History className="w-4 h-4 text-slate-500" />
+                  最近浏览
+                </h2>
+                <Link to="/recent" className="text-xs text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                  查看全部 <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {recentAccounts.map((account: Account) => (
+                  <Link
+                    key={account.id}
+                    to={`/accounts/${account.id}`}
+                    className="flex-shrink-0 w-44 card p-3 hover:border-primary/50 transition-all group"
+                  >
+                    <div className="aspect-video bg-dark rounded-lg mb-2.5 overflow-hidden">
+                      {account.images?.[0] ? (
+                        <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Gamepad2 className="w-6 h-6 text-gray-700" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-400 line-clamp-1 mb-1">{account.title}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-primary font-bold text-sm">¥{account.price}</span>
+                      {account.verificationStatus === 'VERIFIED' && (
+                        <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Browse Categories */}
       <section className="py-16 bg-dark-darker border-y border-dark-border">
