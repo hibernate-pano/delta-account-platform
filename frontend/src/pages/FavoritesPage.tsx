@@ -86,12 +86,42 @@ const FavoritesPage: React.FC = () => {
       </div>
 
       {accounts.length === 0 ? (
-        <div className="text-center py-20">
-          <Heart className="w-16 h-16 mx-auto mb-4 text-gray-700" />
-          <p className="text-gray-500 mb-4">暂无收藏的账号</p>
-          <Link to="/accounts" className="btn-primary">
-            浏览账号市场
-          </Link>
+        <div className="text-center py-20 animate-fade-in">
+          <div className="w-32 h-32 mx-auto mb-6 relative">
+            {/* Heart outline illustration */}
+            <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+              <circle cx="64" cy="64" r="56" fill="rgba(99,102,241,0.06)" />
+              <circle cx="64" cy="64" r="48" fill="rgba(99,102,241,0.04)" />
+              <path
+                d="M64 96C64 96 28 74 28 52C28 38 38 28 52 28C58 28 63 30.5 64 34C65 30.5 70 28 76 28C90 28 100 38 100 52C100 74 64 96 64 96Z"
+                fill="none"
+                stroke="rgba(99,102,241,0.25)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Sparkles */}
+              <circle cx="32" cy="36" r="2" fill="rgba(139,92,246,0.3)" />
+              <circle cx="96" cy="40" r="1.5" fill="rgba(139,92,246,0.25)" />
+              <circle cx="24" cy="72" r="1" fill="rgba(139,92,246,0.2)" />
+              <circle cx="104" cy="80" r="2" fill="rgba(139,92,246,0.2)" />
+              {/* X marks */}
+              <path d="M46 58L58 70M58 58L46 70" stroke="rgba(239,68,68,0.35)" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold mb-2 text-slate-300">还没有收藏任何账号</h3>
+          <p className="text-slate-500 mb-6 max-w-xs mx-auto">
+            看到心仪的账号，点个心形图标收藏起来，方便随时查看对比
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
+              <Gamepad2 className="w-4 h-4" />
+              浏览账号市场
+            </Link>
+            <Link to="/recent" className="btn-secondary inline-flex items-center gap-2">
+              查看最近浏览
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
