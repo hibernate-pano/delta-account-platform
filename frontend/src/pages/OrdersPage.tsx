@@ -292,12 +292,28 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
 // Single Order Card
 const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; onReview: (order: Order) => void }> = ({ order, onViewDetail, onReview }) => {
   const [expanded, setExpanded] = useState(false);
+  const [countdown, setCountdown] = useState('');
   const navigate = useNavigate();
   const { showToast } = useToast();
   const payMutation = usePayOrder();
   const StatusIcon = statusConfig[order.status]?.icon || Clock;
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
   const isPending = order.status === 'PENDING';
+
+  // Live countdown for active rentals
+  React.useEffect(() => {
+    if (order.type !== 'RENT' || order.status !== 'PROCESSING' || !order.rentEnd) return;
+    const update = () => {
+      const remaining = new Date(order.rentEnd!).getTime() - Date.now();
+      if (remaining <= 0) { setCountdown('已到期'); return; }
+      const h = Math.floor(remaining / 3600000);
+      const m = Math.floor((remaining % 3600000) / 60000);
+      setCountdown(h > 0 ? `剩余 ${h}小时${m}分` : `剩余 ${m}分钟`);
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [order.type, order.status, order.rentEnd]);
 
   return (
     <div
@@ -344,6 +360,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             <StatusIcon className="w-2.5 h-2.5" />
             {statusConfig[order.status]?.label || order.status}
           </div>
+          {countdown && (
+            <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-orange-500/20 text-orange-400 font-medium">
+              <Clock className="w-2.5 h-2.5" />
+              {countdown}
+            </div>
+          )}
         </div>
 
         {/* Expand chevron */}
