@@ -31,6 +31,13 @@ const typeConfig: Record<string, { label: string; positive: boolean; icon: React
   REFUND:    { label: '退款',        positive: true,  icon: CheckCircle,      color: 'text-green-400', bg: 'bg-green-500/20'   },
 };
 
+const txStatusConfig: Record<string, { label: string; color: string; bg: string }> = {
+  COMPLETED: { label: '成功', color: 'text-green-400', bg: 'bg-green-500/20' },
+  PENDING:   { label: '处理中', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+  FAILED:    { label: '失败', color: 'text-red-400', bg: 'bg-red-500/20' },
+  CANCELLED: { label: '已取消', color: 'text-slate-400', bg: 'bg-slate-500/20' },
+};
+
 const formatRelativeTime = (dateStr: string) => {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
@@ -501,6 +508,13 @@ const WalletPage: React.FC = () => {
           <div className="text-center py-12">
             <Wallet className="w-12 h-12 mx-auto mb-4 text-slate-700" />
             <p className="text-slate-500">{txSearch ? '没有找到匹配的交易记录' : '暂无交易记录'}</p>
+            {!txSearch && (
+              <p className="text-slate-600 text-xs mt-1 mb-4">购买或出售账号后，交易记录将显示在这里</p>
+            )}
+            <Link to="/accounts" className="btn-primary inline-flex items-center gap-2 text-sm">
+              <ShoppingBag className="w-4 h-4" />
+              去逛逛账号市场
+            </Link>
           </div>
         ) : (
           <div className="divide-y divide-slate-800">
@@ -513,6 +527,7 @@ const WalletPage: React.FC = () => {
                 {group.items.map((tx) => {
                   const cfg = typeConfig[tx.type] || typeConfig.RECHARGE;
                   const TypeIcon = cfg.icon;
+                  const statusCfg = txStatusConfig[tx.status] || txStatusConfig.COMPLETED;
                   return (
                     <div
                       key={tx.id}
@@ -524,7 +539,14 @@ const WalletPage: React.FC = () => {
                           <TypeIcon className={`w-5 h-5 ${cfg.color}`} />
                         </div>
                         <div>
-                          <p className="font-medium">{cfg.label}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{cfg.label}</p>
+                            {tx.status !== 'COMPLETED' && (
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${statusCfg.bg} ${statusCfg.color} ${tx.status === 'PENDING' ? 'animate-pulse' : ''}`}>
+                                {statusCfg.label}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-slate-500">{formatRelativeTime(tx.createdAt)}</p>
                         </div>
                       </div>
