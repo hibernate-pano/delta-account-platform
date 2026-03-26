@@ -293,6 +293,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
 const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; onReview: (order: Order) => void }> = ({ order, onViewDetail, onReview }) => {
   const [expanded, setExpanded] = useState(false);
   const [countdown, setCountdown] = useState('');
+  const [paymentCountdown, setPaymentCountdown] = useState('');
   const navigate = useNavigate();
   const { showToast } = useToast();
   const payMutation = usePayOrder();
@@ -314,6 +315,23 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
     const interval = setInterval(update, 60000);
     return () => clearInterval(interval);
   }, [order.type, order.status, order.rentEnd]);
+
+  // Payment deadline countdown for PENDING orders (30 min window)
+  React.useEffect(() => {
+    if (!isPending) return;
+    const PAYMENT_WINDOW = 30 * 60 * 1000; // 30 minutes
+    const update = () => {
+      const elapsed = Date.now() - new Date(order.createdAt).getTime();
+      const remaining = PAYMENT_WINDOW - elapsed;
+      if (remaining <= 0) { setPaymentCountdown('已超时'); return; }
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      setPaymentCountdown(`${m}:${s.toString().padStart(2, '0')}`);
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [isPending, order.createdAt]);
 
   return (
     <div
@@ -360,7 +378,15 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             <StatusIcon className="w-2.5 h-2.5" />
             {statusConfig[order.status]?.label || order.status}
           </div>
-          {countdown && (
+          {isPending && paymentCountdown && (
+            <div className={`mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+              paymentCountdown === '已超时' ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'
+            }`}>
+              <Clock className="w-2.5 h-2.5" />
+              {paymentCountdown === '已超时' ? '支付超时' : paymentCountdown}
+            </div>
+          )}
+          {countdown && !isPending && (
             <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-orange-500/20 text-orange-400 font-medium">
               <Clock className="w-2.5 h-2.5" />
               {countdown}
