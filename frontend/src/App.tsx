@@ -15,6 +15,8 @@ import RefundsPage from './pages/RefundsPage';
 import WishlistPage from './pages/WishlistPage';
 import NotFoundPage from './pages/NotFoundPage';
 import RecentlyViewedPage from './pages/RecentlyViewedPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalLoadingProvider, useGlobalLoading } from './components/GlobalLoading';
@@ -211,6 +213,8 @@ const App: React.FC = () => {
                     <Route path="/refunds" element={<RefundsPage />} />
                     <Route path="/wishlist" element={<WishlistPage />} />
                     <Route path="/recent" element={<RecentlyViewedPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>

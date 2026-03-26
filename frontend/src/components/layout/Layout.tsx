@@ -29,8 +29,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           notificationApi.getUnreadCount(),
           messageApi.getUnreadCount(),
         ]);
-        setUnreadCount(notifRes.data.data || 0);
-        setMsgUnreadCount(msgRes.data.data || 0);
+        const notifData = notifRes.data?.data;
+        const msgData = msgRes.data?.data;
+        // Handle both number and object response formats
+        setUnreadCount(typeof notifData === 'number' ? notifData : (notifData?.notificationCount ?? 0));
+        setMsgUnreadCount(typeof msgData === 'number' ? msgData : (msgData?.messageCount ?? 0));
       } catch {
         // Silently fail
       }
@@ -167,9 +170,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       }}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
                     >
-                      <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-primary" />
-                      </div>
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                          <User className="w-4 h-4 text-primary" />
+                        </div>
+                      )}
                       <span className="font-medium">{user?.nickname || user?.username}</span>
                       <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                     </button>
@@ -402,12 +409,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div>
               <h4 className="font-medium text-sm text-slate-300 mb-4">法律信息</h4>
               <div className="space-y-2.5">
-                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/terms" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   服务条款
-                </a>
-                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                </Link>
+                <Link to="/privacy" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   隐私政策
-                </a>
+                </Link>
                 <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   退款政策
                 </a>
