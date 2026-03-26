@@ -91,6 +91,10 @@ const KeyboardShortcuts: React.FC<{ onShowShortcuts: () => void }> = ({ onShowSh
         e.preventDefault();
         navigate('/accounts');
       }
+      if (e.key === 'g' && location.pathname === '/accounts' && !(e.target instanceof HTMLInputElement)) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('delta:toggle-view'));
+      }
       if (e.key === '?' && !(e.target instanceof HTMLInputElement)) {
         e.preventDefault();
         onShowRef.current();
@@ -119,6 +123,7 @@ const KeyboardShortcutsHelp: React.FC<{ onClose: () => void }> = ({ onClose }) =
   const shortcuts = [
     { keys: ['⌘', 'K'], desc: '打开账号市场搜索' },
     { keys: ['/'], desc: '在市场页聚焦搜索框' },
+    { keys: ['G'], desc: '切换市场列表/网格视图' },
     { keys: ['Esc'], desc: '关闭弹窗 / 取消聚焦' },
     { keys: ['←', '→'], desc: '图片画廊左右切换' },
     { keys: ['+', '-'], desc: '图片画廊放大/缩小' },

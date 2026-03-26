@@ -50,8 +50,14 @@ const AccountsPage: React.FC = () => {
     }, 100);
   }, [debouncedKeyword, sort]);
 
+  // G key to toggle grid/list view
+  React.useEffect(() => {
+    const handler = () => setViewMode((v) => v === 'grid' ? 'list' : 'grid');
+    window.addEventListener('delta:toggle-view', handler);
+    return () => window.removeEventListener('delta:toggle-view', handler);
+  }, []);
+
   // Reset to page 1 when search or sort changes
-  React.useEffect(() => { setCurrentPage(1); }, [debouncedKeyword, sort]);
 
   // Keyboard dismiss for QuickView modal
   React.useEffect(() => {
