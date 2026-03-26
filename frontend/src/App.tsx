@@ -126,8 +126,9 @@ const KeyboardShortcutsHelp: React.FC<{ onClose: () => void }> = ({ onClose }) =
     { keys: ['/'], desc: '在市场页聚焦搜索框' },
     { keys: ['G'], desc: '切换市场列表/网格视图' },
     { keys: ['Esc'], desc: '关闭弹窗 / 取消聚焦' },
-    { keys: ['←', '→'], desc: '图片画廊左右切换' },
+    { keys: ['←', '→'], desc: '市场页翻页 / 图片画廊' },
     { keys: ['+', '-'], desc: '图片画廊放大/缩小' },
+    { keys: ['P'], desc: '市场页回到第一页' },
     { keys: ['?'], desc: '显示此帮助面板' },
   ];
 

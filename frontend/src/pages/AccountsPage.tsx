@@ -59,6 +59,18 @@ const AccountsPage: React.FC = () => {
 
   // Reset to page 1 when search or sort changes
 
+  // Keyboard shortcuts: ← → for pagination, P to reset
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); setCurrentPage((p) => Math.max(1, p - 1)); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); setCurrentPage((p) => Math.min(totalPages, p + 1)); }
+      if (e.key === 'p') { e.preventDefault(); setCurrentPage(1); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [totalPages]);
+
   // Keyboard dismiss for QuickView modal
   React.useEffect(() => {
     if (!quickViewAccount) return;
