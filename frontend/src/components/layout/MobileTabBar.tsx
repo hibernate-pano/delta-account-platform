@@ -49,7 +49,8 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
         { to: '/accounts', icon: Gamepad2, label: '市场' },
         { to: '/sell', icon: Plus, label: '发布', isAction: true },
         { to: '/orders', icon: ShoppingCart, label: '订单' },
-        { to: '/wishlist', icon: Heart, label: '收藏' },
+        { to: '/messages', icon: MessageCircle, label: '消息', badge: msgUnreadCount },
+        { to: '/notifications', icon: Bell, label: '通知', badge: notifUnreadCount },
         { to: '/profile', icon: User, label: '我的' },
       ]
     : [

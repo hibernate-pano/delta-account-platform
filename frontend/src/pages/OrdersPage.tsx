@@ -237,6 +237,50 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
             ))}
           </div>
 
+          {/* Seller info */}
+          {(order.account?.sellerNickname || order.account?.sellerUsername) && (
+            <div className="mt-3 p-3 bg-dark rounded-xl border border-dark-border">
+              <p className="text-[10px] text-slate-600 mb-2">交易对方</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
+                  {order.account?.sellerAvatar ? (
+                    <img src={order.account.sellerAvatar} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-4 h-4 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-white truncate">
+                      {order.account?.sellerNickname || order.account?.sellerUsername}
+                    </p>
+                    {order.account?.verificationStatus === 'VERIFIED' && (
+                      <span className="flex-shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex items-center gap-0.5">
+                        <CheckCircle className="w-2.5 h-2.5" /> 已认证
+                      </span>
+                    )}
+                    {order.account?.sellerCreditScore != null && (
+                      <span className="flex-shrink-0 flex items-center gap-0.5 text-[10px] text-yellow-400">
+                        <Star className="w-2.5 h-2.5 fill-yellow-400" />
+                        {(order.account.sellerCreditScore / 20).toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-0.5">
+                    {isBuyer ? '点击联系卖家' : '点击联系买家'}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onClose(); navigate(`/messages?accountId=${order.accountId}`); }}
+                  className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-primary text-xs font-medium transition-all"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  联系
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Order Timeline */}
           <div className="bg-dark rounded-xl p-4">
             <p className="text-xs text-slate-500 mb-3">订单时间线</p>
