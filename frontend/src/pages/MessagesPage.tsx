@@ -190,7 +190,6 @@ const MessagesPage: React.FC = () => {
   const createSessionMutation = useCreateSession();
 
   const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -220,15 +219,6 @@ const MessagesPage: React.FC = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages.length, messages[messages.length - 1]?.id]);
-
-  // Simulate "other user typing" when we send a message
-  useEffect(() => {
-    if (sendMessageMutation.isSuccess) {
-      setIsTyping(true);
-      const t = setTimeout(() => setIsTyping(false), 2000 + Math.random() * 2000);
-      return () => clearTimeout(t);
-    }
-  }, [sendMessageMutation.isSuccess]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -446,26 +436,6 @@ const MessagesPage: React.FC = () => {
                     })}
                   </div>
                 ))}
-
-                {/* Typing indicator */}
-                {isTyping && (
-                  <div className="flex items-end gap-2 py-1">
-                    <div className="w-7 h-7 flex-shrink-0 rounded-full bg-dark-lighter flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-slate-500" />
-                    </div>
-                    <div className="bg-dark-lighter rounded-2xl rounded-bl-sm px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        {[0, 1, 2].map((i) => (
-                          <div
-                            key={i}
-                            className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"
-                            style={{ animationDelay: `${i * 150}ms` }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <div ref={messagesEndRef} className="h-4" />
               </>
