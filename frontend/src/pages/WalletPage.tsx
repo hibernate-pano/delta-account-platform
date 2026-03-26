@@ -217,6 +217,7 @@ const WalletPage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'balance' | 'recharges' | 'withdrawals' | 'orders'>('balance');
   const [activeType, setActiveType] = useState<'ALL' | 'BUY' | 'SELL' | 'RENT' | 'REFUND'>('ALL');
+  const [period, setPeriod] = useState<'all' | 'this-month' | 'last-month'>('all');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -290,31 +291,57 @@ const WalletPage: React.FC = () => {
   };
 
   const stats = useMemo(() => {
-    const income = transactions
-      .filter((t) => ['RECHARGE', 'SELL', 'REFUND'].includes(t.type))
-      .reduce((sum, t) => sum + t.amount, 0);
-    const expense = transactions
-      .filter((t) => ['BUY', 'WITHDRAW', 'RENT'].includes(t.type))
-      .reduce((sum, t) => sum + t.amount, 0);
-    const thisMonth = transactions.filter((t) => {
-      const date = new Date(t.createdAt);
+    const getMonthTx = (monthOffset: number) => {
       const now = new Date();
-      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-    });
-    const monthlyIncome = thisMonth
-      .filter((t) => ['RECHARGE', 'SELL', 'REFUND'].includes(t.type))
-      .reduce((sum, t) => sum + t.amount, 0);
-    const monthlyExpense = thisMonth
-      .filter((t) => ['BUY', 'WITHDRAW', 'RENT'].includes(t.type))
-      .reduce((sum, t) => sum + t.amount, 0);
-    return { income, expense, monthlyIncome, monthlyExpense };
-  }, [transactions]);
+      const targetMonth = new Date(now.getFullYear(), now.getMonth() - monthOffset, 1);
+      return transactions.filter((t) => {
+        const date = new Date(t.createdAt);
+        return date.getMonth() === targetMonth.getMonth() && date.getFullYear() === targetMonth.getFullYear();
+      });
+    };
+    const thisMonth = getMonthTx(0);
+    const lastMonth = getMonthTx(1);
+    const periodTx = period === 'last-month' ? lastMonth : period === 'this-month' ? thisMonth : transactions;
+    const income = periodTx.filter((t) => ['RECHARGE', 'SELL', 'REFUND'].includes(t.type)).reduce((sum, t) => sum + t.amount, 0);
+    const expense = periodTx.filter((t) => ['BUY', 'WITHDRAW', 'RENT'].includes(t.type)).reduce((sum, t) => sum + t.amount, 0);
+    const monthlyIncome = thisMonth.filter((t) => ['RECHARGE', 'SELL', 'REFUND'].includes(t.type)).reduce((sum, t) => sum + t.amount, 0);
+    const monthlyExpense = thisMonth.filter((t) => ['BUY', 'WITHDRAW', 'RENT'].includes(t.type)).reduce((sum, t) => sum + t.amount, 0);
+    const lastMonthIncome = lastMonth.filter((t) => ['RECHARGE', 'SELL', 'REFUND'].includes(t.type)).reduce((sum, t) => sum + t.amount, 0);
+    const lastMonthExpense = lastMonth.filter((t) => ['BUY', 'WITHDRAW', 'RENT'].includes(t.type)).reduce((sum, t) => sum + t.amount, 0);
+    return {
+      income,
+      expense,
+      monthlyIncome,
+      monthlyExpense,
+      lastMonthIncome,
+      lastMonthExpense,
+      periodIncome: period === 'last-month' ? lastMonthIncome : period === 'this-month' ? monthlyIncome : income,
+      periodExpense: period === 'last-month' ? lastMonthExpense : period === 'this-month' ? monthlyExpense : expense,
+    };
+  }, [transactions, period]);
+
+  // Period filter helper
+  const isInPeriod = (txDate: Date) => {
+    if (period === 'all') return true;
+    const now = new Date();
+    const txMonth = txDate.getMonth();
+    const txYear = txDate.getFullYear();
+    const nowMonth = now.getMonth();
+    const nowYear = now.getFullYear();
+    if (period === 'this-month') {
+      return txMonth === nowMonth && txYear === nowYear;
+    }
+    // last month
+    const lastMonth = nowMonth === 0 ? 11 : nowMonth - 1;
+    const lastMonthYear = nowMonth === 0 ? nowYear - 1 : nowYear;
+    return txMonth === lastMonth && txYear === lastMonthYear;
+  };
 
   const filteredTransactions = transactions.filter((tx) => {
+    if (!isInPeriod(new Date(tx.createdAt))) return false;
     if (activeTab === 'recharges') return tx.type === 'RECHARGE';
     if (activeTab === 'withdrawals') return tx.type === 'WITHDRAW';
     if (activeTab === 'orders') return ['BUY', 'SELL', 'RENT', 'REFUND'].includes(tx.type);
-    // balance tab: filter by type chip
     if (activeType !== 'ALL') return tx.type === activeType;
     return true;
   }).filter((tx) =>
@@ -411,15 +438,16 @@ const WalletPage: React.FC = () => {
         <h3 className="font-medium mb-4">财务概览</h3>
         {/* Net position bar */}
         {(() => {
-          const net = stats.monthlyIncome - stats.monthlyExpense;
-          const total = stats.monthlyIncome + stats.monthlyExpense;
-          const incomePct = total > 0 ? (stats.monthlyIncome / total) * 100 : 50;
+          const net = stats.periodIncome - stats.periodExpense;
+          const total = stats.periodIncome + stats.periodExpense;
+          const incomePct = total > 0 ? (stats.periodIncome / total) * 100 : 50;
+          const periodLabel = period === 'last-month' ? '上月' : period === 'this-month' ? '本月' : '全部';
           return (
             <div className={`mb-4 p-3 rounded-xl border ${
               net >= 0 ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
             }`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-400">本月净变化</span>
+                <span className="text-sm text-slate-400">{periodLabel}净变化</span>
                 <span className={`text-lg font-bold ${net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {net >= 0 ? '+' : ''}¥{net.toFixed(2)}
                 </span>
@@ -435,8 +463,9 @@ const WalletPage: React.FC = () => {
         })()}
         <div className="grid grid-cols-2 gap-4 text-center mb-4">
           <div>
-            <p className="text-2xl font-bold text-green-400">¥{stats.monthlyIncome.toFixed(2)}</p>
-            <p className="text-xs text-slate-500">本月收入</p>
+            <p className="text-2xl font-bold text-green-400">¥{stats.periodIncome.toFixed(2)}</p>
+            <p className="text-xs text-slate-500">
+              {period === 'last-month' ? '上月' : period === 'this-month' ? '本月' : '总收入'}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-red-400">¥{stats.monthlyExpense.toFixed(2)}</p>
@@ -470,33 +499,54 @@ const WalletPage: React.FC = () => {
             </button>
           ))}
         </div>
-        {/* Transaction type chips (show for balance/orders tabs) */}
-        {activeTab !== 'recharges' && activeTab !== 'withdrawals' && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <span className="text-xs text-slate-600 self-center px-1 flex-shrink-0">类型:</span>
+        {/* Period + Type Filter Row */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-1">
+          {/* Period selector */}
+          <div className="flex gap-1 bg-dark-lighter rounded-lg p-1 flex-shrink-0">
             {([
-              { key: 'ALL', label: '全部', icon: null },
-              { key: 'BUY', label: '购买', icon: ShoppingBag },
-              { key: 'SELL', label: '出售', icon: ArrowUpRight },
-              { key: 'RENT', label: '租赁', icon: ArrowRightLeft },
-              { key: 'REFUND', label: '退款', icon: CheckCircle },
-            ] as const).map((t) => (
+              { key: 'all', label: '全部' },
+              { key: 'this-month', label: '本月' },
+              { key: 'last-month', label: '上月' },
+            ] as const).map(tab => (
               <button
-                key={t.key}
-                onClick={() => setActiveType(t.key)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all text-xs flex-shrink-0 ${
-                  activeType === t.key
-                    ? 'bg-primary/20 text-primary border border-primary/30'
-                    : 'bg-dark-lighter text-slate-500 hover:text-slate-300 border border-transparent'
+                key={tab.key}
+                onClick={() => setPeriod(tab.key)}
+                className={`px-3 py-1.5 rounded-md text-xs transition-all ${
+                  period === tab.key
+                    ? 'bg-primary text-white'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {t.icon && <t.icon className="w-3 h-3" />}
-                {t.label}
+                {tab.label}
               </button>
             ))}
           </div>
-        )}
-      </div>
+          {/* Transaction type chips */}
+          {activeTab !== 'recharges' && activeTab !== 'withdrawals' && (
+            <div className="flex gap-2 flex-shrink-0">
+              {([
+                { key: 'ALL', label: '全部', icon: null },
+                { key: 'BUY', label: '购买', icon: ShoppingBag },
+                { key: 'SELL', label: '出售', icon: ArrowUpRight },
+                { key: 'RENT', label: '租赁', icon: ArrowRightLeft },
+                { key: 'REFUND', label: '退款', icon: CheckCircle },
+              ] as const).map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setActiveType(t.key)}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all text-xs ${
+                    activeType === t.key
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : 'bg-dark-lighter text-slate-500 hover:text-slate-300 border border-transparent'
+                  }`}
+                >
+                  {t.icon && <t.icon className="w-3 h-3" />}
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
       {/* Transaction List */}
       <div className="card">

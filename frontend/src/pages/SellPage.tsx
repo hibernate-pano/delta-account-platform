@@ -52,6 +52,16 @@ const SellPage: React.FC = () => {
   const createMutation = useCreateAccount();
 
   const [step, setStep] = useState(1);
+  const [slideDir, setSlideDir] = useState<'left' | 'right'>('left');
+
+  const handleNext = (target: number) => {
+    setSlideDir('left');
+    setStep(target);
+  };
+  const handleBack = (target: number) => {
+    setSlideDir('right');
+    setStep(target);
+  };
   const [formData, setFormData] = useState({
     title: '',
     gameRank: '',
@@ -106,7 +116,7 @@ const SellPage: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (validateStep1()) setStep(step + 1);
+    if (validateStep1()) handleNext(2);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -239,7 +249,7 @@ const SellPage: React.FC = () => {
       <form onSubmit={handleSubmit}>
         {/* ===== STEP 1: Account Info ===== */}
         {step === 1 && (
-          <div className="space-y-5 animate-fade-in">
+          <div className={`space-y-5 ${slideDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
             <div className="card space-y-5">
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -403,7 +413,7 @@ const SellPage: React.FC = () => {
 
         {/* ===== STEP 2: Images ===== */}
         {step === 2 && (
-          <div className="space-y-5 animate-fade-in">
+          <div className={`space-y-5 ${slideDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
             <div className="card space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -592,7 +602,7 @@ const SellPage: React.FC = () => {
             </div>
 
             <div className="flex gap-3">
-              <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
+              <button type="button" onClick={() => handleBack(1)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
                 <ArrowLeft className="w-5 h-5" /> 返回
               </button>
               <button type="button" onClick={() => {
@@ -600,7 +610,7 @@ const SellPage: React.FC = () => {
                   showToast('请至少上传1张图片', 'warning');
                   return;
                 }
-                setStep(3);
+                handleNext(3);
               }} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2">
                 下一步 <ArrowRight className="w-5 h-5" />
               </button>
@@ -610,7 +620,7 @@ const SellPage: React.FC = () => {
 
         {/* ===== STEP 3: Confirm & Preview ===== */}
         {step === 3 && (
-          <div className="space-y-5 animate-fade-in">
+          <div className={`space-y-5 ${slideDir === 'left' ? 'animate-slide-left' : 'animate-slide-right'}`}>
             {/* Account card preview */}
             <div className="card">
               <div className="flex items-center gap-2 mb-4">
@@ -702,7 +712,7 @@ const SellPage: React.FC = () => {
             </div>
 
             <div className="flex gap-3">
-              <button type="button" onClick={() => setStep(2)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
+              <button type="button" onClick={() => handleBack(2)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
                 <ArrowLeft className="w-5 h-5" /> 返回修改
               </button>
               <button type="submit" disabled={isSubmitting}
