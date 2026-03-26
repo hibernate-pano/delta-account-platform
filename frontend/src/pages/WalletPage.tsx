@@ -6,7 +6,8 @@ import { WalletSkeleton } from '../components/ui/Skeleton';
 import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } from '../hooks/useQueries';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
-  RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X
+  RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X,
+  ShoppingBag, ArrowUpRight
 } from 'lucide-react';
 
 interface Transaction {
@@ -23,10 +24,40 @@ interface Transaction {
 const typeConfig: Record<string, { label: string; positive: boolean; icon: React.ElementType; color: string; bg: string }> = {
   RECHARGE:  { label: '充值',       positive: true,  icon: Plus,             color: 'text-green-400', bg: 'bg-green-500/20'   },
   WITHDRAW:  { label: '提现',       positive: false, icon: Minus,            color: 'text-red-400',   bg: 'bg-red-500/20'     },
-  BUY:       { label: '购买账号',    positive: false, icon: ArrowRightLeft,   color: 'text-red-400',   bg: 'bg-red-500/20'     },
-  SELL:      { label: '出售账号',    positive: true,  icon: ArrowRightLeft,   color: 'text-green-400', bg: 'bg-green-500/20'   },
+  BUY:       { label: '购买账号',    positive: false, icon: ShoppingBag,      color: 'text-red-400',   bg: 'bg-red-500/20'     },
+  SELL:      { label: '出售账号',    positive: true,  icon: ArrowUpRight,    color: 'text-green-400', bg: 'bg-green-500/20'   },
   RENT:      { label: '租赁',        positive: false, icon: ArrowRightLeft,   color: 'text-red-400',   bg: 'bg-red-500/20'     },
   REFUND:    { label: '退款',        positive: true,  icon: CheckCircle,      color: 'text-green-400', bg: 'bg-green-500/20'   },
+};
+
+const formatRelativeTime = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  const h = Math.floor(diff / 3600000);
+  if (h < 24) return `${h}小时前`;
+  const d = Math.floor(diff / 86400000);
+  if (d < 7) return `${d}天前`;
+  return new Date(dateStr).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+};
+
+// Group transactions by date
+const groupTransactionsByDate = (txs: Transaction[]) => {
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  const groups: { label: string; items: Transaction[] }[] = [];
+  const todayItems: Transaction[] = [], yesterdayItems: Transaction[] = [], olderItems: Transaction[] = [];
+  txs.forEach((tx) => {
+    const date = new Date(tx.createdAt).toDateString();
+    if (date === today) todayItems.push(tx);
+    else if (date === yesterday) yesterdayItems.push(tx);
+    else olderItems.push(tx);
+  });
+  if (todayItems.length) groups.push({ label: '今天', items: todayItems });
+  if (yesterdayItems.length) groups.push({ label: '昨天', items: yesterdayItems });
+  if (olderItems.length) groups.push({ label: '更早', items: olderItems });
+  return groups;
 };
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
@@ -175,7 +206,8 @@ const WalletPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'balance' | 'recharges' | 'withdrawals' | 'transactions'>('balance');
+  const [activeTab, setActiveTab] = useState<'balance' | 'recharges' | 'withdrawals' | 'orders'>('balance');
+  const [activeType, setActiveType] = useState<'ALL' | 'BUY' | 'SELL' | 'RENT' | 'REFUND'>('ALL');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -271,8 +303,16 @@ const WalletPage: React.FC = () => {
   const filteredTransactions = transactions.filter((tx) => {
     if (activeTab === 'recharges') return tx.type === 'RECHARGE';
     if (activeTab === 'withdrawals') return tx.type === 'WITHDRAW';
+    if (activeTab === 'orders') return ['BUY', 'SELL', 'RENT', 'REFUND'].includes(tx.type);
+    // balance tab: filter by type chip
+    if (activeType !== 'ALL') return tx.type === activeType;
     return true;
   });
+
+  const groupedTransactions = useMemo(
+    () => groupTransactionsByDate(filteredTransactions),
+    [filteredTransactions]
+  );
 
   if (balanceLoading && txLoading) {
     return <WalletSkeleton />;
@@ -349,27 +389,56 @@ const WalletPage: React.FC = () => {
         <BalanceSparkline transactions={transactions} />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {[
-          { key: 'balance', label: '全部', icon: Wallet },
-          { key: 'recharges', label: '充值', icon: CreditCard },
-          { key: 'withdrawals', label: '提现', icon: Minus },
-          { key: 'transactions', label: '其他', icon: TrendingDown },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key as typeof activeTab)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              activeTab === tab.key
-                ? 'bg-primary text-white'
-                : 'bg-dark-lighter text-slate-400 hover:text-white'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
+      {/* Tab Filter */}
+      <div className="mb-6 space-y-3">
+        {/* Main type tabs */}
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {[
+            { key: 'balance', label: '全部', icon: Wallet },
+            { key: 'recharges', label: '充值', icon: Plus },
+            { key: 'withdrawals', label: '提现', icon: Minus },
+            { key: 'orders', label: '交易', icon: ShoppingBag },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => { setActiveTab(tab.key as typeof activeTab); setActiveType('ALL'); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all flex-shrink-0 ${
+                activeTab === tab.key
+                  ? 'bg-primary text-white'
+                  : 'bg-dark-lighter text-slate-400 hover:text-white'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        {/* Transaction type chips (show for balance/orders tabs) */}
+        {activeTab !== 'recharges' && activeTab !== 'withdrawals' && (
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <span className="text-xs text-slate-600 self-center px-1 flex-shrink-0">类型:</span>
+            {([
+              { key: 'ALL', label: '全部', icon: null },
+              { key: 'BUY', label: '购买', icon: ShoppingBag },
+              { key: 'SELL', label: '出售', icon: ArrowUpRight },
+              { key: 'RENT', label: '租赁', icon: ArrowRightLeft },
+              { key: 'REFUND', label: '退款', icon: CheckCircle },
+            ] as const).map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveType(t.key)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all text-xs flex-shrink-0 ${
+                  activeType === t.key
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'bg-dark-lighter text-slate-500 hover:text-slate-300 border border-transparent'
+                }`}
+              >
+                {t.icon && <t.icon className="w-3 h-3" />}
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Transaction List */}
@@ -387,34 +456,42 @@ const WalletPage: React.FC = () => {
           </div>
         ) : (
           <div className="divide-y divide-slate-800">
-            {filteredTransactions.map((tx) => {
-              const cfg = typeConfig[tx.type] || typeConfig.RECHARGE;
-              const TypeIcon = cfg.icon;
-              return (
-                <div
-                  key={tx.id}
-                  onClick={() => setSelectedTx(tx)}
-                  className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors rounded-lg cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${cfg.bg}`}>
-                      <TypeIcon className={`w-5 h-5 ${cfg.color}`} />
-                    </div>
-                    <div>
-                      <p className="font-medium">{cfg.label}</p>
-                      <p className="text-sm text-slate-500">{tx.createdAt}</p>
-                    </div>
-                  </div>
-                  <div
-                    className={`text-right font-medium ${
-                      cfg.positive ? 'text-green-400' : 'text-red-400'
-                    }`}
-                  >
-                    {cfg.positive ? '+' : '-'}¥{tx.amount.toFixed(2)}
-                  </div>
+            {groupedTransactions.map((group) => (
+              <div key={group.label}>
+                {/* Date separator */}
+                <div className="sticky top-0 bg-dark-card z-10 py-2 px-4">
+                  <span className="text-xs text-slate-600 font-medium">{group.label}</span>
                 </div>
-              );
-            })}
+                {group.items.map((tx) => {
+                  const cfg = typeConfig[tx.type] || typeConfig.RECHARGE;
+                  const TypeIcon = cfg.icon;
+                  return (
+                    <div
+                      key={tx.id}
+                      onClick={() => setSelectedTx(tx)}
+                      className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${cfg.bg}`}>
+                          <TypeIcon className={`w-5 h-5 ${cfg.color}`} />
+                        </div>
+                        <div>
+                          <p className="font-medium">{cfg.label}</p>
+                          <p className="text-sm text-slate-500">{formatRelativeTime(tx.createdAt)}</p>
+                        </div>
+                      </div>
+                      <div
+                        className={`text-right font-medium ${
+                          cfg.positive ? 'text-green-400' : 'text-red-400'
+                        }`}
+                      >
+                        {cfg.positive ? '+' : '-'}¥{tx.amount.toFixed(2)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         )}
       </div>
