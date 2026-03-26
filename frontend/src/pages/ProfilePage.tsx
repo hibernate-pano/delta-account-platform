@@ -651,6 +651,8 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const updateMutation = useUpdateProfile();
   const [nickname, setNickname] = useState(user?.nickname || '');
   const [avatar, setAvatar] = useState(user?.avatar || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -661,7 +663,7 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const handleSave = async () => {
     if (!nickname.trim()) { showToast('请输入昵称', 'error'); return; }
     try {
-      await updateMutation.mutateAsync({ nickname: nickname.trim(), avatar });
+      await updateMutation.mutateAsync({ nickname: nickname.trim(), avatar, phone: phone.trim() || undefined, email: email.trim() || undefined });
       showToast('资料更新成功！', 'success');
       onClose();
     } catch (err: any) {
@@ -734,6 +736,30 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             className="input w-full"
           />
           <p className="text-right text-xs text-slate-600 mt-1">{nickname.length}/20</p>
+        </div>
+
+        {/* Phone */}
+        <div className="mb-4">
+          <label className="block text-sm text-slate-400 mb-2">手机号</label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="绑定手机号（选填）"
+            className="input w-full"
+          />
+        </div>
+
+        {/* Email */}
+        <div className="mb-4">
+          <label className="block text-sm text-slate-400 mb-2">邮箱</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="绑定邮箱（选填）"
+            className="input w-full"
+          />
         </div>
 
         {/* Current info display */}
