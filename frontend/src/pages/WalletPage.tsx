@@ -8,7 +8,7 @@ import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } fro
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
   RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X,
-  ShoppingBag, ArrowUpRight
+  ShoppingBag, ArrowUpRight, AlertCircle
 } from 'lucide-react';
 
 interface Transaction {
@@ -219,8 +219,8 @@ const WalletPage: React.FC = () => {
   const [accountName, setAccountName] = useState('');
   const [txSearch, setTxSearch] = useState('');
 
-  const { data: balanceData, isLoading: balanceLoading } = useWalletBalance();
-  const { data: transactionsData, isLoading: txLoading } = useWalletTransactions({ page: 1, size: 50 });
+  const { data: balanceData, isLoading: balanceLoading, isError: balanceError, refetch: refetchBalance } = useWalletBalance();
+  const { data: transactionsData, isLoading: txLoading, isError: txError, refetch: refetchTx } = useWalletTransactions({ page: 1, size: 50 });
 
   const rechargeMutation = useRecharge();
   const withdrawMutation = useWithdraw();
@@ -323,6 +323,25 @@ const WalletPage: React.FC = () => {
 
   if (balanceLoading && txLoading) {
     return <WalletSkeleton />;
+  }
+
+  if (balanceError || txError) {
+    return (
+      <div className="max-w-4xl mx-auto text-center py-20">
+        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertCircle className="w-10 h-10 text-red-400" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">加载失败</h2>
+        <p className="text-slate-500 mb-6">无法获取钱包数据，请检查网络后重试</p>
+        <div className="flex justify-center gap-3">
+          <button onClick={() => { refetchBalance?.(); refetchTx?.(); }} className="btn-primary inline-flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            重试
+          </button>
+          <Link to="/profile" className="btn-secondary">返回个人中心</Link>
+        </div>
+      </div>
+    );
   }
 
   const isSubmitting = rechargeMutation.isPending || withdrawMutation.isPending;
