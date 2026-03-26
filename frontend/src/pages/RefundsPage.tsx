@@ -7,7 +7,7 @@ import { useMyRefunds, useApplyRefund, useCancelRefund, useMyOrders } from '../h
 import {
   ArrowLeft, Package, RefreshCw, CheckCircle, XCircle, Clock,
   AlertTriangle, DollarSign, ChevronRight, Plus, X, Upload, FileText,
-  ExternalLink, Eye
+  ExternalLink, Eye, AlertCircle
 } from 'lucide-react';
 
 interface Refund {
@@ -223,6 +223,8 @@ const RefundsPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
+  const [amountError, setAmountError] = useState('');
+  const [reasonError, setReasonError] = useState('');
   const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState('');
 
@@ -247,6 +249,8 @@ const RefundsPage: React.FC = () => {
   }
 
   const handleOpenApply = (order?: any) => {
+    setAmountError('');
+    setReasonError('');
     if (order) {
       setSelectedOrder(order);
       setRefundAmount(order.amount?.toString() || '');
@@ -256,10 +260,21 @@ const RefundsPage: React.FC = () => {
 
   const handleApplyRefund = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedOrder || !refundAmount || !refundReason.trim()) {
-      showToast('请填写完整的退款信息', 'warning');
-      return;
+    setAmountError('');
+    setReasonError('');
+    let hasError = false;
+    if (!refundAmount || parseFloat(refundAmount) <= 0) {
+      setAmountError('请输入有效的退款金额');
+      hasError = true;
+    } else if (parseFloat(refundAmount) > (selectedOrder?.amount ?? 0)) {
+      setAmountError(`金额不能超过 ¥${selectedOrder?.amount?.toFixed(2)}`);
+      hasError = true;
     }
+    if (!refundReason.trim()) {
+      setReasonError('请填写退款原因');
+      hasError = true;
+    }
+    if (hasError) return;
     try {
       await applyMutation.mutateAsync({
         orderId: selectedOrder.id,
@@ -463,7 +478,7 @@ const RefundsPage: React.FC = () => {
       {showApplyModal && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setShowApplyModal(false)}
+          onClick={() => { setAmountError(''); setReasonError(''); setShowApplyModal(false); }}
         >
           <div className="card w-full max-w-lg animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
@@ -509,8 +524,8 @@ const RefundsPage: React.FC = () => {
                   <input
                     type="number"
                     value={refundAmount}
-                    onChange={(e) => setRefundAmount(e.target.value)}
-                    className="input pl-10 text-xl font-bold w-full"
+                    onChange={(e) => { setRefundAmount(e.target.value); setAmountError(''); }}
+                    className={`input pl-10 text-xl font-bold w-full ${amountError ? '!border-red-500/50' : ''}`}
                     placeholder="0.00"
                     step="0.01"
                     min="0.01"
@@ -519,18 +534,29 @@ const RefundsPage: React.FC = () => {
                     autoFocus
                   />
                 </div>
-                <p className="text-xs text-slate-500 mt-1">最高可退 ¥{selectedOrder?.amount?.toFixed(2) || '0.00'}</p>
+                {amountError ? (
+                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />{amountError}
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500 mt-1">最高可退 ¥{selectedOrder?.amount?.toFixed(2) || '0.00'}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm text-slate-400 mb-2">退款原因 <span className="text-red-400">*</span></label>
                 <textarea
                   value={refundReason}
-                  onChange={(e) => setRefundReason(e.target.value)}
-                  className="input h-24 resize-none w-full"
+                  onChange={(e) => { setRefundReason(e.target.value); setReasonError(''); }}
+                  className={`input h-24 resize-none w-full ${reasonError ? '!border-red-500/50' : ''}`}
                   placeholder="请详细描述退款原因..."
                   required
                 />
+                {reasonError && (
+                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />{reasonError}
+                  </p>
+                )}
                 {/* Quick reason templates */}
                 <div className="flex flex-wrap gap-2 mt-2">
                   {['账号与描述不符', '卖家无法交付', '临时不想买了', '其他原因'].map((reason) => (
