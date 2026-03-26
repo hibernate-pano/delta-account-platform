@@ -439,7 +439,7 @@ const MessagesPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={sendMessageMutation.isPending || !newMessage.trim()}
-                className="btn-primary !px-5 !py-2.5 disabled:opacity-40 flex items-center gap-2"
+                className="btn-primary !px-5 !py-2.5 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-150 active:scale-90"
               >
                 {sendMessageMutation.isPending ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
