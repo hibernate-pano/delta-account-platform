@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/auth';
 import {
   Gamepad2, User, LogOut, Plus, Home, ShoppingCart, Menu, X, Wallet,
   MessageCircle, Bell, ChevronDown, Shield, BarChart3, RefreshCw, Heart,
-  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle
+  CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle, History
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { notificationApi, messageApi } from '../../api';
@@ -207,6 +207,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                           我的收藏
                         </Link>
                         <Link
+                          to="/recent"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-dark-lighter transition-colors"
+                        >
+                          <History className="w-4 h-4" />
+                          最近浏览
+                        </Link>
+                        <Link
                           to="/orders"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-dark-lighter transition-colors"
@@ -357,6 +365,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   { to: '/sell', label: '发布账号' },
                   { to: '/orders', label: '我的订单' },
                   { to: '/wishlist', label: '我的收藏' },
+                  { to: '/recent', label: '最近浏览' },
                 ].map((link) => (
                   <Link key={link.to} to={link.to}
                     className="block text-sm text-slate-500 hover:text-primary transition-colors">

@@ -14,6 +14,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import RefundsPage from './pages/RefundsPage';
 import WishlistPage from './pages/WishlistPage';
 import NotFoundPage from './pages/NotFoundPage';
+import RecentlyViewedPage from './pages/RecentlyViewedPage';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalLoadingProvider, useGlobalLoading } from './components/GlobalLoading';
@@ -209,6 +210,7 @@ const App: React.FC = () => {
                     <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/refunds" element={<RefundsPage />} />
                     <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/recent" element={<RecentlyViewedPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
