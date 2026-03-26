@@ -53,6 +53,7 @@ const SellPage: React.FC = () => {
 
   const [step, setStep] = useState(1);
   const [slideDir, setSlideDir] = useState<'left' | 'right'>('left');
+  const [gameType, setGameType] = useState('王者荣耀');
 
   const handleNext = (target: number) => {
     setSlideDir('left');
@@ -99,9 +100,8 @@ const SellPage: React.FC = () => {
   const platformFee = price * PLATFORM_FEE_RATE;
   const tax = price * TAX_RATE;
   const youGet = price - platformFee - tax;
-  const activePreset = gamePresets.find((p) =>
-    formData.description?.toLowerCase().includes(p.label) || formData.title?.includes(p.label)
-  );
+  const activePreset = gamePresets.find((p) => p.label === gameType);
+  const activeRanks = activePreset?.ranks || [];
 
   if (!token) {
     navigate('/login');
@@ -124,6 +124,7 @@ const SellPage: React.FC = () => {
     try {
       await createMutation.mutateAsync({
         title: formData.title,
+        gameType,
         gameRank: formData.gameRank,
         skinCount: formData.skinCount,
         weapons: formData.weapons,
@@ -171,7 +172,7 @@ const SellPage: React.FC = () => {
   };
 
   const isSubmitting = createMutation.isPending;
-  const ranks = activePreset?.ranks || ['青铜', '白银', '黄金', '铂金', '钻石', '星耀', '王者'];
+  const ranks = activeRanks;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -267,6 +268,32 @@ const SellPage: React.FC = () => {
                   className="input" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
                   required autoFocus
                 />
+              </div>
+
+              {/* Game type selector */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">游戏类型</label>
+                <div className="flex gap-2 flex-wrap">
+                  {gamePresets.map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        if (gameType !== preset.label) {
+                          setGameType(preset.label);
+                          setFormData((prev) => ({ ...prev, gameRank: '' }));
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                        gameType === preset.label
+                          ? 'bg-primary/20 border-primary text-primary'
+                          : 'bg-dark-lighter border-dark-border text-slate-400 hover:text-white hover:border-slate-600'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -672,6 +699,7 @@ const SellPage: React.FC = () => {
               <h3 className="font-medium text-sm text-slate-300">填写信息汇总</h3>
               {[
                 { label: '账号标题', value: formData.title },
+                { label: '游戏类型', value: gameType },
                 { label: '游戏段位', value: formData.gameRank || '未填写' },
                 { label: '皮肤数量', value: `${formData.skinCount} 个` },
                 { label: '售价', value: `¥${formData.price}` },

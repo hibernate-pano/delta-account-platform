@@ -87,6 +87,7 @@ export const useCreateAccount = () => {
   return useMutation({
     mutationFn: (data: {
       title: string;
+      gameType?: string;
       gameRank?: string;
       skinCount?: number;
       weapons?: string;
@@ -430,6 +431,17 @@ export const useMarkAllNotificationsRead = () => {
 
   return useMutation({
     mutationFn: () => notificationApi.markAllAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+    },
+  });
+};
+
+export const useDeleteNotification = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => notificationApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },

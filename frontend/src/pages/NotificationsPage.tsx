@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
-import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '../hooks/useQueries';
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
@@ -246,6 +246,7 @@ const NotificationsPage: React.FC = () => {
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
+  const deleteMutation = useDeleteNotification();
 
   const notifications: Notification[] = (data?.data?.data || []).filter((n: Notification) => !deletedIds.has(n.id));
 
@@ -261,9 +262,17 @@ const NotificationsPage: React.FC = () => {
     catch { showToast('操作失败', 'error'); }
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
+    // Optimistic update
     setDeletedIds((prev) => new Set([...prev, id]));
-    showToast('通知已删除', 'info');
+    try {
+      await deleteMutation.mutateAsync(id);
+      showToast('通知已删除', 'info');
+    } catch {
+      // Rollback
+      setDeletedIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
+      showToast('删除失败', 'error');
+    }
   };
 
   // Keyboard dismiss for detail modal

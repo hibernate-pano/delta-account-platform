@@ -142,6 +142,7 @@ export const notificationApi = {
   markAsRead: (id: number) => api.put(`/api/notifications/${id}/read`),
   markAllAsRead: () => api.put('/api/notifications/read-all'),
   getUnreadCount: () => api.get('/api/notifications/unread-count'),
+  delete: (id: number) => api.delete(`/api/notifications/${id}`),
 };
 
 // Admin API

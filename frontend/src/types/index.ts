@@ -15,6 +15,7 @@ export interface Account {
   id: number;
   sellerId: number;
   title: string;
+  gameType?: string;
   gameRank?: string;
   skinCount: number;
   weapons?: string;
