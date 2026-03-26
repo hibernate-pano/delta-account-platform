@@ -7,7 +7,7 @@ import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
-import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats } from '../hooks/useQueries';
+import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
@@ -30,6 +30,10 @@ const AccountDetailPage: React.FC = () => {
   const createSessionMutation = useCreateSession();
   const { data: reviewStatsData } = useSellerReviewStats(account?.sellerId);
   const reviewStats = reviewStatsData?.data?.data;
+  const { data: sellerAccountsData } = useSellerAccounts(account?.sellerId);
+  const sellerAccounts = (sellerAccountsData?.data?.data || []).filter(
+    (a: any) => a.id !== accountId && a.status === 'ON_SALE'
+  );
 
   const account: Account | undefined = data?.data?.data;
 
@@ -344,6 +348,50 @@ const AccountDetailPage: React.FC = () => {
                   <Clock className="w-3 h-3 text-purple-400" />
                   <span>快速交付</span>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Seller's Other Listings */}
+          {sellerAccounts.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <span className="text-slate-500">卖家其他账号</span>
+                  <span className="px-2 py-0.5 bg-dark-lighter text-slate-500 text-xs rounded-full">{sellerAccounts.length}个在售</span>
+                </h3>
+                <Link
+                  to={`/accounts?seller=${account?.sellerId}`}
+                  className="text-xs text-primary hover:text-primary-light transition-colors flex items-center gap-1"
+                >
+                  查看全部 <ChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                {sellerAccounts.slice(0, 6).map((acc: any) => (
+                  <Link
+                    key={acc.id}
+                    to={`/accounts/${acc.id}`}
+                    className="flex-shrink-0 w-36 card p-2.5 hover:border-primary/40 transition-all group"
+                  >
+                    <div className="aspect-video bg-dark rounded-lg mb-2 overflow-hidden">
+                      {acc.images?.[0] ? (
+                        <img src={acc.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Gamepad2 className="w-5 h-5 text-gray-700" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-400 line-clamp-1 mb-1">{acc.title}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-primary font-bold text-sm">¥{acc.price}</span>
+                      {acc.verificationStatus === 'VERIFIED' && (
+                        <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                      )}
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           )}
