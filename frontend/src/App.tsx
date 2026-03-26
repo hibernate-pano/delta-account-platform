@@ -17,6 +17,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import RecentlyViewedPage from './pages/RecentlyViewedPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import FAQPage from './pages/FAQPage';
 import { ToastProvider } from './components/ui/Toast';
 import { BrowserTabBadge, UnreadIndicator } from './components/ui/BrowserTabBadge';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -224,6 +225,7 @@ const App: React.FC = () => {
                     <Route path="/recent" element={<RecentlyViewedPage />} />
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/faq" element={<FAQPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>

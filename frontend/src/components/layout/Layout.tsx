@@ -502,12 +502,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {link.label}
                   </Link>
                 ))}
-                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/faq" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   常见问题 FAQ
-                </a>
-                <a href="#" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                </Link>
+                <Link to="/faq" className="block text-sm text-slate-500 hover:text-primary transition-colors">
                   交易指南
-                </a>
+                </Link>
               </div>
             </div>
 
