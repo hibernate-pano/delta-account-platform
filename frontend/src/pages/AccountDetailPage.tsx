@@ -119,12 +119,22 @@ const AccountDetailPage: React.FC = () => {
 
   if (!account) {
     return (
-      <div className="text-center py-20">
-        <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
-        <p className="text-gray-500 mb-4">账号不存在</p>
-        <Link to="/accounts" className="btn-primary">
-          返回市场
-        </Link>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-24 h-24 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-6 border border-dark-border">
+            <Gamepad2 className="w-12 h-12 text-slate-600" />
+          </div>
+          <h2 className="text-xl font-bold mb-3 text-slate-300">账号不存在或已下架</h2>
+          <p className="text-slate-500 mb-8 max-w-sm">该账号可能已被售出或卖家已下架</p>
+          <div className="flex items-center justify-center gap-3">
+            <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" /> 返回
+            </button>
+            <Link to="/accounts" className="btn-primary flex items-center gap-2">
+              <Gamepad2 className="w-4 h-4" /> 浏览市场
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

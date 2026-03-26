@@ -15,6 +15,7 @@ import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
 import RefundsPage from './pages/RefundsPage';
 import WishlistPage from './pages/WishlistPage';
+import NotFoundPage from './pages/NotFoundPage';
 import AdminPage from './pages/AdminPage';
 import { ToastProvider } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -107,6 +108,7 @@ const App: React.FC = () => {
                   <Route path="/refunds" element={<RefundsPage />} />
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/admin" element={<AdminPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Layout>
             </BrowserRouter>
