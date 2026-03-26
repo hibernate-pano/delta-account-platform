@@ -63,6 +63,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
         ${className}
       `}
       title={wishlisted ? '取消收藏' : '添加收藏'}
+      aria-label={wishlisted ? '取消收藏' : '添加收藏'}
     >
       <Heart
         className={`${iconSizes[size]} transition-all duration-200 ${

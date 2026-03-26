@@ -404,6 +404,7 @@ const AccountsPage: React.FC = () => {
                       : 'bg-black/40 text-white opacity-0 group-hover:opacity-100'
                   }`}
                   title={isCompareSelected(account.id) ? '取消对比' : '加入对比'}
+                  aria-label={isCompareSelected(account.id) ? '取消对比' : '加入对比'}
                 >
                   {isCompareSelected(account.id) ? <Check className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
                 </button>
@@ -412,6 +413,7 @@ const AccountsPage: React.FC = () => {
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewAccount(account); }}
                   className="absolute top-2 right-8 w-7 h-7 bg-black/40 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-primary"
                   title="快速查看"
+                  aria-label="快速查看"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -464,6 +466,7 @@ const AccountsPage: React.FC = () => {
                       : 'bg-black/40 text-white opacity-0 group-hover:opacity-100'
                   }`}
                   title={isCompareSelected(account.id) ? '取消对比' : '加入对比'}
+                  aria-label={isCompareSelected(account.id) ? '取消对比' : '加入对比'}
                 >
                   {isCompareSelected(account.id) ? <Check className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
                 </button>

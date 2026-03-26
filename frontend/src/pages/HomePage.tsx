@@ -7,7 +7,7 @@ import { useAccounts } from '../hooks/useQueries';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
-  ChevronDown, MessageSquare, ThumbsUp
+  ChevronDown, MessageSquare, ThumbsUp, AlertCircle
 } from 'lucide-react';
 
 // Animated counter
@@ -118,7 +118,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
 
-  const { data, isLoading } = useAccounts({ size: 8 });
+  const { data, isLoading, isError } = useAccounts({ size: 8 });
   const accounts: Account[] = data?.data?.data?.records || [];
 
   // Featured = verified accounts
@@ -302,7 +302,19 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Verified */}
-      {isLoading ? (
+      {isError && (
+        <section className="py-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="card text-center py-12">
+              <AlertCircle className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-500 mb-3">加载失败，请检查网络连接</p>
+              <button onClick={() => window.location.reload()} className="btn-secondary text-sm">
+                重新加载
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : isLoading ? (
         <section className="py-16">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex justify-between items-center mb-8">
