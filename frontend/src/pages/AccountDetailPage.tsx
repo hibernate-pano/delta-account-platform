@@ -7,7 +7,7 @@ import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
-import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts } from '../hooks/useQueries';
+import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
@@ -30,6 +30,8 @@ const AccountDetailPage: React.FC = () => {
   const createSessionMutation = useCreateSession();
   const { data: reviewStatsData } = useSellerReviewStats(account?.sellerId);
   const reviewStats = reviewStatsData?.data?.data;
+  const { data: sellerReviewsData, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
+  const sellerReviews = sellerReviewsData?.data?.data || [];
   const { data: sellerAccountsData } = useSellerAccounts(account?.sellerId);
   const sellerAccounts = (sellerAccountsData?.data?.data || []).filter(
     (a: any) => a.id !== accountId && a.status === 'ON_SALE'
@@ -403,7 +405,7 @@ const isOwner = user?.id === account?.sellerId;
                         <img src={acc.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Gamepad2 className="w-5 h-5 text-gray-700" />
+                          <Gamepad2 className="w-5 h-5 text-slate-700" />
                         </div>
                       )}
                     </div>
@@ -417,6 +419,86 @@ const isOwner = user?.id === account?.sellerId;
                   </Link>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Seller Reviews */}
+          {account?.sellerId && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-400" />
+                  卖家评价
+                  {reviewStats && (
+                    <span className="px-2 py-0.5 bg-dark-lighter text-slate-500 text-xs rounded-full">{reviewStats.totalCount}条</span>
+                  )}
+                </h3>
+                {reviewsError && (
+                  <button
+                    onClick={() => refetchReviews()}
+                    className="text-xs text-slate-600 hover:text-slate-400 flex items-center gap-1"
+                  >
+                    <RefreshCw className="w-3 h-3" /> 重试
+                  </button>
+                )}
+              </div>
+
+              {sellerReviews.length === 0 && !reviewsError ? (
+                <div className="card p-6 text-center">
+                  <Star className="w-8 h-8 mx-auto mb-2 text-slate-700" />
+                  <p className="text-sm text-slate-500">暂无评价</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sellerReviews.slice(0, 5).map((review: any) => (
+                    <div key={review.id} className="card p-4">
+                      <div className="flex items-start gap-3">
+                        {review.reviewer?.avatar ? (
+                          <img src={review.reviewer.avatar} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-dark-lighter flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-slate-600" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-sm text-slate-300 font-medium truncate">
+                              {review.reviewer?.nickname || review.reviewer?.username || '匿名用户'}
+                            </span>
+                            <div className="flex items-center gap-0.5 flex-shrink-0">
+                              {Array.from({ length: 5 }, (_, i) => (
+                                i < review.rating
+                                  ? <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  : <Star key={i} className="w-3 h-3 text-slate-700" />
+                              ))}
+                            </div>
+                            <span className="text-xs text-yellow-400/70 font-medium flex-shrink-0">{review.rating}.0</span>
+                            <span className="text-xs text-slate-600 ml-auto flex-shrink-0">
+                              {review.createdAt
+                                ? new Date(review.createdAt).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
+                                : ''}
+                            </span>
+                          </div>
+                          {review.content && (
+                            <p className="text-sm text-slate-400 leading-relaxed">{review.content}</p>
+                          )}
+                          {review.reply && (
+                            <div className="mt-2 pl-3 border-l-2 border-primary/30">
+                              <p className="text-xs text-slate-500 mb-0.5">商家回复</p>
+                              <p className="text-sm text-slate-400">{review.reply}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {sellerReviews.length > 5 && (
+                    <p className="text-center text-xs text-slate-600 py-2">
+                      还有 {sellerReviews.length - 5} 条评价
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
