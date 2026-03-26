@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react';
 import { useWishlistStore } from '../../store/wishlist';
 import { useAuthStore } from '../../store/auth';
 import { useToast } from './Toast';
+import { favoriteApi } from '../../api';
 import { Account } from '../../types';
 
 interface WishlistButtonProps {
@@ -35,19 +36,37 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
     lg: 'w-6 h-6',
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!token || pending) return;
-    if (wishlisted) {
+
+    const wasWishlisted = wishlisted;
+
+    // Optimistic update
+    if (wasWishlisted) {
       removeItem(account.id);
       showToast('已取消收藏', 'info');
     } else {
-      setPending(true);
       addItem(account);
       setBursting(true);
-      setTimeout(() => { setBursting(false); setPending(false); }, 450);
+      setTimeout(() => setBursting(false), 450);
       showToast('已添加到收藏夹', 'success');
+    }
+
+    setPending(true);
+    try {
+      await favoriteApi.toggle(account.id);
+    } catch {
+      // Rollback on failure
+      if (wasWishlisted) {
+        addItem(account);
+      } else {
+        removeItem(account.id);
+      }
+      showToast('操作失败，请重试', 'error');
+    } finally {
+      setPending(false);
     }
   };
 

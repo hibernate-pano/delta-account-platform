@@ -8,6 +8,7 @@ interface WishlistState {
   removeItem: (accountId: number) => void;
   isWishlisted: (accountId: number) => boolean;
   clearAll: () => void;
+  seed: (accounts: Account[]) => void;
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -34,6 +35,10 @@ export const useWishlistStore = create<WishlistState>()(
 
       clearAll: () => {
         set({ items: [] });
+      },
+
+      seed: (accounts) => {
+        set({ items: accounts });
       },
     }),
     {

@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
 import { useAuthStore } from './store/auth';
+import { useWishlistStore } from './store/wishlist';
+import { favoriteApi } from './api';
 import HomePage from './pages/HomePage';
 import AccountsPage from './pages/AccountsPage';
 import LoginPage from './pages/LoginPage';
@@ -204,6 +206,16 @@ const App: React.FC = () => {
       initAuth();
     }
   }, []);
+
+  // Seed wishlist from backend once auth is ready
+  const token = useAuthStore((s) => s.token);
+  const wishlistSeed = useWishlistStore((s) => s.seed);
+  useEffect(() => {
+    if (!isInitialized || !token) return;
+    favoriteApi.getMyList()
+      .then((res) => wishlistSeed(res.data.data || []))
+      .catch(() => {});
+  }, [isInitialized, token]);
 
   // Show minimal loader while auth initializes
   if (!isInitialized) {
