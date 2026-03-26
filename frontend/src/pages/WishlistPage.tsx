@@ -215,6 +215,11 @@ const WishlistPage: React.FC = () => {
                       {account.title}
                     </h3>
                     <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">
+                      {account.gameType && (
+                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">
+                          {account.gameType}
+                        </span>
+                      )}
                       {account.gameRank && (
                         <span className="badge badge-primary">{account.gameRank}</span>
                       )}
@@ -312,6 +317,9 @@ const WishlistPage: React.FC = () => {
                     <div className="flex items-center gap-2 mb-1">
                       {account.verificationStatus === 'VERIFIED' && (
                         <span className="text-xs px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">已认证</span>
+                      )}
+                      {account.gameType && (
+                        <span className="text-xs px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded">{account.gameType}</span>
                       )}
                       {account.gameRank && (
                         <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">{account.gameRank}</span>

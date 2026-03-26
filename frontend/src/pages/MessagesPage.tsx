@@ -308,9 +308,16 @@ const MessagesPage: React.FC = () => {
                   currentSession?.otherUser?.username || '聊天'}
               </h1>
               {currentSession?.accountTitle && (
-                <p className="text-xs text-slate-500 truncate">
-                  订单: {currentSession.accountTitle}
-                </p>
+                <div className="flex items-center gap-2 truncate">
+                  {account?.gameType && (
+                    <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-[10px] flex-shrink-0">
+                      {account.gameType}
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-500 truncate">
+                    账号: {currentSession.accountTitle}
+                  </span>
+                </div>
               )}
             </div>
           </div>
