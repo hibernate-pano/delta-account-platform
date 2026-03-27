@@ -7,8 +7,9 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { formatRelativeTime } from '../utils/format';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { useToast } from '../components/ui/Toast';
+import { EmptyState } from '../components/ui/EmptyState';
 import {
-  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star, ShoppingCart, RefreshCw
+  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star, ShoppingCart, RefreshCw, Heart
 } from 'lucide-react';
 
 const RecentlyViewedPage: React.FC = () => {
@@ -34,15 +35,13 @@ const RecentlyViewedPage: React.FC = () => {
 
   if (!token) {
     return (
-      <div className="max-w-6xl mx-auto text-center py-20">
-        <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Eye className="w-10 h-10 text-slate-700" />
-        </div>
-        <h2 className="text-xl font-bold mb-2">登录后查看浏览历史</h2>
-        <p className="text-slate-500 mb-6">浏览过的账号会出现在这里</p>
-        <Link to="/login" className="btn-primary inline-flex items-center gap-2">
-          立即登录 <ArrowRight className="w-4 h-4" />
-        </Link>
+      <div className="max-w-6xl mx-auto">
+        <EmptyState
+          icon={Eye}
+          title="登录后查看浏览历史"
+          description="浏览过的账号会出现在这里"
+          actions={[{ label: '立即登录', to: '/login', icon: ArrowRight, variant: 'primary' }]}
+        />
       </div>
     );
   }
@@ -121,28 +120,21 @@ const RecentlyViewedPage: React.FC = () => {
       )}
 
       {filteredItems.length === 0 && recentItems.length > 0 ? (
-        <div className="card text-center py-12 animate-fade-in">
-          <CheckCircle className="w-10 h-10 mx-auto mb-3 text-slate-600" />
-          <p className="text-slate-500 mb-2">没有符合条件的浏览记录</p>
-          <button onClick={() => { setSortMode('recent'); setVerifiedOnly(false); }} className="text-xs text-primary hover:text-primary-light transition-colors">
-            清除筛选条件
-          </button>
-        </div>
+        <EmptyState
+          icon={CheckCircle}
+          title="没有符合条件的浏览记录"
+          actions={[{ label: '清除筛选条件', onClick: () => { setSortMode('recent'); setVerifiedOnly(false); }, variant: 'secondary' }]}
+        />
       ) : filteredItems.length === 0 ? (
-        <div className="card text-center py-20 animate-fade-in">
-          <div className="w-24 h-24 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-6">
-            <History className="w-12 h-12 text-slate-700" />
-          </div>
-          <h3 className="text-xl font-semibold mb-3 text-slate-300">还没有浏览记录</h3>
-          <p className="text-slate-500 mb-8 max-w-sm mx-auto">
-            浏览账号市场后，你浏览过的账号会显示在这里
-          </p>
-          <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4" />
-            开始浏览
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <EmptyState
+          icon={History}
+          title="还没有浏览记录"
+          description="浏览账号市场后，你浏览过的账号会显示在这里"
+          actions={[
+            { label: '开始浏览', to: '/accounts', icon: Gamepad2 },
+            { label: '查看收藏', to: '/wishlist', icon: Heart, variant: 'secondary' },
+          ]}
+        />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {filteredItems.map((item) => (

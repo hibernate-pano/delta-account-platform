@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
+import { EmptyState } from '../components/ui/EmptyState';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { formatRelativeTime } from '../utils/format';
 import {
@@ -85,15 +86,13 @@ const WishlistPage: React.FC = () => {
 
   if (!token) {
     return (
-      <div className="max-w-4xl mx-auto text-center py-20">
-        <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Heart className="w-10 h-10 text-slate-700" />
-        </div>
-        <h2 className="text-xl font-bold mb-2">登录后查看收藏</h2>
-        <p className="text-slate-500 mb-6">收藏感兴趣的账号，随时购买</p>
-        <Link to="/login" className="btn-primary inline-flex items-center gap-2">
-          立即登录 <ArrowRight className="w-4 h-4" />
-        </Link>
+      <div className="max-w-4xl mx-auto">
+        <EmptyState
+          icon={Heart}
+          title="登录后查看收藏"
+          description="收藏感兴趣的账号，随时购买"
+          actions={[{ label: '立即登录', to: '/login', icon: ArrowRight, variant: 'primary' }]}
+        />
       </div>
     );
   }
@@ -144,21 +143,15 @@ const WishlistPage: React.FC = () => {
       )}
 
       {wishlistItems.length === 0 ? (
-        /* Empty State */
-        <div className="card text-center py-20 animate-fade-in">
-          <div className="w-24 h-24 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart className="w-12 h-12 text-slate-700" />
-          </div>
-          <h3 className="text-xl font-semibold mb-3 text-slate-300">收藏夹是空的</h3>
-          <p className="text-slate-500 mb-8 max-w-sm mx-auto">
-            在账号市场浏览时，点击心形图标即可收藏感兴趣的账号
-          </p>
-          <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4" />
-            浏览账号市场
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <EmptyState
+          icon={Heart}
+          title="收藏夹是空的"
+          description="在账号市场浏览时，点击心形图标即可收藏感兴趣的账号"
+          actions={[
+            { label: '浏览账号市场', to: '/accounts', icon: Gamepad2 },
+            { label: '查看最近浏览', to: '/recent', icon: Eye, variant: 'secondary' },
+          ]}
+        />
       ) : (
         <>
           {/* Toolbar */}
