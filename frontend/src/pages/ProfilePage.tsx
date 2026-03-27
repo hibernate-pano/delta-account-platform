@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
@@ -124,6 +124,7 @@ const ProfilePage: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
+  const [accountSort, setAccountSort] = useState<'newest' | 'oldest' | 'price-high' | 'price-low' | 'views'>('newest');
 
   const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useAuthProfile();
   const { data: ordersData, isLoading: ordersLoading, isError: ordersError } = useMyOrders();
@@ -379,10 +380,25 @@ const ProfilePage: React.FC = () => {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">发布的账号</h3>
-                <Link to="/sell" className="btn-primary text-sm flex items-center gap-2">
-                  <Package className="w-4 h-4" />
-                  发布新账号
-                </Link>
+                <div className="flex items-center gap-2">
+                  {accounts.length > 1 && (
+                    <select
+                      value={accountSort}
+                      onChange={(e) => setAccountSort(e.target.value as typeof accountSort)}
+                      className="bg-dark border border-dark-border text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary cursor-pointer"
+                    >
+                      <option value="newest">最新发布</option>
+                      <option value="oldest">最早发布</option>
+                      <option value="price-high">价格最高</option>
+                      <option value="price-low">价格最低</option>
+                      <option value="views">浏览最多</option>
+                    </select>
+                  )}
+                  <Link to="/sell" className="btn-primary text-sm flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    发布新账号
+                  </Link>
+                </div>
               </div>
 
               {accountsLoading ? (
@@ -414,7 +430,16 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {accounts.map((account: any) => (
+                  {useMemo(() => {
+                    const sorted = [...accounts].sort((a, b) => {
+                      if (accountSort === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                      if (accountSort === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                      if (accountSort === 'price-high') return (b.price || 0) - (a.price || 0);
+                      if (accountSort === 'price-low') return (a.price || 0) - (b.price || 0);
+                      if (accountSort === 'views') return (b.viewCount || 0) - (a.viewCount || 0);
+                      return 0;
+                    });
+                    return sorted.map((account: any) => (
                     <div
                       key={account.id}
                       className="card hover:border-primary/50 transition-all cursor-pointer group"

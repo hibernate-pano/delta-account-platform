@@ -105,8 +105,19 @@ const AccountDetailPage: React.FC = () => {
     }
   };
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = account?.title || 'DeltaHub 优质账号';
+    const shareData = { title, text: `${title} - ¥${account?.price}`, url };
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // user cancelled or not supported, fall through to clipboard
+      }
+    }
+    navigator.clipboard.writeText(url);
     setCopied(true);
     showToast('链接已复制到剪贴板', 'success');
     setTimeout(() => setCopied(false), 2000);

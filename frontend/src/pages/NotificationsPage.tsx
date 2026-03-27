@@ -71,22 +71,28 @@ const groupByDate = (notifications: Notification[]) => {
 
 // Smart navigation map per notification type
 const getNavTarget = (notification: Notification): { to: string; label: string } | null => {
-  switch (notification.type) {
+  const { type, relatedId } = notification;
+  switch (type) {
     case 'ORDER_PAID':
     case 'ORDER_COMPLETED':
     case 'ORDER_CANCELLED':
     case 'ORDER_REJECTED':
-      return { to: '/orders', label: '查看订单' };
+    case 'PAYMENT_FAILED':
+      return {
+        to: relatedId ? `/orders?orderId=${relatedId}` : '/orders',
+        label: type === 'PAYMENT_FAILED' ? '重新支付' : '查看订单',
+      };
     case 'REFUND':
-      return { to: '/refunds', label: '查看退款' };
+      return {
+        to: relatedId ? `/refunds?orderId=${relatedId}` : '/refunds',
+        label: '查看退款',
+      };
     case 'NEW_MESSAGE':
       return { to: '/messages', label: '回复消息' };
     case 'WALLET':
       return { to: '/wallet', label: '查看钱包' };
-    case 'PAYMENT_FAILED':
-      return { to: '/orders', label: '重新支付' };
     case 'NEW_REVIEW':
-      return { to: '/orders', label: '查看评价' };
+      return { to: '/profile?tab=reviews', label: '查看评价' };
     case 'LOGIN_ALERT':
     case 'PASSWORD_CHANGED':
     case 'ACCOUNT_VERIFIED':

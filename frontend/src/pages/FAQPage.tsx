@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   ChevronDown, Shield, CreditCard, Clock, Lock, CheckCircle,
-  MessageCircle, ArrowLeft, Gamepad2, AlertTriangle, HelpCircle, RefreshCw, Search, X
+  MessageCircle, ArrowLeft, Gamepad2, AlertTriangle, HelpCircle, RefreshCw, Search, X, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 
 interface FAQItem {
@@ -94,6 +94,7 @@ const FAQPage: React.FC = () => {
   const [openQuestion, setOpenQuestion] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('全部');
   const [searchQuery, setSearchQuery] = useState('');
+  const [votedFAQ, setVotedFAQ] = useState<Record<number, 'up' | 'down'>>({});
 
   const filteredFAQ = faqData.filter((f) => {
     const matchesCategory = activeCategory === '全部' || f.category === activeCategory;
@@ -205,6 +206,32 @@ const FAQPage: React.FC = () => {
                   <p className="text-sm text-slate-400 leading-relaxed pl-2 border-l-2 border-primary/30">
                     {faq.answer}
                   </p>
+                  {votedFAQ[idx] ? (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                      {votedFAQ[idx] === 'up' ? (
+                        <ThumbsUp className="w-3.5 h-3.5 text-green-400" />
+                      ) : (
+                        <ThumbsDown className="w-3.5 h-3.5 text-red-400" />
+                      )}
+                      <span>感谢您的反馈！</span>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-slate-600">有帮助吗？</span>
+                      <button
+                        onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'up' }))}
+                        className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-green-500/20 hover:text-green-400 border border-dark-border hover:border-green-500/30 transition-all"
+                      >
+                        <ThumbsUp className="w-3 h-3" /> 有帮助
+                      </button>
+                      <button
+                        onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'down' }))}
+                        className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-red-500/20 hover:text-red-400 border border-dark-border hover:border-red-500/30 transition-all"
+                      >
+                        <ThumbsDown className="w-3 h-3" /> 没帮助
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { OrderCardSkeleton } from '../components/ui/Skeleton';
@@ -951,6 +951,19 @@ const OrdersPage: React.FC = () => {
       (o.account?.title?.toLowerCase().includes(kw) ?? false);
     return statusMatch && typeMatch && keywordMatch;
   }), [orders, activeTab, activeType, keyword]);
+
+  // Auto-open order detail from URL param (deep-link from notifications)
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const orderIdStr = searchParams.get('orderId');
+    if (orderIdStr && !selectedOrder) {
+      const id = parseInt(orderIdStr, 10);
+      if (!isNaN(id)) {
+        const found = orders.find(o => o.id === id);
+        if (found) setSelectedOrder(found);
+      }
+    }
+  }, [searchParams, orders, selectedOrder]);
 
   // Group by month
   const groupedOrders = useMemo(() => {
