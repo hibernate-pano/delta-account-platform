@@ -8,7 +8,7 @@ import {
   Users, Package, FileText, Shield, RefreshCw, Star,
   CheckCircle, XCircle, Clock, BarChart3, ArrowRight, Eye,
   TrendingDown, AlertTriangle, Ban, ChevronDown,
-  Activity, Zap, ArrowUpRight, Search
+  Activity, Zap, ArrowUpRight, Search, X
 } from 'lucide-react';
 
 interface PendingAccount {
@@ -135,6 +135,8 @@ const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'orders' | 'users'>('overview');
   const [accountFilter, setAccountFilter] = useState<'PENDING' | 'VERIFIED' | 'BANNED' | 'ALL'>('PENDING');
   const [accountSearch, setAccountSearch] = useState('');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [userSearch, setUserSearch] = useState('');
   const [orderPage, setOrderPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
 
@@ -150,6 +152,31 @@ const AdminPage: React.FC = () => {
   const filteredAccounts = useMemo(() =>
     allAccounts.filter((a) => !accountSearch || a.title.toLowerCase().includes(accountSearch.toLowerCase())),
     [allAccounts, accountSearch]
+  );
+
+  const allOrders: any[] = ordersData?.data?.data?.records || [];
+  const filteredOrders = useMemo(() =>
+    allOrders.filter((o: any) => {
+      if (!orderSearch) return true;
+      const q = orderSearch.toLowerCase();
+      return o.orderNo?.toLowerCase().includes(q)
+        || o.accountTitle?.toLowerCase().includes(q)
+        || o.buyer?.username?.toLowerCase().includes(q)
+        || o.seller?.username?.toLowerCase().includes(q);
+    }),
+    [allOrders, orderSearch]
+  );
+
+  const allUsers: any[] = usersData?.data?.data?.records || [];
+  const filteredUsers = useMemo(() =>
+    allUsers.filter((u: any) => {
+      if (!userSearch) return true;
+      const q = userSearch.toLowerCase();
+      return u.username?.toLowerCase().includes(q)
+        || u.email?.toLowerCase().includes(q)
+        || u.nickname?.toLowerCase().includes(q);
+    }),
+    [allUsers, userSearch]
   );
 
   const handleVerify = (id: number, approved: boolean, label: string) => {
@@ -467,6 +494,20 @@ const AdminPage: React.FC = () => {
             </div>
           ) : (
             <>
+              {/* Search bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <input
+                  type="text" value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)}
+                  placeholder="搜索订单号 / 买家 / 卖家 / 账号..."
+                  className="input w-full !pl-9 !py-2.5 text-sm"
+                />
+                {orderSearch && (
+                  <button onClick={() => setOrderSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               <div className="card overflow-hidden p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -478,7 +519,7 @@ const AdminPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-dark-border">
-                      {(ordersData?.data?.data?.records || []).map((order: any) => {
+                      {filteredOrders.map((order: any) => {
                         const statusMap: Record<string, { label: string; color: string; bg: string }> = {
                           PENDING: { label: '待支付', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
                           PAID: { label: '已支付', color: 'text-blue-400', bg: 'bg-blue-500/20' },
@@ -568,6 +609,20 @@ const AdminPage: React.FC = () => {
             </div>
           ) : (
             <>
+              {/* Search bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <input
+                  type="text" value={userSearch} onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder="搜索用户名 / 邮箱 / 昵称..."
+                  className="input w-full !pl-9 !py-2.5 text-sm"
+                />
+                {userSearch && (
+                  <button onClick={() => setUserSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               <div className="card overflow-hidden p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -579,7 +634,7 @@ const AdminPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-dark-border">
-                      {(usersData?.data?.data?.records || []).map((user: any) => {
+                      {filteredUsers.map((user: any) => {
                         const roleMap: Record<string, { label: string; color: string; bg: string }> = {
                           ADMIN: { label: '管理员', color: 'text-red-400', bg: 'bg-red-500/20' },
                           SELLER: { label: '卖家', color: 'text-blue-400', bg: 'bg-blue-500/20' },
@@ -649,7 +704,7 @@ const AdminPage: React.FC = () => {
                           </tr>
                         );
                       })}
-                      {(usersData?.data?.data?.records || []).length === 0 && (
+                      {filteredUsers.length === 0 && (
                         <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500">暂无用户记录</td></tr>
                       )}
                     </tbody>

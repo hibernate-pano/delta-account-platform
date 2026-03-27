@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
-import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, User, Lock, Shield, Zap, TrendingUp, MessageCircle } from 'lucide-react';
+import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, User, Lock, Shield, Zap, TrendingUp, MessageCircle, CheckCircle } from 'lucide-react';
 import AuthBackground from '../components/ui/AuthBackground';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
@@ -200,14 +200,14 @@ const LoginPage: React.FC = () => {
                   )}
                   {/* Password strength */}
                   {formData.password && !fieldErrors.password && (() => {
-                    let score = 0;
-                    if (formData.password.length >= 6) score++;
-                    if (formData.password.length >= 8) score++;
-                    if (/[a-z]/.test(formData.password) && /[A-Z]/.test(formData.password)) score++;
-                    if (/\d/.test(formData.password)) score++;
-                    const strength = score <= 1 ? 1 : score <= 3 ? 2 : 3;
-                    const color = score <= 1 ? 'bg-red-500' : score <= 3 ? 'bg-yellow-500' : 'bg-green-500';
-                    const label = score <= 1 ? '密码强度：弱' : '密码强度：良好';
+                    const pw = formData.password;
+                    const ok8 = pw.length >= 8;
+                    const okMixed = /[a-z]/.test(pw) && /[A-Z]/.test(pw);
+                    const okDigit = /\d/.test(pw);
+                    const okSpecial = /[^a-zA-Z0-9]/.test(pw);
+                    const score = [ok8, okMixed, okDigit, okSpecial].filter(Boolean).length;
+                    const strength = score <= 1 ? 1 : score <= 2 ? 2 : 3;
+                    const color = score <= 1 ? 'bg-red-500' : score <= 2 ? 'bg-yellow-500' : 'bg-green-500';
                     return (
                       <div className="space-y-1.5 mt-2">
                         <div className="flex gap-1">
@@ -215,7 +215,19 @@ const LoginPage: React.FC = () => {
                             <div key={level} className={`h-1 flex-1 rounded-full transition-colors ${strength >= level ? color : 'bg-dark-lighter'}`} />
                           ))}
                         </div>
-                        <p className={`text-[10px] ${score <= 1 ? 'text-red-400' : 'text-slate-600'}`}>{label}</p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+                          {[
+                            { done: ok8, label: '8位以上' },
+                            { done: okMixed, label: '大小写混合' },
+                            { done: okDigit, label: '包含数字' },
+                            { done: okSpecial, label: '特殊字符' },
+                          ].map(({ done, label }) => (
+                            <span key={label} className={`text-[10px] flex items-center gap-0.5 ${done ? 'text-green-400' : 'text-slate-600'}`}>
+                              {done ? <CheckCircle className="w-2.5 h-2.5 flex-shrink-0" /> : <span className="w-2.5 h-2.5 flex-shrink-0" />}
+                              {label}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     );
                   })()}
