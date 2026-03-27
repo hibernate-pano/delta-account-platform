@@ -12,28 +12,32 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ children, onRefres
   const [pullY, setPullY] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const touchStartY = useRef(0);
-  const isAtTop = useRef(false);
+  const pullingRef = useRef(false);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (refreshing) return;
     if (window.scrollY <= 2) {
-      isAtTop.current = true;
       touchStartY.current = e.touches[0].clientY;
+      pullingRef.current = false;
     }
   }, [refreshing]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isAtTop.current || refreshing) return;
+    // Only intercept pull-down when scrolled to top
+    if (window.scrollY > 2) return;
+    if (refreshing) return;
     const delta = e.touches[0].clientY - touchStartY.current;
     if (delta > 0) {
       e.preventDefault();
+      pullingRef.current = true;
       setPulling(true);
       setPullY(Math.min(delta, threshold + 40));
     }
   }, [refreshing, threshold]);
 
   const handleTouchEnd = useCallback(async () => {
-    if (!pulling) return;
+    if (!pullingRef.current) return;
+    pullingRef.current = false;
     if (pullY >= threshold && !refreshing) {
       setRefreshing(true);
       setPulling(false);
@@ -44,8 +48,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ children, onRefres
       setPulling(false);
       setPullY(0);
     }
-    isAtTop.current = false;
-  }, [pulling, pullY, threshold, refreshing, onRefresh]);
+  }, [pullY, threshold, refreshing, onRefresh]);
 
   return (
     <div
@@ -54,15 +57,21 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ children, onRefres
       onTouchEnd={handleTouchEnd}
       className="relative"
     >
-      {/* Pull indicator */}
+      {/* Pull indicator — uses translateY so it stays attached to scroll position */}
       {pulling && (
         <div
-          className="fixed top-0 left-0 right-0 z-50 flex justify-center items-center pointer-events-none"
-          style={{ paddingTop: `${Math.min(pullY, threshold + 20)}px`, transition: refreshing ? 'none' : 'padding-top 0.1s ease' }}
+          className="absolute top-0 left-0 right-0 z-50 flex justify-center pointer-events-none"
+          style={{
+            paddingTop: `${Math.min(pullY, threshold + 20)}px`,
+            transition: refreshing ? 'none' : 'padding-top 0.1s ease',
+          }}
         >
           <RefreshCw
             className={`w-5 h-5 ${refreshing ? 'animate-spin text-primary' : `text-primary ${pullY >= threshold ? 'opacity-100 scale-110' : 'opacity-60'}`}`}
-            style={{ transform: refreshing ? 'rotate(0deg)' : `rotate(${Math.min(pullY, threshold) / threshold * 360}deg)`, transition: 'transform 0.1s ease' }}
+            style={{
+              transform: refreshing ? 'rotate(0deg)' : `rotate(${Math.min(pullY, threshold) / threshold * 360}deg)`,
+              transition: 'transform 0.1s ease',
+            }}
           />
         </div>
       )}

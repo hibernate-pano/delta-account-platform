@@ -201,6 +201,21 @@ const MessagesPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Restore draft from localStorage when session changes
+  useEffect(() => {
+    if (currentSessionId != null) {
+      const draft = localStorage.getItem(`delta_msg_draft_${currentSessionId}`);
+      if (draft) setNewMessage(draft);
+    }
+  }, [currentSessionId]);
+
+  // Persist draft to localStorage on every keystroke
+  useEffect(() => {
+    if (currentSessionId != null && newMessage) {
+      localStorage.setItem(`delta_msg_draft_${currentSessionId}`, newMessage);
+    }
+  }, [newMessage, currentSessionId]);
+
   // Poll messages every 5s when in chat
   useEffect(() => {
     if (!currentSessionId) return;
@@ -238,6 +253,9 @@ const MessagesPage: React.FC = () => {
         content,
       });
       setNewMessage(''); // only clear on success
+      if (currentSessionId != null) {
+        localStorage.removeItem(`delta_msg_draft_${currentSessionId}`);
+      }
       refetch();
     } catch {
       showToast('发送失败，请重试', 'error');
