@@ -5,11 +5,13 @@ import { useAuthStore } from '../store/auth';
 import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, Check, X, Sparkles } from 'lucide-react';
 import AuthBackground from '../components/ui/AuthBackground';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useToast } from '../components/ui/Toast';
 
 const RegisterPage: React.FC = () => {
   usePageTitle('注册');
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -92,7 +94,8 @@ const RegisterPage: React.FC = () => {
       });
       const { token, userId, username, role } = res.data.data;
       setAuth(token, { id: userId, username, role, balance: 0, creditScore: 100, status: 'ACTIVE' });
-      navigate('/');
+      showToast('注册成功！欢迎加入 DeltaHub', 'success');
+      setTimeout(() => navigate('/'), 500);
     } catch (err: any) {
       setError(err.response?.data?.message || '注册失败，请稍后重试');
     } finally {

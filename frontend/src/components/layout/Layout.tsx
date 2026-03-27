@@ -490,10 +490,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {[
                   { to: '/', label: '首页' },
                   { to: '/accounts', label: '账号市场' },
-                  { to: '/sell', label: '发布账号' },
-                  { to: '/orders', label: '我的订单' },
-                  { to: '/wishlist', label: '我的收藏' },
-                  { to: '/recent', label: '最近浏览' },
+                  ...(token ? [
+                    { to: '/sell', label: '发布账号' },
+                    { to: '/orders', label: '我的订单' },
+                    { to: '/wishlist', label: '我的收藏' },
+                    { to: '/recent', label: '最近浏览' },
+                  ] : []),
                 ].map((link) => (
                   <Link key={link.to} to={link.to}
                     className="block text-sm text-slate-500 hover:text-primary transition-colors">
@@ -507,7 +509,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div>
               <h4 className="font-medium text-sm text-slate-300 mb-4">帮助支持</h4>
               <div className="space-y-2.5">
-                {[
+                {token && [
                   { to: '/notifications', label: '通知中心' },
                   { to: '/wallet', label: '钱包充值' },
                   { to: '/refunds', label: '退款申请' },
