@@ -271,16 +271,27 @@ const AccountEditPage: React.FC = () => {
               className="input w-full"
             />
             <div className="flex flex-wrap gap-1 mt-2">
-              {weaponPresets.map((w) => (
-                <button
-                  key={w}
-                  type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, weapons: prev.weapons ? `${prev.weapons}, ${w}` : w }))}
-                  className="text-[11px] px-2 py-0.5 bg-dark rounded text-slate-500 hover:text-white hover:bg-dark-lighter transition-all"
-                >
-                  {w}
-                </button>
-              ))}
+              {weaponPresets.map((w) => {
+                const isActive = (formData.weapons || '').split(',').map(s => s.trim()).includes(w);
+                return (
+                  <button
+                    key={w}
+                    type="button"
+                    onClick={() => setFormData((prev) => {
+                      const items = (prev.weapons || '').split(',').map(s => s.trim()).filter(Boolean);
+                      const updated = items.includes(w) ? items.filter(i => i !== w) : [...items, w];
+                      return { ...prev, weapons: updated.join(', ') };
+                    })}
+                    className={`text-[11px] px-2 py-0.5 rounded transition-all ${
+                      isActive
+                        ? 'bg-primary/20 text-primary border border-primary/40'
+                        : 'bg-dark text-slate-500 hover:text-white hover:bg-dark-lighter'
+                    }`}
+                  >
+                    {w}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

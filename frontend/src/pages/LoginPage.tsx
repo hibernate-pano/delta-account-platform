@@ -82,6 +82,7 @@ const LoginPage: React.FC = () => {
 
   const handleDemoLogin = async (username: string) => {
     setFormData({ username, password: 'password123' });
+    setLoginTab('manual');
     setLoadingAccountId(username);
     try {
       const res = await authApi.login({ username, password: 'password123' });
