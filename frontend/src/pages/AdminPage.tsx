@@ -135,6 +135,7 @@ const AdminPage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'orders' | 'users'>('overview');
   const [accountFilter, setAccountFilter] = useState<'PENDING' | 'VERIFIED' | 'BANNED' | 'ALL'>('PENDING');
+  const [selectedAccounts, setSelectedAccounts] = useState<Set<number>>(new Set());
   const [accountSearch, setAccountSearch] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
@@ -195,6 +196,27 @@ const AdminPage: React.FC = () => {
 
   const handleBan = (id: number) => {
     setPendingBanId(id);
+  };
+
+  const handleBulkVerify = (approved: boolean) => {
+    const ids = Array.from(selectedAccounts);
+    let completed = 0;
+    ids.forEach((id) => {
+      verifyMutation.mutate({ id, approved }, {
+        onSuccess: () => {
+          completed++;
+          if (completed === ids.length) {
+            showToast(approved ? `已通过 ${ids.length} 个账号` : `已拒绝 ${ids.length} 个账号`, approved ? 'success' : 'warning');
+            setSelectedAccounts(new Set());
+            refetchAccounts();
+            refetchStats();
+          }
+        },
+        onError: () => {
+          completed++;
+        },
+      });
+    });
   };
 
   if (!token || user?.role !== 'ADMIN') {
@@ -452,9 +474,57 @@ const AdminPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-2">
+              {/* Bulk action bar */}
+              {selectedAccounts.size > 0 && (
+                <div className="sticky top-2 z-10 mx-auto max-w-2xl bg-dark-card border border-primary/30 rounded-xl p-3 flex items-center justify-between shadow-xl animate-slide-up">
+                  <span className="text-sm text-slate-300">
+                    已选择 <span className="text-primary font-bold">{selectedAccounts.size}</span> 个账号
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleBulkVerify(true)}
+                      disabled={verifyMutation.isPending}
+                      className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      批量通过
+                    </button>
+                    {accountFilter === 'PENDING' && (
+                      <button
+                        onClick={() => handleBulkVerify(false)}
+                        disabled={verifyMutation.isPending}
+                        className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        批量拒绝
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedAccounts(new Set())}
+                      className="px-3 py-1.5 text-slate-500 hover:text-white text-sm"
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              )}
               {filteredAccounts.map((account) => (
                 <div key={account.id}
-                  className="card flex items-center gap-4 p-4 hover:border-slate-700 transition-all group">
+                  className={`card flex items-center gap-4 p-4 transition-all group ${selectedAccounts.has(account.id) ? 'border-primary/40 bg-primary/5' : 'hover:border-slate-700'}`}>
+                  {/* Bulk select checkbox */}
+                  <input
+                    type="checkbox"
+                    checked={selectedAccounts.has(account.id)}
+                    onChange={() => {
+                      setSelectedAccounts(prev => {
+                        const next = new Set(prev);
+                        if (next.has(account.id)) next.delete(account.id);
+                        else next.add(account.id);
+                        return next;
+                      });
+                    }}
+                    className="w-4 h-4 rounded border-dark-border bg-dark text-primary focus:ring-primary flex-shrink-0 cursor-pointer"
+                  />
                   <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Package className="w-6 h-6 text-primary" />
                   </div>

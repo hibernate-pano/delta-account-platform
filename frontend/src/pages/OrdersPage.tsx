@@ -11,7 +11,7 @@ import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
-  Shield, User, Star, Search
+  Shield, User, Star, Search, TrendingUp
 } from 'lucide-react';
 
 interface Order {
@@ -1051,11 +1051,11 @@ const OrdersPage: React.FC = () => {
 
       {/* Orders */}
       {filteredOrders.length === 0 ? (
-        <div className="card text-center py-20">
-          <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-10 h-10 text-slate-700" />
+        <div className="card text-center py-12">
+          <div className="w-16 h-16 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 text-slate-700" />
           </div>
-          <h3 className="text-lg font-medium mb-2 text-slate-400">
+          <h3 className="text-base font-medium mb-2 text-slate-400">
             {activeTab === 'all'
               ? activeType === 'BUY' ? '暂无购买记录'
               : activeType === 'RENT' ? '暂无租赁记录'
@@ -1066,7 +1066,25 @@ const OrdersPage: React.FC = () => {
               : '暂无已取消/退款订单'
             }
           </h3>
-          <p className="text-slate-600 text-sm mb-6">开始探索账号市场吧</p>
+          <p className="text-slate-600 text-xs mb-6">开始探索账号市场吧</p>
+          {/* Quick action cards */}
+          <div className="flex justify-center gap-3 mb-6">
+            <Link to="/accounts" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+              <ShoppingBag className="w-5 h-5 text-blue-400 mb-2" />
+              <p className="text-sm font-medium text-slate-300">购买账号</p>
+              <p className="text-xs text-slate-600">浏览精选账号</p>
+            </Link>
+            <Link to="/accounts?rental=true" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+              <Clock className="w-5 h-5 text-purple-400 mb-2" />
+              <p className="text-sm font-medium text-slate-300">租赁账号</p>
+              <p className="text-xs text-slate-600">按小时计费</p>
+            </Link>
+            <Link to="/sell" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+              <TrendingUp className="w-5 h-5 text-green-400 mb-2" />
+              <p className="text-sm font-medium text-slate-300">发布账号</p>
+              <p className="text-xs text-slate-600">快速变现</p>
+            </Link>
+          </div>
           <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
             <ShoppingBag className="w-4 h-4" />
             去逛逛
