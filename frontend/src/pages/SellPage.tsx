@@ -803,10 +803,15 @@ const SellPage: React.FC = () => {
               )}
 
               {images.length === 0 && (
-                <div className="flex items-center justify-center gap-4 py-6 text-slate-600">
-                  <ImageIcon className="w-5 h-5" />
-                  <span className="text-sm">暂无图片，建议至少上传1张</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-6 flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
+                >
+                  <ImageIcon className="w-8 h-8" />
+                  <span className="text-sm">点击上传账号截图</span>
+                  <span className="text-xs text-slate-600">建议至少上传1张，高清图片更吸引买家</span>
+                </button>
               )}
             </div>
 

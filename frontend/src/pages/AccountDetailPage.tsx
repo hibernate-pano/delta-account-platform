@@ -366,15 +366,23 @@ const isOwner = user?.id === account?.sellerId;
                   {/* Review breakdown bar */}
                   {reviewStats && reviewStats.totalCount > 0 && (
                     <div className="flex items-center gap-1 mt-1.5">
-                      {['fiveStar', 'fourStar', 'threeStar', 'twoStar', 'oneStar'].map((star, i) => {
-                        const count = reviewStats[star as keyof typeof reviewStats] as number;
+                      {(['fiveStar', 'fourStar', 'threeStar', 'twoStar', 'oneStar'] as const).map((star, i) => {
+                        const count = reviewStats[star] as number;
                         const pct = reviewStats.totalCount > 0 ? (count / reviewStats.totalCount * 100) : 0;
-                        return pct > 0 && (
+                        const minWidth = count > 0 ? 6 : 2;
+                        const colors = [
+                          'bg-yellow-400/70',
+                          'bg-yellow-400/55',
+                          'bg-yellow-400/35',
+                          'bg-yellow-400/20',
+                          'bg-yellow-400/10',
+                        ];
+                        return (
                           <div
                             key={star}
-                            className="h-1 rounded-full bg-yellow-400/60"
-                            style={{ width: `${Math.max(pct, 3)}%` }}
-                            title={`${['5','4','3','2','1'][i]}星: ${count}条`}
+                            className={`h-1 rounded-full ${colors[i]}`}
+                            style={{ width: `${Math.max(pct, minWidth)}%` }}
+                            title={`${['5','4','3','2','1'][i]}星: ${count}条 (${pct.toFixed(1)}%)`}
                           />
                         );
                       })}
@@ -405,10 +413,19 @@ const isOwner = user?.id === account?.sellerId;
                 {!isOwner && (
                   <button
                     onClick={handleContactSeller}
-                    className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-primary text-sm font-medium transition-all"
+                    disabled={createSessionMutation.isPending}
+                    className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 border rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-wait ${
+                      createSessionMutation.isPending
+                        ? 'bg-primary/10 border-primary/30 text-primary/60'
+                        : 'bg-primary/20 hover:bg-primary/30 border-primary/30 text-primary'
+                    }`}
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    聊聊
+                    {createSessionMutation.isPending ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <MessageCircle className="w-4 h-4" />
+                    )}
+                    {createSessionMutation.isPending ? '打开中...' : '聊聊'}
                   </button>
                 )}
               </div>
