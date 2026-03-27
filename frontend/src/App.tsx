@@ -2,6 +2,7 @@ import React, { useEffect, lazy, Suspense, useState, useCallback, useRef } from 
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/auth';
 import { useWishlistStore } from './store/wishlist';
 import { favoriteApi } from './api';
@@ -247,20 +248,20 @@ const App: React.FC = () => {
                     <Route path="/accounts/:id" element={<AccountDetailPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/sell" element={<SellPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/orders" element={<OrdersPage />} />
-                    <Route path="/wallet" element={<WalletPage />} />
-                    <Route path="/messages" element={<MessagesPage />} />
-                    <Route path="/messages/:sessionId" element={<MessagesPage />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/refunds" element={<RefundsPage />} />
-                    <Route path="/wishlist" element={<WishlistPage />} />
-                    <Route path="/recent" element={<RecentlyViewedPage />} />
+                    <Route path="/sell" element={<ProtectedRoute><SellPage /></ProtectedRoute>} />
+                    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+                    <Route path="/wallet" element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
+                    <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+                    <Route path="/messages/:sessionId" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+                    <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+                    <Route path="/refunds" element={<ProtectedRoute><RefundsPage /></ProtectedRoute>} />
+                    <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+                    <Route path="/recent" element={<ProtectedRoute><RecentlyViewedPage /></ProtectedRoute>} />
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/faq" element={<FAQPage />} />
-                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Suspense>

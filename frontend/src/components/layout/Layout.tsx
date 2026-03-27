@@ -115,7 +115,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     setShowUserMenu(false);
   }, [logout, navigate]);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
   const isAdmin = user?.role === 'ADMIN';
 
   const NavLink = ({
