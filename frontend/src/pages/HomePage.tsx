@@ -8,6 +8,7 @@ import { PullToRefresh } from '../components/ui/PullToRefresh';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { useAccounts } from '../hooks/useQueries';
+import { useMyOrders } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
@@ -740,7 +741,8 @@ const HomePage: React.FC = () => {
 
 // Live transaction toast (social proof)
 const TransactionToast: React.FC = () => {
-  const recentOrders: any[] = [];
+  const { data: ordersData } = useMyOrders();
+  const recentOrders = ordersData?.data?.data?.records?.filter((o: any) => o.status === 'COMPLETED') || [];
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<{ user: string; action: string; title: string; price: string } | null>(null);
 

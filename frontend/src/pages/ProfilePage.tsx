@@ -158,9 +158,6 @@ const ProfilePage: React.FC = () => {
     totalSpent: orders
       .filter((o: any) => o.status === 'COMPLETED' && o.type === 'BUY')
       .reduce((sum: number, o: any) => sum + (o.amount || 0), 0),
-    totalEarned: orders
-      .filter((o: any) => o.status === 'COMPLETED' && o.type === 'SELL')
-      .reduce((sum: number, o: any) => sum + (o.amount || 0), 0),
     avgOrderValue: orders.filter((o: any) => o.status === 'COMPLETED').length > 0
       ? orders.filter((o: any) => o.status === 'COMPLETED').reduce((sum: number, o: any) => sum + (o.amount || 0), 0) /
         orders.filter((o: any) => o.status === 'COMPLETED').length
@@ -630,7 +627,7 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Spending / Earnings Card */}
-              {(stats.totalSpent > 0 || stats.totalEarned > 0) && (
+              {stats.totalSpent > 0 && (
                 <div className="card">
                   <h3 className="font-medium mb-4 flex items-center gap-2">
                     <Wallet className="w-5 h-5 text-primary" />
@@ -641,12 +638,6 @@ const ProfilePage: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-slate-500">累计消费</span>
                         <span className="font-medium text-red-400">-¥{stats.totalSpent.toFixed(2)}</span>
-                      </div>
-                    )}
-                    {stats.totalEarned > 0 && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500">累计收入</span>
-                        <span className="font-medium text-green-400">+¥{stats.totalEarned.toFixed(2)}</span>
                       </div>
                     )}
                     {stats.avgOrderValue > 0 && (
@@ -710,7 +701,7 @@ const ProfilePage: React.FC = () => {
                     })}
                   </div>
                   {/* Achievement badges */}
-                  {(stats.totalAccounts > 0 || stats.sold > 0 || stats.totalEarned > 0) && (
+                  {(stats.totalAccounts > 0 || stats.sold > 0) && (
                     <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-dark-border">
                       <span className="text-xs text-slate-500">成就:</span>
                       {stats.totalAccounts >= 1 && (
@@ -721,11 +712,6 @@ const ProfilePage: React.FC = () => {
                       {stats.sold >= 5 && (
                         <span className="text-xs px-2 py-1 bg-green-500/10 text-green-400 rounded-full flex items-center gap-1">
                           <TrendingUp className="w-3 h-3" /> 成功卖家
-                        </span>
-                      )}
-                      {stats.totalEarned >= 1000 && (
-                        <span className="text-xs px-2 py-1 bg-purple-500/10 text-purple-400 rounded-full flex items-center gap-1">
-                          <Wallet className="w-3 h-3" /> 千元收入
                         </span>
                       )}
                       {stats.totalAccounts >= 10 && (
