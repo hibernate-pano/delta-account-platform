@@ -20,6 +20,12 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
   const touchStartY = useRef<number>(0);
   const galleryRef = useRef<HTMLDivElement>(null);
   const [galleryFocused, setGalleryFocused] = useState(false);
+  const [mainImgLoaded, setMainImgLoaded] = useState(false);
+  const [lightboxImgLoaded, setLightboxImgLoaded] = useState(false);
+
+  // Reset loaded state when image changes
+  useEffect(() => { setMainImgLoaded(false); }, [currentIndex]);
+  useEffect(() => { setLightboxImgLoaded(false); }, [lightboxIndex]);
 
   // Keyboard navigation: ←/→ works in main gallery when hovered/focused, and in lightbox
   useEffect(() => {
@@ -121,10 +127,17 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(currentIndex); } }}
       >
+        {!mainImgLoaded && (
+          <div className="absolute inset-0 bg-dark-lighter animate-pulse flex items-center justify-center">
+            <span className="text-slate-700 text-xs">加载中...</span>
+          </div>
+        )}
         <img
           src={images[currentIndex]}
           alt={title}
+          onLoad={() => setMainImgLoaded(true)}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          style={{ opacity: mainImgLoaded ? 1 : 0, transition: 'opacity 0.3s' }}
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -246,14 +259,22 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
             onTouchEnd={handleTouchEnd}
             style={{ cursor: zoomLevel > 1 ? 'grab' : 'default' }}
           >
+            {!lightboxImgLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-slate-600 text-sm">加载中...</span>
+              </div>
+            )}
             <img
               src={images[lightboxIndex]}
               alt={title}
+              onLoad={() => setLightboxImgLoaded(true)}
               className="object-contain transition-transform duration-200"
               style={{
                 transform: `scale(${zoomLevel}) translate(${dragOffset.x / zoomLevel}px, ${dragOffset.y / zoomLevel}px)`,
                 maxWidth: '100vw',
                 maxHeight: 'calc(100vh - 120px)',
+                opacity: lightboxImgLoaded ? 1 : 0,
+                transition: 'opacity 0.3s',
               }}
               draggable={false}
             />
