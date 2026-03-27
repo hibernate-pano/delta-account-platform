@@ -311,10 +311,10 @@ const MessagesPage: React.FC = () => {
               )}
             </div>
           </div>
-          {/* Connection status */}
-          <div className="flex items-center gap-1 text-green-400 text-xs">
+          {/* Connection status — no real-time presence data from backend */}
+          <div className="flex items-center gap-1 text-slate-500 text-xs">
             <Wifi className="w-3.5 h-3.5" />
-            <span>在线</span>
+            <span>私信</span>
           </div>
         </div>
 

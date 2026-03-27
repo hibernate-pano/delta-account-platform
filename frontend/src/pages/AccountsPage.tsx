@@ -594,6 +594,21 @@ const AccountsPage: React.FC = () => {
                     <span className="text-sm text-slate-500">租 ¥{account.rentalPrice}/时</span>
                   )}
                 </div>
+                {/* Engagement stats */}
+                {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0)) && (
+                  <div className="flex items-center gap-3 text-xs text-slate-600 mt-1.5">
+                    {account.viewCount != null && (
+                      <span className="flex items-center gap-0.5">
+                        <Eye className="w-3 h-3" />{account.viewCount}
+                      </span>
+                    )}
+                    {account.orderCount != null && account.orderCount > 0 && (
+                      <span className="flex items-center gap-0.5">
+                        <ShoppingCart className="w-3 h-3" />{account.orderCount}笔交易
+                      </span>
+                    )}
+                  </div>
+                )}
                 {/* Seller info */}
                 {(account.sellerNickname || account.sellerUsername) && (
                   <div className="flex items-center gap-2 mt-2">

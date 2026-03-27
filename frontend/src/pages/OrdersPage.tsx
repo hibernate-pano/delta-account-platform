@@ -369,7 +369,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
 };
 
 // Single Order Card
-const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; onReview: (order: Order) => void }> = ({ order, onViewDetail, onReview }) => {
+const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; onReview: (order: Order) => void }> = React.memo(({ order, onViewDetail, onReview }) => {
   const [expanded, setExpanded] = useState(false);
   const [countdown, setCountdown] = useState('');
   const [paymentCountdown, setPaymentCountdown] = useState('');
@@ -641,7 +641,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
       )}
     </div>
   );
-};
+});
 
 // Review Modal
 const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, onClose }) => {
@@ -793,7 +793,7 @@ const OrdersPage: React.FC = () => {
   const { data, isLoading, isError, refetch } = useMyOrders();
   const orders: Order[] = data?.data?.data?.records || [];
 
-  const filteredOrders = orders.filter(o => {
+  const filteredOrders = useMemo(() => orders.filter(o => {
     const statusMatch =
       activeTab === 'all' ||
       (activeTab === 'PENDING' && o.status === 'PENDING') ||
@@ -806,7 +806,7 @@ const OrdersPage: React.FC = () => {
       o.orderNo.toLowerCase().includes(kw) ||
       (o.account?.title?.toLowerCase().includes(kw) ?? false);
     return statusMatch && typeMatch && keywordMatch;
-  });
+  }), [orders, activeTab, activeType, keyword]);
 
   // Group by month
   const groupedOrders = useMemo(() => {
