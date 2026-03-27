@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -76,6 +76,7 @@ const SellPage: React.FC = () => {
   const [newImage, setNewImage] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [previewImg, setPreviewImg] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -84,6 +85,9 @@ const SellPage: React.FC = () => {
     const hasContent = formData.title || images.length > 0 || formData.price || formData.description;
     setIsDirty(!!hasContent);
   }, [formData, images]);
+
+  // Reset preview index when images change
+  useEffect(() => { setPreviewImg(0); }, [images]);
 
   // beforeunload: warn on tab close / browser back with unsaved data
   useEffect(() => {
@@ -677,9 +681,25 @@ const SellPage: React.FC = () => {
 
               {/* Mini account card */}
               <div className="bg-dark rounded-xl overflow-hidden">
-                {images[0] ? (
-                  <div className="aspect-video">
-                    <img src={images[0]} alt="" className="w-full h-full object-cover" />
+                {images.length > 0 ? (
+                  <div className="space-y-2">
+                    <div className="aspect-video">
+                      <img src={images[previewImg]} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    {images.length > 1 && (
+                      <div className="flex gap-2 px-3 pb-3 overflow-x-auto scrollbar-hide">
+                        {images.map((img, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setPreviewImg(idx)}
+                            className={`flex-shrink-0 w-14 h-10 rounded-lg overflow-hidden transition-all ${idx === previewImg ? 'ring-2 ring-primary opacity-100' : 'opacity-50 hover:opacity-80'}`}
+                          >
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="aspect-video bg-dark-lighter flex items-center justify-center">

@@ -9,7 +9,7 @@ import { ScrollToTop } from '../components/ui/ScrollToTop';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
-  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock
+  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock, CheckCircle
 } from 'lucide-react';
 
 interface Notification {
@@ -105,7 +105,9 @@ const NotificationItem: React.FC<{
   onDelete: (id: number) => void;
   onView: (n: Notification) => void;
   markReadPending: boolean;
-}> = ({ notification, onMarkRead, onDelete, onView, markReadPending }) => {
+  selectedIds: Set<number>;
+  onToggleSelect: (id: number) => void;
+}> = ({ notification, onMarkRead, onDelete, onView, markReadPending, selectedIds, onToggleSelect }) => {
   const [swipeX, setSwipeX] = useState(0);
   const [swiping, setSwiping] = useState(false);
   const touchStartX = useRef(0);
@@ -151,7 +153,21 @@ const NotificationItem: React.FC<{
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="px-4 py-4 flex items-start gap-3 hover:bg-dark-lighter/40 transition-colors cursor-pointer active:bg-dark-lighter/60"
+        {/* Selection checkbox */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onToggleSelect(notification.id); }}
+          className="flex-shrink-0 flex items-center justify-center w-10 h-full align-middle"
+        >
+          <div className={`w-4.5 h-4.5 rounded border flex items-center justify-center transition-all ${
+            selectedIds.has(notification.id)
+              ? 'bg-primary border-primary'
+              : 'border-slate-600 hover:border-slate-400'
+          }`}>
+            {selectedIds.has(notification.id) && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+          </div>
+        </button>
+        <div className="px-2 py-4 flex items-start gap-3 hover:bg-dark-lighter/40 transition-colors cursor-pointer active:bg-dark-lighter/60"
           onClick={() => {
             // Smart navigate on click
             const target = getNavTarget(notification);
@@ -246,6 +262,7 @@ const NotificationsPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, !!selectedNotification);
@@ -280,6 +297,16 @@ const NotificationsPage: React.FC = () => {
       setDeletedIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
       showToast('删除失败', 'error');
     }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    selectedIds.forEach((id) => {
+      setDeletedIds((prev) => new Set([...prev, id]));
+      deleteMutation.mutate(id);
+    });
+    showToast(`${selectedIds.size} 条通知已删除`, 'info');
+    setSelectedIds(new Set());
   };
 
   // Keyboard dismiss for detail modal
@@ -400,6 +427,19 @@ const NotificationsPage: React.FC = () => {
               className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50">
               {markAllReadMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCheck className="w-4 h-4" />}
               全部已读
+            </button>
+          )}
+          <button
+            onClick={() => { setSelectedIds(new Set()); }}
+            className="btn-ghost p-2"
+            title={selectedIds.size > 0 ? '取消选择' : '选择'}
+          >
+            {selectedIds.size > 0 ? <X className="w-4 h-4 text-primary" /> : <CheckCircle className="w-4 h-4" />}
+          </button>
+          {selectedIds.size > 0 && (
+            <button onClick={handleBulkDelete} className="btn-secondary !py-1.5 !px-3 text-sm flex items-center gap-1.5">
+              <Trash2 className="w-3.5 h-3.5" />
+              删除 ({selectedIds.size})
             </button>
           )}
           <button onClick={() => refetch()} className="btn-ghost p-2" title="刷新">
@@ -523,6 +563,14 @@ const NotificationsPage: React.FC = () => {
                       onDelete={handleDelete}
                       onView={setSelectedNotification}
                       markReadPending={pendingIds.has(notification.id)}
+                      selectedIds={selectedIds}
+                      onToggleSelect={(id) => {
+                        setSelectedIds((prev) => {
+                          const next = new Set(prev);
+                          next.has(id) ? next.delete(id) : next.add(id);
+                          return next;
+                        });
+                      }}
                     />
                   ))}
                 </div>

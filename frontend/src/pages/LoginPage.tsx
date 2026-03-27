@@ -198,6 +198,27 @@ const LoginPage: React.FC = () => {
                       {fieldErrors.password}
                     </p>
                   )}
+                  {/* Password strength */}
+                  {formData.password && !fieldErrors.password && (() => {
+                    let score = 0;
+                    if (formData.password.length >= 6) score++;
+                    if (formData.password.length >= 8) score++;
+                    if (/[a-z]/.test(formData.password) && /[A-Z]/.test(formData.password)) score++;
+                    if (/\d/.test(formData.password)) score++;
+                    const strength = score <= 1 ? 1 : score <= 3 ? 2 : 3;
+                    const color = score <= 1 ? 'bg-red-500' : score <= 3 ? 'bg-yellow-500' : 'bg-green-500';
+                    const label = score <= 1 ? '密码强度：弱' : '密码强度：良好';
+                    return (
+                      <div className="space-y-1.5 mt-2">
+                        <div className="flex gap-1">
+                          {([1, 2, 3] as const).map((level) => (
+                            <div key={level} className={`h-1 flex-1 rounded-full transition-colors ${strength >= level ? color : 'bg-dark-lighter'}`} />
+                          ))}
+                        </div>
+                        <p className={`text-[10px] ${score <= 1 ? 'text-red-400' : 'text-slate-600'}`}>{label}</p>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
