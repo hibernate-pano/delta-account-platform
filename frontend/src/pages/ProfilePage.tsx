@@ -12,7 +12,8 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
-  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload, Eye, ShoppingCart
+  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload, Eye, ShoppingCart,
+  Image, Pencil, Smartphone, Mail
 } from 'lucide-react';
 
 import { Review } from '../types';
@@ -185,10 +186,10 @@ const ProfilePage: React.FC = () => {
 
   // Profile completeness score + missing fields list
   const completenessFields = [
-    { key: 'avatar', label: '上传头像', done: !!(profile?.avatar || user?.avatar), icon: '🖼️' },
-    { key: 'nickname', label: '设置昵称', done: !!(profile?.nickname || user?.nickname), icon: '✏️' },
-    { key: 'phone', label: '绑定手机', done: !!(profile?.phone || user?.phone), icon: '📱' },
-    { key: 'email', label: '填写邮箱', done: !!(profile?.email || user?.email), icon: '📧' },
+    { key: 'avatar', label: '上传头像', done: !!(profile?.avatar || user?.avatar), icon: Image },
+    { key: 'nickname', label: '设置昵称', done: !!(profile?.nickname || user?.nickname), icon: Pencil },
+    { key: 'phone', label: '绑定手机', done: !!(profile?.phone || user?.phone), icon: Smartphone },
+    { key: 'email', label: '填写邮箱', done: !!(profile?.email || user?.email), icon: Mail },
   ];
   const missingFields = completenessFields.filter(f => !f.done);
   const completeness = Math.round(completenessFields.filter(f => f.done).length / completenessFields.length * 100);
@@ -318,7 +319,7 @@ const ProfilePage: React.FC = () => {
                   onClick={() => setShowEditModal(true)}
                   className="flex items-center gap-1.5 px-2.5 py-1.5 bg-dark-lighter hover:bg-dark-lighter/80 border border-dark-border hover:border-primary/40 rounded-full text-xs text-slate-400 hover:text-primary transition-all"
                 >
-                  <span>{field.icon}</span>
+                  <span><field.icon className="w-3.5 h-3.5" /></span>
                   <span>{field.label}</span>
                 </button>
               ))}
