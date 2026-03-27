@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api';
 import { useAuthStore } from '../store/auth';
-import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, User, Lock, Shield, Zap, TrendingUp, MessageCircle, CheckCircle } from 'lucide-react';
+import { Gamepad2, ArrowRight, AlertCircle, Eye, EyeOff, User, Lock, Shield, Zap, TrendingUp, MessageCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import AuthBackground from '../components/ui/AuthBackground';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
@@ -291,13 +291,17 @@ const LoginPage: React.FC = () => {
                       className={`w-full flex items-center gap-4 p-4 bg-dark-lighter border border-transparent rounded-xl text-left transition-all disabled:opacity-50 ${acc.bg}`}
                     >
                       <div className={`w-11 h-11 rounded-xl bg-dark flex items-center justify-center flex-shrink-0 border border-slate-700/50`}>
-                        <Icon className={`w-5 h-5 ${acc.color}`} />
+                        {loading ? (
+                          <RefreshCw className="w-5 h-5 text-slate-400 animate-spin" />
+                        ) : (
+                          <Icon className={`w-5 h-5 ${acc.color}`} />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-white text-sm">{acc.label}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{acc.sub}</p>
+                        <p className="font-medium text-white text-sm">{loading ? '登录中...' : acc.label}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{loading ? '正在验证...' : acc.sub}</p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                      {!loading && <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />}
                     </button>
                   );
                 })}

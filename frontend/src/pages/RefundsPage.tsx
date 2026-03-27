@@ -438,7 +438,7 @@ const RefundsPage: React.FC = () => {
                         {/* Mini refund progress bar */}
                         <div className="flex items-center gap-1 mb-2">
                           {(['申请', '审核', '完成'] as const).map((step, i) => {
-                            const statusOrder = ['PENDING', 'APPROVED', 'REFUNDED'];
+                            const statusOrder = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'REFUNDED'];
                             const refundOrder = statusOrder.indexOf(refund.status);
                             const isDone = i < refundOrder;
                             const isActive = i === refundOrder && refund.status === 'PENDING';

@@ -164,9 +164,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
           {/* Pay Button */}
           <button
-            onClick={handlePay}
-            disabled={loading || selectedMethod !== 'BALANCE' || insufficientBalance}
-            className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={insufficientBalance ? () => { onClose(); navigate('/wallet'); } : handlePay}
+            disabled={loading || (selectedMethod !== 'BALANCE' && !insufficientBalance)}
+            className={`w-full py-4 text-lg flex items-center justify-center gap-2 transition-all ${
+              insufficientBalance
+                ? 'btn-secondary border-red-500/30 text-red-400 hover:border-red-500/50'
+                : 'btn-primary disabled:opacity-50 disabled:cursor-not-allowed'
+            }`}
           >
             {loading ? (
               <>

@@ -113,6 +113,7 @@ const NotificationItem: React.FC<{
   const touchStartX = useRef(0);
   const config = typeConfig[notification.type] || getDefault();
   const Icon = config.icon;
+  const isUnread = notification.status === 'UNREAD';
 
   const navigate = useNavigate();
 
@@ -137,7 +138,6 @@ const NotificationItem: React.FC<{
     setSwiping(false);
   };
 
-  const isUnread = notification.status === 'UNREAD';
   const isHigh = config.priority === 'HIGH';
 
   return (
