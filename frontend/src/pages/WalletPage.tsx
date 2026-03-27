@@ -211,6 +211,10 @@ const TransactionDetailModal: React.FC<{ tx: Transaction; onClose: () => void }>
   );
 };
 
+// Format a raw numeric string for display (e.g. "1000" → "1,000.00")
+const fmtAmt = (v: string) =>
+  v && !isNaN(+v) ? (+v).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+
 const WalletPage: React.FC = () => {
   usePageTitle('我的钱包');
   const navigate = useNavigate();
@@ -723,9 +727,10 @@ const WalletPage: React.FC = () => {
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-slate-500">¥</span>
                   <input
-                    type="number"
-                    value={rechargeAmount}
-                    onChange={(e) => setRechargeAmount(e.target.value)}
+                    type="text"
+                    inputMode="decimal"
+                    value={fmtAmt(rechargeAmount)}
+                    onChange={(e) => setRechargeAmount(e.target.value.replace(/,/g, '').replace(/[^\d.]/g, ''))}
                     className="input w-full pl-10 text-2xl font-bold"
                     placeholder="0.00"
                     step="0.01"
@@ -805,9 +810,10 @@ const WalletPage: React.FC = () => {
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-slate-500">¥</span>
                   <input
-                    type="number"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    type="text"
+                    inputMode="decimal"
+                    value={fmtAmt(withdrawAmount)}
+                    onChange={(e) => setWithdrawAmount(e.target.value.replace(/,/g, '').replace(/[^\d.]/g, ''))}
                     className="input w-full pl-10 text-2xl font-bold"
                     placeholder="0.00"
                     step="0.01"

@@ -54,20 +54,7 @@ const AccountDetailPage: React.FC = () => {
   const [rentHours, setRentHours] = useState(1);
   const [activeTab, setActiveTab] = useState<'info' | 'details'>('info');
   const [copied, setCopied] = useState(false);
-  const [viewerCount, setViewerCount] = useState(0);
-
-  // Live viewer count simulation
-  useEffect(() => {
-    if (!account) return;
-    const base = Math.floor((account.viewCount || 0) / 10) + Math.floor(Math.random() * 8) + 3;
-    setViewerCount(base);
-    const interval = setInterval(() => {
-      const delta = Math.floor(Math.random() * 5) - 2;
-      setViewerCount(prev => Math.max(1, prev + delta));
-    }, 8000 + Math.random() * 7000);
-    const hide = setTimeout(() => setViewerCount(0), 25000);
-    return () => { clearInterval(interval); clearTimeout(hide); };
-  }, [account?.id]);
+  const viewerCount = account?.viewCount ?? 0;
 
   const handleBuy = async () => {
     if (!token) {
@@ -206,10 +193,10 @@ const isOwner = user?.id === account?.sellerId;
           <h1 className="text-2xl font-bold mb-3">{account.title}</h1>
           {viewerCount > 0 && (
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full">
-                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
-                <span className="text-xs text-orange-400 font-medium">
-                  <span className="text-orange-300">{viewerCount}</span> 人正在查看此账号
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-500/10 border border-slate-500/20 rounded-full">
+                <Eye className="w-3 h-3 text-slate-400" />
+                <span className="text-xs text-slate-400">
+                  <span className="font-medium text-slate-300">{viewerCount.toLocaleString()}</span> 次浏览
                 </span>
               </div>
             </div>
