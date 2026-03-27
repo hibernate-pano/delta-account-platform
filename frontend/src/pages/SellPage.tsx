@@ -29,6 +29,26 @@ const getSkinMultiplier = (count: number) => {
   return 1;
 };
 
+// Client-side image compression: max 1200px wide, JPEG 0.82 quality
+const compressImage = (file: File): Promise<string> =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxW = 1200;
+        let { width, height } = img;
+        if (width > maxW) { height = (height * maxW) / width; width = maxW; }
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+
 const getPriceSuggestion = (rank: string, skinCount: number) => {
   const base = RANK_BASE_PRICES[rank] ?? 50;
   const mult = getSkinMultiplier(skinCount);
@@ -102,12 +122,7 @@ const SellPage: React.FC = () => {
     files.forEach((file) => {
       if (images.length >= 5) { showToast('最多只能上传5张图片', 'warning'); return; }
       if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const result = ev.target?.result as string;
-        setImages((prev) => [...prev, result]);
-      };
-      reader.readAsDataURL(file);
+      compressImage(file).then((compressed) => setImages((prev) => [...prev, compressed]));
     });
     // Reset so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -535,12 +550,7 @@ const SellPage: React.FC = () => {
                   const imageFiles = files.filter(f => f.type.startsWith('image/'));
                   if (imageFiles.length > 0) {
                     imageFiles.slice(0, 5 - images.length).forEach((file) => {
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        const result = ev.target?.result as string;
-                        setImages((prev) => [...prev, result]);
-                      };
-                      reader.readAsDataURL(file);
+                      compressImage(file).then((compressed) => setImages((prev) => [...prev, compressed]));
                     });
                     return;
                   }

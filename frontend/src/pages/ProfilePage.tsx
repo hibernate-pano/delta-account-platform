@@ -9,7 +9,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
-  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send
+  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload
 } from 'lucide-react';
 
 import { Review } from '../types';
@@ -878,6 +878,30 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
             ))}
           </div>
+          <input
+            type="file"
+            accept="image/*"
+            id="avatar-upload"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                setAvatar(ev.target?.result as string);
+                showToast('头像已上传', 'success');
+              };
+              reader.readAsDataURL(file);
+              e.target.value = '';
+            }}
+          />
+          <label
+            htmlFor="avatar-upload"
+            className="text-xs text-primary hover:text-primary-light cursor-pointer flex items-center gap-1 mt-2 transition-colors"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            上传自定义头像
+          </label>
         </div>
 
         {/* Nickname */}
