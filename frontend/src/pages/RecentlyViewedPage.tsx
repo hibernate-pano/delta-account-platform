@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
@@ -26,6 +26,18 @@ const RecentlyViewedPage: React.FC = () => {
   const { items: recentItems, removeItem, clearAll } = useRecentStore();
   const { token } = useAuthStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [sortMode, setSortMode] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  const filteredItems = useMemo(() => {
+    return recentItems
+      .filter(item => !verifiedOnly || item.account.verificationStatus === 'VERIFIED')
+      .sort((a, b) => {
+        if (sortMode === 'price_asc') return a.account.price - b.account.price;
+        if (sortMode === 'price_desc') return b.account.price - a.account.price;
+        return b.viewedAt - a.viewedAt;
+      });
+  }, [recentItems, sortMode, verifiedOnly]);
 
   if (!token) {
     return (
@@ -53,7 +65,7 @@ const RecentlyViewedPage: React.FC = () => {
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {recentItems.length > 0
-              ? `${recentItems.length} 个浏览过的账号`
+              ? `${filteredItems.length} / ${recentItems.length} 个浏览过的账号`
               : '暂无浏览记录'}
           </p>
         </div>
@@ -87,8 +99,43 @@ const RecentlyViewedPage: React.FC = () => {
         </div>
       )}
 
-      {recentItems.length === 0 ? (
-        /* Empty State */
+      {recentItems.length > 0 && (
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          <span className="text-xs text-slate-500">排序:</span>
+          <select
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+            className="bg-dark-lighter border border-dark-border text-slate-300 text-xs rounded-lg px-3 py-1.5 cursor-pointer"
+          >
+            <option value="recent">最近浏览</option>
+            <option value="price_asc">价格 ↑ 低到高</option>
+            <option value="price_desc">价格 ↓ 高到低</option>
+          </select>
+          <button
+            onClick={() => setVerifiedOnly(!verifiedOnly)}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+              verifiedOnly
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'bg-dark-lighter text-slate-400 border border-dark-border hover:border-green-500/30 hover:text-green-400'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5" />
+              仅看已认证
+            </span>
+          </button>
+        </div>
+      )}
+
+      {filteredItems.length === 0 && recentItems.length > 0 ? (
+        <div className="card text-center py-12 animate-fade-in">
+          <CheckCircle className="w-10 h-10 mx-auto mb-3 text-slate-600" />
+          <p className="text-slate-500 mb-2">没有符合条件的浏览记录</p>
+          <button onClick={() => { setSortMode('recent'); setVerifiedOnly(false); }} className="text-xs text-primary hover:text-primary-light transition-colors">
+            清除筛选条件
+          </button>
+        </div>
+      ) : filteredItems.length === 0 ? (
         <div className="card text-center py-20 animate-fade-in">
           <div className="w-24 h-24 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-6">
             <History className="w-12 h-12 text-slate-700" />
@@ -105,7 +152,7 @@ const RecentlyViewedPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-          {recentItems.map((item) => (
+          {filteredItems.map((item) => (
             <div key={`${item.account.id}-${item.viewedAt}`} className="card group relative hover:border-slate-700 transition-all">
               {/* Wishlist */}
               <div className="absolute top-2 right-2 z-10">

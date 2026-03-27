@@ -11,7 +11,7 @@ import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
-  Shield, User, Star, Search, TrendingUp
+  Shield, User, Star, Search, TrendingUp, TrendingDown
 } from 'lucide-react';
 
 interface Order {
@@ -973,6 +973,68 @@ const OrdersPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Spending Overview */}
+      {stats.total > 0 && (
+        <div className="mb-6 space-y-3">
+          <div className="card p-4">
+            <h3 className="text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              收支概览
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="text-center">
+                <p className="text-xl font-bold text-white">
+                  ¥{orders
+                    .filter(o => ['COMPLETED', 'PAID', 'PROCESSING'].includes(o.status))
+                    .reduce((sum, o) => sum + (o.amount || 0), 0)
+                    .toFixed(0)}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">总交易额</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-red-400 flex items-center justify-center gap-1">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  ¥{orders
+                    .filter(o => o.type === 'BUY' && ['COMPLETED', 'PAID', 'PROCESSING'].includes(o.status))
+                    .reduce((sum, o) => sum + (o.amount || 0), 0)
+                    .toFixed(0)}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">购买支出</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-purple-400 flex items-center justify-center gap-1">
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  ¥{orders
+                    .filter(o => o.type === 'RENT' && ['COMPLETED', 'PAID', 'PROCESSING'].includes(o.status))
+                    .reduce((sum, o) => sum + (o.amount || 0), 0)
+                    .toFixed(0)}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">租赁支出</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-green-400">
+                  {orders.filter(o => o.status === 'COMPLETED').length}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">完成交易</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Rentals Alert */}
+          {orders.filter(o => o.type === 'RENT' && ['PAID', 'PROCESSING'].includes(o.status) && o.rentEnd).length > 0 && (
+            <div className="card p-4 border-l-4 border-l-orange-500 bg-orange-500/5 flex items-center gap-3">
+              <Clock className="w-5 h-5 text-orange-400 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-orange-400">
+                  有 {orders.filter(o => o.type === 'RENT' && ['PAID', 'PROCESSING'].includes(o.status)).length} 个租赁订单进行中
+                </p>
+                <p className="text-xs text-slate-500">请注意租赁到期时间，及时续费或归还</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Search + Status + Type Filter */}
       <div className="mb-6 space-y-3">
