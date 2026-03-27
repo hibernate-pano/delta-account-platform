@@ -15,7 +15,7 @@ import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp, Eye, Sparkles
+  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, Check, Clock
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -242,11 +242,12 @@ const isOwner = user?.id === account?.sellerId;
                   : 'bg-yellow-500/20 text-yellow-400'
               }`}
             >
-              {account.verificationStatus === 'VERIFIED' ? '✅ 已认证' : '⏳ 待审核'}
+              {account.verificationStatus === 'VERIFIED' ? <span className="inline-flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-400" /> 已认证</span> : <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-yellow-400" /> 待审核</span>}
             </span>
             {account.status === 'ON_SALE' && (
-              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium">
-                🔥 出售中
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium inline-flex items-center gap-1.5">
+                <Flame className="w-4 h-4" />
+                出售中
               </span>
             )}
           </div>

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -189,11 +189,11 @@ const AccountsPage: React.FC = () => {
   };
 
   const sortOptions = [
-    { key: '', label: '最新', icon: '✨' },
-    { key: 'price_asc', label: '价格从低到高', icon: '⬆️' },
-    { key: 'price_desc', label: '价格从高到低', icon: '⬇️' },
-    { key: 'skin_count', label: '皮肤数量', icon: '🎨' },
-    { key: 'seller_credit', label: '卖家信誉', icon: '⭐' },
+    { key: '', label: '最新', icon: Sparkles },
+    { key: 'price_asc', label: '价格从低到高', icon: ArrowUpDown },
+    { key: 'price_desc', label: '价格从高到低', icon: ArrowUpDown },
+    { key: 'skin_count', label: '皮肤数量', icon: Palette },
+    { key: 'seller_credit', label: '卖家信誉', icon: Star },
   ];
 
   const priceRanges = [
@@ -398,7 +398,7 @@ const AccountsPage: React.FC = () => {
                   : 'bg-dark-lighter text-slate-400 hover:text-white'
               }`}
             >
-              <span className="mr-1">{option.icon}</span>
+              <span className="mr-1">{React.createElement(option.icon, { className: 'w-3.5 h-3.5' })}</span>
               {option.label}
             </button>
           ))}
@@ -834,10 +834,10 @@ const AccountsPage: React.FC = () => {
                   <span className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">{quickViewAccount.gameRank || '暂无段位'}</span>
                   <span className="px-2.5 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-amber-400/70" /> {quickViewAccount.skinCount} 皮肤</span>
                   {quickViewAccount.verificationStatus === 'VERIFIED' && (
-                    <span className="px-2.5 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">✓ 已认证</span>
+                    <span className="px-2.5 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium inline-flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> 已认证</span>
                   )}
                   {quickViewAccount.status === 'ON_SALE' && (
-                    <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium">🔥 出售中</span>
+                    <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium inline-flex items-center gap-1.5"><Flame className="w-3.5 h-3.5" /> 出售中</span>
                   )}
                 </div>
               </div>
