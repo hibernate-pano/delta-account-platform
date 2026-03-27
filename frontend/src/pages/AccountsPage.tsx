@@ -430,16 +430,53 @@ const AccountsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Results Count */}
+      {/* Results Count + Active Filters */}
       {!isLoading && accounts.length > 0 && (
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-slate-500">
-            第 <span className="text-primary font-medium">{currentPage}</span> / {totalPages} 页，
-            共 <span className="text-primary font-medium">{totalRecords}</span> 个账号
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm text-slate-500">
+              <span className="text-primary font-medium">{totalRecords}</span> 个账号
+              {totalRecords < (data?.data?.data?.total || 0) && (
+                <span className="text-slate-600">（共 {(data?.data?.data?.total || 0)} 个）</span>
+              )}
+            </p>
+            {verifiedOnly && (
+              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-xs flex items-center gap-1 border border-emerald-500/30">
+                <ShieldCheck className="w-3 h-3" /> 已认证
+                <button onClick={() => setVerifiedOnly(false)} className="ml-0.5 hover:text-emerald-300"><X className="w-2.5 h-2.5" /></button>
+              </span>
+            )}
+            {rentalOnly && (
+              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs flex items-center gap-1 border border-purple-500/30">
+                <Clock className="w-3 h-3" /> 支持租赁
+                <button onClick={() => setRentalOnly(false)} className="ml-0.5 hover:text-purple-300"><X className="w-2.5 h-2.5" /></button>
+              </span>
+            )}
+            {selectedPriceRange && (
+              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full text-xs flex items-center gap-1 border border-blue-500/30">
+                {priceRanges.find(r => r.key === selectedPriceRange)?.label || selectedPriceRange}
+                <button onClick={() => setSelectedPriceRange('')} className="ml-0.5 hover:text-blue-300"><X className="w-2.5 h-2.5" /></button>
+              </span>
+            )}
+            {sort && (
+              <span className="px-2 py-0.5 bg-dark-lighter text-slate-400 rounded-full text-xs flex items-center gap-1 border border-dark-border">
+                {sortOptions.find(o => o.key === sort)?.label || sort}
+                <button onClick={() => setSort('')} className="ml-0.5 hover:text-slate-300"><X className="w-2.5 h-2.5" /></button>
+              </span>
+            )}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+              >
+                清除全部
+              </button>
+            )}
+          </div>
           <p className="text-xs text-slate-600 flex items-center gap-1">
-            <RefreshCw className="w-3 h-3" />
-            {dataUpdatedAt ? `更新于 ${(() => { const d = Math.floor((Date.now() - dataUpdatedAt) / 60000); return d < 1 ? '刚刚' : d < 60 ? `${d}分钟前` : `${Math.floor(d/60)}小时前`; })()}` : ''}
+            第 <span className="text-primary">{currentPage}</span>/<span>{totalPages}</span> 页
+            <RefreshCw className="w-3 h-3 ml-2" />
+            {dataUpdatedAt ? ` ${(() => { const d = Math.floor((Date.now() - dataUpdatedAt) / 60000); return d < 1 ? '刚刚' : d < 60 ? `${d}分钟前` : `${Math.floor(d/60)}小时前`; })()}` : ''}
           </p>
         </div>
       )}

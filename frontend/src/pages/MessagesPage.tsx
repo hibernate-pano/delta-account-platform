@@ -199,15 +199,19 @@ const MessagesPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
+  const [partnerOnline, setPartnerOnline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastMessageCountRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const partnerOnlineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Restore draft from localStorage when session changes
   useEffect(() => {
     setOptimisticMessages([]);
     lastMessageCountRef.current = 0;
+    setPartnerOnline(false);
+    if (partnerOnlineTimerRef.current) { clearTimeout(partnerOnlineTimerRef.current); partnerOnlineTimerRef.current = null; }
     if (currentSessionId != null) {
       const draft = localStorage.getItem(`delta_msg_draft_${currentSessionId}`);
       if (draft) setNewMessage(draft);
@@ -233,6 +237,10 @@ const MessagesPage: React.FC = () => {
         if (latestMsg && latestMsg.senderId !== user?.id) {
           setShowTypingIndicator(true);
           setTimeout(() => setShowTypingIndicator(false), 2000);
+          // Mark partner as online and set 60s timer
+          setPartnerOnline(true);
+          if (partnerOnlineTimerRef.current) clearTimeout(partnerOnlineTimerRef.current);
+          partnerOnlineTimerRef.current = setTimeout(() => setPartnerOnline(false), 60_000);
         }
       }
       lastMessageCountRef.current = newCount;
@@ -356,14 +364,25 @@ const MessagesPage: React.FC = () => {
                   <User className="w-5 h-5 text-primary" />
                 </div>
               )}
-              {/* Status dot — no real-time presence data from backend, use neutral */}
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-slate-600 rounded-full border-2 border-dark" />
+              {/* Online indicator — green pulse when partner was recently active */}
+              <span
+                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-dark transition-colors ${
+                  partnerOnline ? 'bg-green-400 animate-pulse' : 'bg-slate-600'
+                }`}
+              />
             </div>
             <div className="min-w-0">
               <h1 className="text-base font-bold truncate">
                 {currentSession?.otherUser?.nickname ||
                   currentSession?.otherUser?.username || '聊天'}
               </h1>
+              <p className="text-[11px] mt-0.5">
+                {partnerOnline ? (
+                  <span className="text-green-400">在线</span>
+                ) : (
+                  <span className="text-slate-600">离线</span>
+                )}
+              </p>
               {currentSession?.accountTitle && (
                 <div className="flex items-center gap-2 truncate">
                   {account?.gameType && (
