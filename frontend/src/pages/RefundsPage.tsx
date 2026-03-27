@@ -205,6 +205,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
                       onConfirm={confirmCancel}
                       onCancel={() => setShowCancelConfirm(false)}
                       confirmLabel="撤销"
+                      isPending={cancelMutation.isPending}
                     />
                   </div>
                 ) : (

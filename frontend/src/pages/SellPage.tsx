@@ -411,7 +411,8 @@ const SellPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value.slice(0, 30) })}
                   maxLength={30}
                   id="sell-title"
-                  className="input" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
+                  disabled={isSubmitting}
+                  className="input disabled:opacity-50 disabled:cursor-not-allowed" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
                   required autoFocus
                 />
               </div>
@@ -449,7 +450,8 @@ const SellPage: React.FC = () => {
                     value={formData.gameRank}
                     onChange={(e) => setFormData({ ...formData, gameRank: e.target.value })}
                     id="sell-rank"
-                    className="input"
+                    disabled={isSubmitting}
+                    className="input disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="">选择段位</option>
                     {ranks.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -512,7 +514,8 @@ const SellPage: React.FC = () => {
                       type="number" value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       id="sell-price"
-                      className="input pl-10 text-xl font-bold !text-white" placeholder="0.00" step="0.01" min="1" required
+                      disabled={isSubmitting}
+                      className="input pl-10 text-xl font-bold !text-white disabled:opacity-50 disabled:cursor-not-allowed" placeholder="0.00" step="0.01" min="1" required
                     />
                   </div>
                   {formData.price && (formData.gameRank || formData.skinCount > 0) && (
@@ -636,7 +639,8 @@ const SellPage: React.FC = () => {
                   type="text" value={formData.weapons}
                   onChange={(e) => setFormData({ ...formData, weapons: e.target.value.slice(0, 100) })}
                   maxLength={100}
-                  className="input" placeholder="主要武器和装备，用逗号分隔"
+                  disabled={isSubmitting}
+                  className="input disabled:opacity-50 disabled:cursor-not-allowed" placeholder="主要武器和装备，用逗号分隔"
                 />
                 <div className="flex flex-wrap gap-2 mt-2">
                   {weaponPresets.map((preset) => (
@@ -663,7 +667,8 @@ const SellPage: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value.slice(0, 500) })}
                   maxLength={500}
-                  className="input h-28 resize-none" placeholder="详细描述：绑定信息、历史充值、特殊角色..."
+                  disabled={isSubmitting}
+                  className="input h-28 resize-none disabled:opacity-50 disabled:cursor-not-allowed" placeholder="详细描述：绑定信息、历史充值、特殊角色..."
                 />
               </div>
             </div>
@@ -960,7 +965,14 @@ const SellPage: React.FC = () => {
             )}
 
             {/* Notice */}
-            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex gap-3">
+            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex gap-3 relative">
+              {/* Submitting overlay */}
+              {isSubmitting && (
+                <div className="absolute inset-0 bg-dark-card/70 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 z-10">
+                  <RefreshCw className="w-6 h-6 text-primary animate-spin" />
+                  <p className="text-sm text-slate-400">正在发布账号...</p>
+                </div>
+              )}
               <Info className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
               <div className="text-xs text-slate-400">
                 <p className="text-yellow-400/80 font-medium mb-1">发布须知</p>
@@ -970,7 +982,7 @@ const SellPage: React.FC = () => {
             </div>
 
             <div className="flex gap-3">
-              <button type="button" onClick={() => handleBack(2)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
+              <button type="button" onClick={() => handleBack(2)} disabled={isSubmitting} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2 disabled:opacity-50">
                 <ArrowLeft className="w-5 h-5" /> 返回修改
               </button>
               <button type="submit" disabled={isSubmitting}
