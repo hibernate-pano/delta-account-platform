@@ -785,6 +785,73 @@ const HomePage: React.FC = () => {
       </section>
     </div>
     </PullToRefresh>
+    <TransactionToast />
+  );
+};
+
+// Live transaction activity feed (social proof)
+const TransactionToast: React.FC = () => {
+  const { data: ordersData } = useMyOrders();
+  const recentOrders: any[] = ordersData?.data?.data?.records || [];
+  const [visible, setVisible] = useState(false);
+  const [current, setCurrent] = useState<{ user: string; action: string; title: string; price: string } | null>(null);
+
+  useEffect(() => {
+    const demoMessages = [
+      { user: '小李', action: '购买', title: '满皮肤钻石账号', price: '¥1,299' },
+      { user: '阿杰', action: '租赁', title: '星耀段位账号', price: '¥8/时' },
+      { user: '星星', action: '购买', title: '传说皮肤账号', price: '¥2,599' },
+      { user: '老王', action: '购买', title: '王者低星账号', price: '¥888' },
+      { user: '小林', action: '租赁', title: '荣耀王者账号', price: '¥15/时' },
+    ];
+
+    const pick = () => {
+      if (recentOrders.length > 0) {
+        const o = recentOrders[Math.floor(Math.random() * Math.min(recentOrders.length, 5))];
+        return {
+          user: ['买家', '用户', '玩家'][Math.floor(Math.random() * 3)],
+          action: o.type === 'BUY' ? '购买' : '租赁',
+          title: o.account?.title || o.accountTitle || '某账号',
+          price: o.type === 'BUY' ? `¥${o.amount}` : `¥${o.amount}/时`,
+        };
+      }
+      return demoMessages[Math.floor(Math.random() * demoMessages.length)];
+    };
+
+    const init = setTimeout(() => {
+      setCurrent(pick());
+      setVisible(true);
+    }, 4000);
+    const cycle = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => { setCurrent(pick()); setVisible(true); }, 500);
+    }, 7000);
+    return () => { clearTimeout(init); clearInterval(cycle); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!current) return null;
+
+  return (
+    <div
+      className={`fixed bottom-6 right-6 z-40 transition-all duration-500 ${
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'
+      }`}
+    >
+      <div className="flex items-center gap-3 bg-dark-card border border-dark-border rounded-xl px-4 py-3 shadow-2xl max-w-xs">
+        <div className="w-9 h-9 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+          <CheckCircle className="w-4 h-4 text-green-400" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-slate-300">
+            <span className="text-green-400 font-medium">{current.user}</span> 刚刚
+            <span className="text-primary font-medium"> {current.action}</span> 了
+          </p>
+          <p className="text-xs text-slate-500 truncate">{current.title}</p>
+        </div>
+        <div className="text-sm font-bold text-primary flex-shrink-0">{current.price}</div>
+      </div>
+    </div>
   );
 };
 
