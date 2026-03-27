@@ -10,7 +10,8 @@ import { ScrollToTop } from '../components/ui/ScrollToTop';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
-  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock, CheckCircle, CheckCheck
+  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock, CheckCircle, CheckCheck,
+  DollarSign, Gamepad2, History, RefreshCcw
 } from 'lucide-react';
 
 interface Notification {
@@ -41,6 +42,14 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   LOGIN_ALERT: { icon: AlertTriangle, color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: '安全', priority: 'HIGH' },
   PASSWORD_CHANGED: { icon: Lock, color: 'text-blue-400', bg: 'bg-blue-500/20', label: '安全', priority: 'HIGH' },
   SYSTEM: { icon: Zap, color: 'text-orange-400', bg: 'bg-orange-500/20', label: '系统', priority: 'HIGH' },
+  // New types
+  TRANSACTION: { icon: DollarSign, color: 'text-green-400', bg: 'bg-green-500/20', label: '交易', priority: 'NORMAL' },
+  ACCOUNT_SOLD: { icon: Gamepad2, color: 'text-emerald-400', bg: 'bg-emerald-500/20', label: '售出', priority: 'HIGH' },
+  RENTAL_EXPIRED: { icon: History, color: 'text-orange-400', bg: 'bg-orange-500/20', label: '租约到期', priority: 'HIGH' },
+  PAYMENT_SUCCESS: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/20', label: '支付成功', priority: 'HIGH' },
+  RENTAL_REMINDER: { icon: RefreshCcw, color: 'text-cyan-400', bg: 'bg-cyan-500/20', label: '续租提醒', priority: 'NORMAL' },
+  ACCOUNT_PUBLISHED: { icon: CheckCircle, color: 'text-blue-400', bg: 'bg-blue-500/20', label: '发布成功', priority: 'LOW' },
+  RENTAL_STARTED: { icon: Gamepad2, color: 'text-purple-400', bg: 'bg-purple-500/20', label: '租用开始', priority: 'NORMAL' },
 };
 const getDefault = () => ({ icon: Bell, color: 'text-slate-400', bg: 'bg-slate-500/20', label: '通知', priority: 'NORMAL' as const });
 
@@ -96,9 +105,17 @@ const getNavTarget = (notification: Notification): { to: string; label: string }
     case 'LOGIN_ALERT':
     case 'PASSWORD_CHANGED':
     case 'ACCOUNT_VERIFIED':
+    case 'ACCOUNT_PUBLISHED':
       return { to: '/profile', label: '个人中心' };
     case 'ACCOUNT_EXPIRING':
-      return { to: '/accounts', label: '浏览账号' };
+    case 'RENTAL_EXPIRED':
+    case 'RENTAL_REMINDER':
+      return { to: '/orders', label: '查看订单' };
+    case 'ACCOUNT_SOLD':
+    case 'RENTAL_STARTED':
+    case 'PAYMENT_SUCCESS':
+    case 'TRANSACTION':
+      return { to: relatedId ? `/orders?orderId=${relatedId}` : '/orders', label: '查看订单' };
     default:
       return null;
   }
