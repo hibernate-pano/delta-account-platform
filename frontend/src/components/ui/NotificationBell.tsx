@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCircle, AlertCircle, MessageSquare, Clock, ChevronRight } from 'lucide-react';
 import { useNotifications, useUnreadCount, useMarkNotificationRead, useMarkAllNotificationsRead } from '../../hooks/useQueries';
+import { useToast } from './Toast';
 
 const formatTime = (dateStr: string) => {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -17,6 +18,7 @@ export const NotificationBell: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData?.notificationCount ?? 0;
@@ -36,8 +38,12 @@ export const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleMarkAllRead = () => {
-    markAllReadMutation.mutate();
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllReadMutation.mutateAsync();
+    } catch {
+      showToast('操作失败，请重试', 'error');
+    }
   };
 
   const getIcon = (type: string) => {
@@ -69,13 +75,19 @@ export const NotificationBell: React.FC = () => {
       case 'ORDER_COMPLETED':
       case 'ORDER_CANCELLED':
       case 'REFUND':
+      case 'PAYMENT_FAILED':
         return '/orders';
       case 'NEW_MESSAGE':
         return '/messages';
       case 'WALLET':
+        return '/wallet';
       case 'ACCOUNT_VERIFIED':
       case 'ACCOUNT_REJECTED':
-        return '/wallet';
+      case 'LOGIN_ALERT':
+      case 'PASSWORD_CHANGED':
+        return '/profile';
+      case 'ACCOUNT_EXPIRING':
+        return '/accounts';
       default:
         return null;
     }

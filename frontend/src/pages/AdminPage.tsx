@@ -547,7 +547,10 @@ const AdminPage: React.FC = () => {
                       )}
                       <span>卖家: {account.seller?.nickname || account.seller?.username || '-'}</span>
                       <span className="text-primary font-medium">¥{account.price}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{account.createdAt}</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {account.createdAt ? new Date(account.createdAt).toLocaleDateString('zh-CN') : '-'}
+                      </span>
                     </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
