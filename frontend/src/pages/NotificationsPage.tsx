@@ -170,6 +170,7 @@ const NotificationItem: React.FC<{
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onToggleSelect(notification.id); }}
+          aria-label={selectedIds.has(notification.id) ? '取消选择此通知' : '选择此通知'}
           className="flex-shrink-0 flex items-center justify-center w-10 h-full align-middle"
         >
           <div className={`w-4.5 h-4.5 rounded border flex items-center justify-center transition-all ${

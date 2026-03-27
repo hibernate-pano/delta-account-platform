@@ -1019,6 +1019,51 @@ const OrdersPage: React.FC = () => {
                 <p className="text-xs text-slate-500 mt-0.5">完成交易</p>
               </div>
             </div>
+
+            {/* Monthly spending mini chart */}
+            {(() => {
+              const monthlyMap: Record<string, number> = {};
+              orders
+                .filter(o => ['COMPLETED', 'PAID', 'PROCESSING'].includes(o.status) && o.type === 'BUY')
+                .forEach(o => {
+                  const d = new Date(o.createdAt);
+                  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                  monthlyMap[key] = (monthlyMap[key] || 0) + (o.amount || 0);
+                });
+              const sorted = Object.entries(monthlyMap)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .slice(-6);
+              if (sorted.length < 2) return null;
+              const maxVal = Math.max(...sorted.map(([, v]) => v), 1);
+              return (
+                <div className="mt-4 pt-4 border-t border-dark-border">
+                  <p className="text-xs text-slate-500 mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    近{sorted.length}个月购买趋势
+                  </p>
+                  <div className="flex items-end gap-1.5 h-14">
+                    {sorted.map(([key, amount]) => {
+                      const pct = maxVal > 0 ? (amount / maxVal) * 100 : 0;
+                      const [, month] = key.split('-');
+                      const label = `${month}月`;
+                      return (
+                        <div key={key} className="flex-1 flex flex-col items-center gap-0.5 group">
+                          <span className="text-[10px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                            ¥{amount.toFixed(0)}
+                          </span>
+                          <div
+                            className="w-full bg-gradient-to-t from-primary/70 to-primary rounded-t transition-all hover:from-primary"
+                            style={{ height: `${Math.max(pct, 4)}%` }}
+                            title={`${key}: ¥${amount.toFixed(2)}`}
+                          />
+                          <span className="text-[9px] text-slate-600">{label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Active Rentals Alert */}

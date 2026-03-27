@@ -134,7 +134,7 @@ const isOwner = user?.id === account?.sellerId;
     return (
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="btn-ghost p-2">
+          <button onClick={() => navigate(-1)} className="btn-ghost p-2" aria-label="返回上一页">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="h-8 w-48 skeleton rounded" />
@@ -180,7 +180,7 @@ const isOwner = user?.id === account?.sellerId;
     <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate(-1)} className="btn-ghost p-2 hover:bg-dark-lighter">
+        <button onClick={() => navigate(-1)} className="btn-ghost p-2 hover:bg-dark-lighter" aria-label="返回上一页">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
