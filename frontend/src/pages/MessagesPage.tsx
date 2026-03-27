@@ -152,7 +152,7 @@ const MessagesPage: React.FC = () => {
             </div>
           )}
           {session.unreadCount && session.unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold leading-none">
+            <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold leading-none animate-pulse">
               {session.unreadCount > 9 ? '9+' : session.unreadCount}
             </span>
           )}
@@ -162,7 +162,13 @@ const MessagesPage: React.FC = () => {
             <p className={`font-medium truncate text-sm ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
               {session.otherUser?.nickname || session.otherUser?.username || '用户'}
             </p>
-            <span className="text-xs text-slate-600 flex-shrink-0 ml-2">
+            <span
+              className="text-xs text-slate-600 flex-shrink-0 ml-2 cursor-help hover:text-slate-400 transition-colors"
+              title={session.lastMessageAt ? new Date(session.lastMessageAt).toLocaleString('zh-CN', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+              }) : ''}
+            >
               {formatSessionTime(session.lastMessageAt)}
             </span>
           </div>
@@ -431,7 +437,15 @@ const MessagesPage: React.FC = () => {
                             </div>
                             {/* Time + status */}
                             <div className={`flex items-center gap-1 mt-1 text-[10px] text-slate-600 ${isMe ? 'justify-end' : ''}`}>
-                              <span>{formatTime(msg.createdAt)}</span>
+                              <span
+                                className="cursor-help hover:text-slate-400 transition-colors"
+                                title={new Date(msg.createdAt).toLocaleString('zh-CN', {
+                                  year: 'numeric', month: 'long', day: 'numeric',
+                                  hour: '2-digit', minute: '2-digit',
+                                })}
+                              >
+                                {formatTime(msg.createdAt)}
+                              </span>
                               {isMe && <StatusIcon status={msg.status} isMe={isMe} />}
                             </div>
                           </div>

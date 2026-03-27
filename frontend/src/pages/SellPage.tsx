@@ -248,6 +248,17 @@ const SellPage: React.FC = () => {
   const isSubmitting = createMutation.isPending;
   const ranks = activeRanks;
 
+  // Form completion progress
+  const completionPercent = useMemo(() => {
+    let score = 0;
+    if (formData.title) score += 20;
+    if (formData.gameRank) score += 20;
+    if (formData.price && parseFloat(formData.price) > 0) score += 20;
+    if (images.length > 0) score += 20;
+    if (formData.description.length >= 10) score += 20;
+    return score;
+  }, [formData.title, formData.gameRank, formData.price, images.length, formData.description]);
+
   return (
     <div className="max-w-2xl mx-auto">
       {/* Seller Guide */}
@@ -265,6 +276,37 @@ const SellPage: React.FC = () => {
             onCancel={dismissDraft}
             confirmLabel="继续编辑"
           />
+        </div>
+      )}
+
+      {/* Form completion progress indicator */}
+      {step === 1 && (
+        <div className="mb-6 bg-dark rounded-xl p-4 border border-dark-border">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-slate-400">填写进度</span>
+            <span className={`text-xs font-medium ${
+              completionPercent === 100 ? 'text-green-400' :
+              completionPercent >= 60 ? 'text-yellow-400' : 'text-slate-500'
+            }`}>
+              {completionPercent}%
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-dark-lighter rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                completionPercent === 100 ? 'bg-green-500' :
+                completionPercent >= 60 ? 'bg-yellow-500' : 'bg-primary'
+              }`}
+              style={{ width: `${completionPercent}%` }}
+            />
+          </div>
+          <div className="flex gap-4 mt-2.5 text-[10px]">
+            <span className={formData.title ? 'text-green-400' : 'text-slate-600'}>标题 {formData.title ? '✓' : '○'}</span>
+            <span className={formData.gameRank ? 'text-green-400' : 'text-slate-600'}>段位 {formData.gameRank ? '✓' : '○'}</span>
+            <span className={formData.price ? 'text-green-400' : 'text-slate-600'}>价格 {formData.price ? '✓' : '○'}</span>
+            <span className={images.length > 0 ? 'text-green-400' : 'text-slate-600'}>图片 {images.length > 0 ? '✓' : '○'}</span>
+            <span className={formData.description.length >= 10 ? 'text-green-400' : 'text-slate-600'}>描述 {formData.description.length >= 10 ? '✓' : '○'}</span>
+          </div>
         </div>
       )}
 
