@@ -9,7 +9,7 @@ import { ScrollToTop } from '../components/ui/ScrollToTop';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
-  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock, CheckCircle
+  XCircle, ShieldOff, CreditCard, AlertTriangle, Lock, CheckCircle, CheckCheck
 } from 'lucide-react';
 
 interface Notification {
@@ -122,11 +122,15 @@ const NotificationItem: React.FC<{
   };
   const handleTouchMove = (e: React.TouchEvent) => {
     const dx = e.touches[0].clientX - touchStartX.current;
-    if (dx < 0) setSwipeX(Math.max(dx, -80));
+    if (dx < 0) setSwipeX(Math.max(dx, -80)); // left = delete
+    if (dx > 0 && isUnread) setSwipeX(Math.min(dx, 80)); // right = mark read
   };
   const handleTouchEnd = () => {
     if (swipeX < -40) {
       setSwipeX(-80);
+    } else if (swipeX > 40 && isUnread) {
+      onMarkRead(notification.id);
+      setSwipeX(0);
     } else {
       setSwipeX(0);
     }
@@ -145,6 +149,15 @@ const NotificationItem: React.FC<{
       >
         <Trash2 className="w-5 h-5 text-white" />
       </div>
+      {/* Swipe-to-mark-read action */}
+      {isUnread && (
+        <div
+          className="absolute inset-y-0 left-0 w-20 bg-green-500/90 flex items-center justify-center cursor-pointer"
+          onClick={() => { onMarkRead(notification.id); setSwipeX(0); }}
+        >
+          <CheckCheck className="w-5 h-5 text-white" />
+        </div>
+      )}
 
       <div
         className="relative bg-dark-card"

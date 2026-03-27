@@ -118,14 +118,20 @@ const SellPage: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDirty]);
 
-  // Restore draft from localStorage on mount
+  // Restore draft from localStorage on mount (with confirmation)
   useEffect(() => {
     const saved = localStorage.getItem(SELL_DRAFT_KEY);
     if (!saved) return;
     try {
       const { formData: savedForm, images: savedImages } = JSON.parse(saved);
-      if (savedForm) setFormData((f) => ({ ...f, ...savedForm }));
-      if (savedImages?.length) setImages(savedImages);
+      if (!savedForm && !savedImages?.length) return;
+      const title = savedForm?.title || '未命名';
+      if (window.confirm(`发现未完成的草稿「${title}」，是否继续编辑？`)) {
+        if (savedForm) setFormData((f) => ({ ...f, ...savedForm }));
+        if (savedImages?.length) setImages(savedImages);
+      } else {
+        localStorage.removeItem(SELL_DRAFT_KEY);
+      }
     } catch { /* ignore corrupt draft */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
