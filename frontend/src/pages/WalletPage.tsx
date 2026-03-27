@@ -484,7 +484,7 @@ const WalletPage: React.FC = () => {
       {/* Tab Filter */}
       <div className="mb-6 space-y-3">
         {/* Main type tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [-webkit-overflow-scrolling:touch]">
           {[
             { key: 'balance', label: '全部', icon: Wallet },
             { key: 'recharges', label: '充值', icon: Plus },
@@ -506,7 +506,7 @@ const WalletPage: React.FC = () => {
           ))}
         </div>
         {/* Period + Type Filter Row */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-1">
+        <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide [-webkit-overflow-scrolling:touch]">
           {/* Period selector */}
           <div className="flex gap-1 bg-dark-lighter rounded-lg p-1 flex-shrink-0">
             {([

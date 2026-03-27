@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -385,6 +385,21 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
   const isPending = order.status === 'PENDING';
 
+  const handleToggleExpand = useCallback(() => setExpanded(v => !v), []);
+  const handleViewDetail = useCallback(() => onViewDetail(order), [order, onViewDetail]);
+  const handleReview = useCallback(() => onReview(order), [order, onReview]);
+  const handleContact = useCallback(() => navigate(`/messages?accountId=${order.accountId}`), [navigate, order.accountId]);
+  const handleViewAccount = useCallback(() => navigate(`/accounts/${order.accountId}`), [navigate, order.accountId]);
+  const handlePay = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await payMutation.mutateAsync(order.id);
+      showToast('支付成功！', 'success');
+    } catch (err: any) {
+      showToast(err.response?.data?.message || '支付失败', 'error');
+    }
+  }, [order.id, payMutation, showToast]);
+
   // Live countdown for active rentals
   React.useEffect(() => {
     if (order.type !== 'RENT' || order.status !== 'PROCESSING' || !order.rentEnd) return;
@@ -426,7 +441,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
       {/* Main row — always visible */}
       <div
         className="flex items-center gap-3 p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
+        onClick={handleToggleExpand}
       >
         {/* Account thumbnail */}
         <div className="w-14 h-14 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative">
@@ -585,7 +600,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                   </p>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); navigate(`/messages?accountId=${order.accountId}`); }}
+                  onClick={handleContact}
                   className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-primary text-xs font-medium transition-all"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -598,29 +613,21 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
           {/* Actions */}
           <div className="flex gap-2 mt-3">
             <button
-              onClick={(e) => { e.stopPropagation(); onViewDetail(order); }}
+              onClick={handleViewDetail}
               className="btn-secondary flex-1 !py-2 text-xs flex items-center justify-center gap-1.5"
             >
               <FileText className="w-3.5 h-3.5" />
               订单详情
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); navigate(`/accounts/${order.accountId}`); }}
+              onClick={handleViewAccount}
               className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             {isPending && (
               <button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    await payMutation.mutateAsync(order.id);
-                    showToast('支付成功！', 'success');
-                  } catch (err: any) {
-                    showToast(err.response?.data?.message || '支付失败', 'error');
-                  }
-                }}
+                onClick={handlePay}
                 disabled={payMutation.isPending}
                 className="btn-primary flex-1 !py-2 text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
@@ -640,7 +647,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             )}
             {order.status === 'COMPLETED' && (
               <button
-                onClick={(e) => { e.stopPropagation(); onReview(order); }}
+                onClick={handleReview}
                 className="btn-secondary !py-2 !px-2.5 text-xs flex items-center justify-center gap-1.5"
               >
                 <Star className="w-3.5 h-3.5 text-yellow-400" />

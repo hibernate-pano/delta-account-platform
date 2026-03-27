@@ -178,7 +178,7 @@ const AccountsPage: React.FC = () => {
             <Clock className="w-4 h-4 text-slate-500" />
             <h3 className="text-sm font-medium text-slate-500">最近浏览</h3>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide [-webkit-overflow-scrolling:touch]">
             {recentAccounts.map((account) => (
               <Link
                 key={account.id}
