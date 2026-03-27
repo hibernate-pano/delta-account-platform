@@ -753,8 +753,16 @@ const SellPage: React.FC = () => {
                 <div className="p-3">
                   <h3 className="font-medium text-sm mb-2">{formData.title || '账号标题'}</h3>
                   <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-                    <span className="px-2 py-0.5 bg-dark-lighter rounded">{formData.gameRank || '段位'}</span>
-                    <span>{formData.skinCount} 皮肤</span>
+                    <div className="flex items-center gap-1.5">
+                      {gameType && (
+                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">{gameType}</span>
+                      )}
+                      <span className="px-2 py-0.5 bg-dark-lighter rounded">{formData.gameRank || '段位'}</span>
+                      <span>{formData.skinCount} 皮肤</span>
+                    </div>
+                    {formData.weapons && (
+                      <span className="text-slate-600 truncate max-w-[120px]">{formData.weapons}</span>
+                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-primary">¥{formData.price || '0'}</span>

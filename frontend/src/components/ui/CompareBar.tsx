@@ -156,6 +156,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
   };
 
   const fields = [
+    { label: '游戏', values: accounts.map((a) => a.gameType || '—') },
     { label: '价格', values: accounts.map((a) => `¥${a.price}`), bestIdx: priceBest },
     { label: '段位', values: accounts.map((a) => a.gameRank || '未填写') },
     { label: '皮肤数量', values: accounts.map((a) => `${a.skinCount || 0} 个`), bestIdx: skinBest },
