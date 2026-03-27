@@ -53,6 +53,10 @@ const RegisterPage: React.FC = () => {
       setError('用户名需要3-20个字符');
       return false;
     }
+    if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      setError('用户名只能包含字母、数字和下划线');
+      return false;
+    }
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       setError('请输入有效的邮箱地址');
       return false;

@@ -72,7 +72,8 @@ const LoginPage: React.FC = () => {
       setAuth(token, { id: userId, username: uname, role, balance: 0, creditScore: 100, status: 'ACTIVE' });
       navigate(nextUrl, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || '登录失败，请检查用户名和密码');
+      const msg = err.response?.data?.message;
+      setError(msg || (err.request ? '无法连接到服务器，请检查网络' : '登录失败，请检查用户名和密码'));
       triggerShake();
       usernameRef.current?.focus();
     } finally {
@@ -90,7 +91,8 @@ const LoginPage: React.FC = () => {
       setAuth(token, { id: userId, username: uname, role, balance: 0, creditScore: 100, status: 'ACTIVE' });
       navigate(nextUrl, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || '登录失败');
+      const msg = err.response?.data?.message;
+      setError(msg || (err.request ? '无法连接到服务器，请检查网络' : '登录失败'));
       triggerShake();
       usernameRef.current?.focus();
     } finally {
