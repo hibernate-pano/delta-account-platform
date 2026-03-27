@@ -23,7 +23,7 @@ const RegisterPage: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string; email?: string }>({});
 
   // Password strength checker
   const getPasswordStrength = (pwd: string) => {
@@ -178,10 +178,22 @@ const RegisterPage: React.FC = () => {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="input"
+                onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setFieldErrors(f => { const n = { ...f }; delete n.email; return n; }); }}
+                onBlur={() => {
+                  if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                    setFieldErrors(f => ({ ...f, email: '请输入有效的邮箱地址' }));
+                  } else {
+                    setFieldErrors(f => { const n = { ...f }; delete n.email; return n; });
+                  }
+                }}
+                className={`input ${fieldErrors.email ? 'border-red-500 focus:border-red-500' : ''}`}
                 placeholder="可选，用于找回密码"
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-red-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />{fieldErrors.email}
+                </p>
+              )}
             </div>
 
             {/* Password */}

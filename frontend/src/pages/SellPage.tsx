@@ -8,7 +8,7 @@ import { useCreateAccount } from '../hooks/useQueries';
 import {
   Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
   Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical,
-  Shield, Clock, BarChart3, CheckCircle, Edit3, User
+  Shield, Clock, BarChart3, CheckCircle, Edit3, User, RefreshCw
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
@@ -107,6 +107,7 @@ const SellPage: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [compressingCount, setCompressingCount] = useState(0);
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [previewImg, setPreviewImg] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -167,7 +168,10 @@ const SellPage: React.FC = () => {
     files.forEach((file) => {
       if (images.length >= 5) { showToast('最多只能上传5张图片', 'warning'); return; }
       if (!file.type.startsWith('image/')) { showToast('请选择图片文件', 'error'); return; }
-      compressImage(file).then((compressed) => setImages((prev) => [...prev, compressed]));
+      setCompressingCount(c => c + 1);
+      compressImage(file)
+        .then((compressed) => setImages((prev) => [...prev, compressed]))
+        .finally(() => setCompressingCount(c => c - 1));
     });
     // Reset so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -687,7 +691,10 @@ const SellPage: React.FC = () => {
                   const imageFiles = files.filter(f => f.type.startsWith('image/'));
                   if (imageFiles.length > 0) {
                     imageFiles.slice(0, 5 - images.length).forEach((file) => {
-                      compressImage(file).then((compressed) => setImages((prev) => [...prev, compressed]));
+                      setCompressingCount(c => c + 1);
+                      compressImage(file)
+                        .then((compressed) => setImages((prev) => [...prev, compressed]))
+                        .finally(() => setCompressingCount(c => c - 1));
                     });
                     return;
                   }
@@ -701,6 +708,11 @@ const SellPage: React.FC = () => {
               >
                 {dragOver ? (
                   <p className="text-primary text-sm font-medium">松开以添加图片</p>
+                ) : compressingCount > 0 ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <RefreshCw className="w-7 h-7 mx-auto text-primary animate-spin" />
+                    <p className="text-sm text-primary font-medium animate-pulse">正在压缩处理 {compressingCount} 张图片...</p>
+                  </div>
                 ) : (
                   <>
                     <Upload className="w-7 h-7 mx-auto mb-2 text-slate-600" />
