@@ -747,6 +747,10 @@ const RefundsPage: React.FC = () => {
                 </div>
               )}
 
+              {selectedOrder && (
+                <div className="h-px bg-dark-border mb-6" />
+              )}
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-sm text-slate-400">退款金额 <span className="text-red-400">*</span></label>
@@ -793,7 +797,7 @@ const RefundsPage: React.FC = () => {
                     type="number"
                     value={refundAmount}
                     onChange={(e) => { setRefundAmount(e.target.value); setAmountError(''); }}
-                    className={`input pl-10 text-xl font-bold w-full ${amountError ? '!border-red-500/50' : ''}`}
+                    className={`input pl-10 text-xl font-bold w-full transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/50 ${amountError ? '!border-red-500/50' : ''}`}
                     placeholder="0.00"
                     step="0.01"
                     min="0.01"
@@ -816,8 +820,8 @@ const RefundsPage: React.FC = () => {
                 <textarea
                   value={refundReason}
                   onChange={(e) => { setRefundReason(e.target.value); setReasonError(''); }}
-                  className={`input h-24 resize-none w-full ${reasonError ? '!border-red-500/50' : ''}`}
-                  placeholder="请详细描述退款原因..."
+                  className={`input h-24 resize-none w-full transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/50 ${reasonError ? '!border-red-500/50' : ''}`}
+                  placeholder="详细描述退款原因，如：账号与描述不符、无法登录等..."
                   required
                 />
                 {reasonError ? (
@@ -838,7 +842,7 @@ const RefundsPage: React.FC = () => {
                       key={reason}
                       type="button"
                       onClick={() => setRefundReason(reason)}
-                      className={`px-3 py-1 rounded-full text-xs transition-all border ${
+                      className={`px-3 py-1 rounded-full text-xs transition-all border hover:scale-105 active:scale-95 ${
                         refundReason === reason
                           ? 'bg-primary/20 border-primary/50 text-primary'
                           : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'

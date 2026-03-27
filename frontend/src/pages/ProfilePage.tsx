@@ -1118,17 +1118,19 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </div>
             )}
           </div>
-          <p className="text-xs text-slate-500 mb-2">选择头像</p>
-          <div className="flex gap-2">
+          <p className="text-xs text-slate-500 mb-3 text-center">选择头像</p>
+          <div className="flex justify-center gap-3 flex-wrap">
             {avatarPresets.map((url, i) => (
               <button
                 key={i}
                 onClick={() => setAvatar(url)}
-                className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all ${
-                  avatar === url ? 'border-primary scale-110' : 'border-transparent hover:border-slate-600'
+                className={`w-11 h-11 rounded-full overflow-hidden border-2 transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  avatar === url
+                    ? 'border-primary ring-2 ring-primary/30 ring-offset-2 ring-offset-dark-card scale-105'
+                    : 'border-dark-border hover:border-slate-500 hover:bg-dark-lighter'
                 }`}
               >
-                <img src={url} alt="" className="w-full h-full" />
+                <img src={url} alt="" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -1197,14 +1199,20 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         {/* Current info display */}
-        <div className="mb-5 p-3 bg-dark rounded-xl border border-dark-border">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-slate-500">用户名</span>
-            <span className="text-slate-300">@{user?.username}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-500">信誉分</span>
-            <span className="text-yellow-400">{user?.creditScore ?? '—'}</span>
+        <div className="mb-5 p-4 bg-gradient-to-br from-dark-lighter to-dark rounded-xl border border-dark-border">
+          <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-3">账户信息</p>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-500">用户名</span>
+              <span className="text-xs text-slate-300 font-mono">@{user?.username}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-500">信誉分</span>
+              <span className="text-xs font-medium text-yellow-400 flex items-center gap-1">
+                <Star className="w-3 h-3 fill-yellow-400" />
+                {user?.creditScore ?? '—'}
+              </span>
+            </div>
           </div>
         </div>
 
