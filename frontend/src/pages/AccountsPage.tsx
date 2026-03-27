@@ -30,6 +30,8 @@ const AccountsPage: React.FC = () => {
   const PAGE_SIZE = 12;
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [quickViewAccount, setQuickViewAccount] = useState<Account | null>(null);
+  const quickViewTriggerRef = useRef<HTMLElement | null>(null);
+  const quickViewCloseRef = useRef<HTMLButtonElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { token } = useAuthStore();
   const { showToast } = useToast();
@@ -50,6 +52,32 @@ const AccountsPage: React.FC = () => {
       }
     }, 100);
   }, [debouncedKeyword, sort]);
+
+  // Focus trap for Quick View modal
+  React.useEffect(() => {
+    if (!quickViewAccount) return;
+    quickViewCloseRef.current?.focus();
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || !quickViewCloseRef.current) return;
+      const modal = quickViewCloseRef.current.closest('[data-quickview]') as HTMLElement;
+      if (!modal) return;
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setQuickViewAccount(null); };
+    document.addEventListener('keydown', handleTab);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('keydown', handleTab);
+      document.removeEventListener('keydown', handleEsc);
+      quickViewTriggerRef.current?.focus();
+    };
+  }, [quickViewAccount]);
 
   // G key to toggle grid/list view
   React.useEffect(() => {
@@ -472,7 +500,7 @@ const AccountsPage: React.FC = () => {
                 </button>
                 {/* Quick view button */}
                 <button
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewAccount(account); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); quickViewTriggerRef.current = e.currentTarget as HTMLElement; setQuickViewAccount(account); }}
                   className="absolute top-2 right-8 w-7 h-7 bg-black/40 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-primary"
                   title="快速查看"
                   aria-label="快速查看"
@@ -717,13 +745,14 @@ const AccountsPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setQuickViewAccount(null)}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
+            data-quickview
             className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="sticky top-0 z-10 bg-dark-card border-b border-dark-border px-6 py-4 flex items-center justify-between">
               <h2 className="font-bold text-white">快速预览</h2>
-              <button onClick={() => setQuickViewAccount(null)} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              <button ref={quickViewCloseRef} onClick={() => setQuickViewAccount(null)} className="w-8 h-8 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 <X className="w-5 h-5" />
               </button>
             </div>
