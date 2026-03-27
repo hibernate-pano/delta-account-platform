@@ -191,18 +191,20 @@ const MessagesPage: React.FC = () => {
 
   const currentSessionId = sessionId ? parseInt(sessionId) : null;
   const { data: messagesData, isLoading: messagesLoading, isError: messagesError, refetch } = useSessionMessages(currentSessionId!);
-  const messages: Message[] = messagesData?.data?.data || [];
+  const messages: Message[] = [...(messagesData?.data?.data || []), ...optimisticMessages];
 
   const sendMessageMutation = useSendMessage();
   const createSessionMutation = useCreateSession();
 
   const [newMessage, setNewMessage] = useState('');
+  const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Restore draft from localStorage when session changes
   useEffect(() => {
+    setOptimisticMessages([]);
     if (currentSessionId != null) {
       const draft = localStorage.getItem(`delta_msg_draft_${currentSessionId}`);
       if (draft) setNewMessage(draft);
@@ -245,21 +247,46 @@ const MessagesPage: React.FC = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !sessionId) return;
-    const content = newMessage;
+    const content = newMessage.trim();
+
+    // Optimistic message
+    const tempId = -Date.now();
+    const optimisticMsg: Message = {
+      id: tempId,
+      sessionId: parseInt(sessionId),
+      senderId: user!.id,
+      content,
+      type: 'TEXT',
+      isRead: false,
+      status: 'sending',
+      createdAt: new Date().toISOString(),
+    };
+
+    setOptimisticMessages((prev) => [...prev, optimisticMsg]);
+    setNewMessage('');
+    if (currentSessionId != null) {
+      localStorage.removeItem(`delta_msg_draft_${currentSessionId}`);
+    }
 
     try {
       await sendMessageMutation.mutateAsync({
         sessionId: parseInt(sessionId),
         content,
       });
-      setNewMessage(''); // only clear on success
-      if (currentSessionId != null) {
-        localStorage.removeItem(`delta_msg_draft_${currentSessionId}`);
-      }
-      refetch();
+      // Update status to sent
+      setOptimisticMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, status: 'sent' } : m))
+      );
+      // Remove optimistic message after a brief delay (server refetch will show the real one)
+      setTimeout(() => {
+        setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+        refetch();
+      }, 800);
     } catch {
+      // Remove failed optimistic message and restore input
+      setOptimisticMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setNewMessage(content);
       showToast('发送失败，请重试', 'error');
-      // keep input so user can retry
     }
   };
 
