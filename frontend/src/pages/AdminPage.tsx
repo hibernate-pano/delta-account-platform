@@ -143,6 +143,8 @@ const AdminPage: React.FC = () => {
   const [userPage, setUserPage] = useState(1);
   const [pendingBanId, setPendingBanId] = useState<number | null>(null);
   const [pendingUserBan, setPendingUserBan] = useState<{ id: number; banned: boolean; username: string } | null>(null);
+  const [pendingBulkApprove, setPendingBulkApprove] = useState(false);
+  const [pendingBulkReject, setPendingBulkReject] = useState(false);
 
   const { data: statsData, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminStats();
   const { data: accountsData, isLoading: accountsLoading, isError: accountsError, refetch: refetchAccounts } = useAdminAccounts({ status: accountFilter, size: 50 });
@@ -484,24 +486,41 @@ const AdminPage: React.FC = () => {
                     已选择 <span className="text-primary font-bold">{selectedAccounts.size}</span> 个账号
                   </span>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => handleBulkVerify(true)}
-                      disabled={verifyMutation.isPending}
-                      className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
-                    >
-                      {verifyMutation.isPending ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <CheckCircle className="w-3.5 h-3.5" />
-                      )}
-                      批量通过
-                    </button>
-                    {accountFilter === 'PENDING' && (
+                    {pendingBulkApprove ? (
+                      <ConfirmInline
+                        message={`确定通过全部 ${selectedAccounts.size} 个账号吗？`}
+                        confirmLabel="确认通过"
+                        onConfirm={async () => { setPendingBulkApprove(false); await handleBulkVerify(true); }}
+                        onCancel={() => setPendingBulkApprove(false)}
+                      />
+                    ) : (
                       <button
-                        onClick={() => handleBulkVerify(false)}
+                        onClick={() => setPendingBulkApprove(true)}
                         disabled={verifyMutation.isPending}
-                        className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
+                        className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
                       >
+                        {verifyMutation.isPending ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        )}
+                        批量通过
+                      </button>
+                    )}
+                    {accountFilter === 'PENDING' && (
+                      pendingBulkReject ? (
+                        <ConfirmInline
+                          message={`确定拒绝全部 ${selectedAccounts.size} 个账号吗？`}
+                          confirmLabel="确认拒绝"
+                          onConfirm={async () => { setPendingBulkReject(false); await handleBulkVerify(false); }}
+                          onCancel={() => setPendingBulkReject(false)}
+                        />
+                      ) : (
+                        <button
+                          onClick={() => setPendingBulkReject(true)}
+                          disabled={verifyMutation.isPending}
+                          className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
+                        >
                         {verifyMutation.isPending ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                         ) : (
@@ -509,6 +528,7 @@ const AdminPage: React.FC = () => {
                         )}
                         批量拒绝
                       </button>
+                      )}
                     )}
                     <button
                       onClick={() => setSelectedAccounts(new Set())}
