@@ -14,6 +14,10 @@ interface RecentState {
   addItem: (account: Account) => void;
   removeItem: (accountId: number) => void;
   clearAll: () => void;
+  getVerifiedCount: () => number;
+  getPriceRange: () => { min: number; max: number };
+  getRecentItems: (limit?: number) => RecentItem[];
+  getItemsBySeller: (sellerId: number) => RecentItem[];
 }
 
 export const useRecentStore = create<RecentState>()(
@@ -37,6 +41,19 @@ export const useRecentStore = create<RecentState>()(
       clearAll: () => {
         set({ items: [] });
       },
+
+      getVerifiedCount: () => get().items.filter((item) => item.account.verificationStatus === 'VERIFIED').length,
+
+      getPriceRange: () => {
+        const prices = get().items.map((item) => item.account.price).filter((p) => p > 0);
+        if (prices.length === 0) return { min: 0, max: 0 };
+        return { min: Math.min(...prices), max: Math.max(...prices) };
+      },
+
+      getRecentItems: (limit = MAX_RECENT) => get().items.slice(0, limit),
+
+      getItemsBySeller: (sellerId: number) =>
+        get().items.filter((item) => item.account.sellerId === sellerId),
     }),
     {
       name: 'recent-storage',

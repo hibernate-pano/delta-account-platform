@@ -11,7 +11,23 @@ interface FAQItem {
   answer: string;
   icon: React.ElementType;
   category: string;
+  helpfulCount?: number; // mock helpful votes
+  totalVotes?: number;   // mock total votes
 }
+
+// Mock helpfulness stats (would come from backend in production)
+const faqStats: Record<number, { helpful: number; total: number }> = {
+  0: { helpful: 128, total: 142 },
+  1: { helpful: 96, total: 110 },
+  2: { helpful: 215, total: 230 },
+  3: { helpful: 87, total: 105 },
+  4: { helpful: 63, total: 80 },
+  5: { helpful: 54, total: 68 },
+  6: { helpful: 42, total: 55 },
+  7: { helpful: 38, total: 52 },
+  8: { helpful: 71, total: 85 },
+  9: { helpful: 29, total: 41 },
+};
 
 const faqData: FAQItem[] = [
   // Account Safety
@@ -216,20 +232,41 @@ const FAQPage: React.FC = () => {
                       <span>感谢您的反馈！</span>
                     </div>
                   ) : (
-                    <div className="mt-3 flex items-center gap-2">
-                      <span className="text-xs text-slate-600">有帮助吗？</span>
-                      <button
-                        onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'up' }))}
-                        className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-green-500/20 hover:text-green-400 border border-dark-border hover:border-green-500/30 transition-all"
-                      >
-                        <ThumbsUp className="w-3 h-3" /> 有帮助
-                      </button>
-                      <button
-                        onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'down' }))}
-                        className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-red-500/20 hover:text-red-400 border border-dark-border hover:border-red-500/30 transition-all"
-                      >
-                        <ThumbsDown className="w-3 h-3" /> 没帮助
-                      </button>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      {(() => {
+                        const originalIdx = faqData.indexOf(faq);
+                        const stats = faqStats[originalIdx];
+                        const ratio = stats ? Math.round((stats.helpful / stats.total) * 100) : 88;
+                        const total = stats?.total || 80;
+                        return (
+                          <>
+                            <span className="text-xs text-slate-600">有帮助吗？</span>
+                            {/* Helpful ratio indicator */}
+                            <div className="flex items-center gap-1.5 ml-auto mr-1">
+                              <div className="w-16 h-1.5 bg-dark rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-green-400/70 rounded-full transition-all"
+                                  style={{ width: `${ratio}%` }}
+                                />
+                              </div>
+                              <span className="text-[10px] text-green-400/80">{ratio}% 觉得有用</span>
+                              <span className="text-[10px] text-slate-600">({total}人)</span>
+                            </div>
+                            <button
+                              onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'up' }))}
+                              className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-green-500/20 hover:text-green-400 border border-dark-border hover:border-green-500/30 transition-all"
+                            >
+                              <ThumbsUp className="w-3 h-3" /> 有帮助
+                            </button>
+                            <button
+                              onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'down' }))}
+                              className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-red-500/20 hover:text-red-400 border border-dark-border hover:border-red-500/30 transition-all"
+                            >
+                              <ThumbsDown className="w-3 h-3" /> 没帮助
+                            </button>
+                          </>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
