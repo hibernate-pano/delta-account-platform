@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWishlistStore } from '../../store/wishlist';
 import { useAuthStore } from '../../store/auth';
@@ -80,24 +80,30 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
     <button
       onClick={handleClick}
       disabled={pending}
+      aria-busy={pending}
+      aria-label={pending ? '处理中...' : wishlisted ? '取消收藏' : '添加收藏'}
       className={`
         ${sizeClasses[size]}
         rounded-full flex items-center justify-center
         transition-all duration-200
+        ${pending ? 'opacity-60' : ''}
         ${wishlisted
           ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
           : 'bg-black/40 hover:bg-black/60 text-white/70 hover:text-white'
         }
         ${className}
       `}
-      title={wishlisted ? '取消收藏' : '添加收藏'}
-      aria-label={wishlisted ? '取消收藏' : '添加收藏'}
+      title={pending ? '处理中...' : wishlisted ? '取消收藏' : '添加收藏'}
     >
-      <Heart
-        className={`${iconSizes[size]} transition-all duration-200 ${
-          wishlisted ? 'fill-red-400' : ''
-        } ${bursting ? 'heart-burst text-red-400' : ''}`}
-      />
+      {pending ? (
+        <RefreshCw className={`${iconSizes[size]} animate-spin`} />
+      ) : (
+        <Heart
+          className={`${iconSizes[size]} transition-all duration-200 ${
+            wishlisted ? 'fill-red-400' : ''
+          } ${bursting ? 'heart-burst text-red-400' : ''}`}
+        />
+      )}
     </button>
   );
 };

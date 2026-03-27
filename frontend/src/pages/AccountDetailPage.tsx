@@ -7,6 +7,7 @@ import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
@@ -30,7 +31,7 @@ const AccountDetailPage: React.FC = () => {
   const createSessionMutation = useCreateSession();
   const { data: reviewStatsData } = useSellerReviewStats(account?.sellerId);
   const reviewStats = reviewStatsData?.data?.data;
-  const { data: sellerReviewsData, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
+  const { data: sellerReviewsData, isLoading: reviewsLoading, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
   const sellerReviews = sellerReviewsData?.data?.data || [];
   const [votedReviews, setVotedReviews] = useState<Set<number>>(new Set());
   const { data: sellerAccountsData } = useSellerAccounts(account?.sellerId);
@@ -530,7 +531,11 @@ const isOwner = user?.id === account?.sellerId;
                 )}
               </div>
 
-              {sellerReviews.length === 0 && !reviewsError ? (
+              {reviewsLoading ? (
+                <div className="card p-4">
+                  <ReviewSkeleton count={3} />
+                </div>
+              ) : sellerReviews.length === 0 && !reviewsError ? (
                 <div className="card p-6 text-center">
                   <Star className="w-8 h-8 mx-auto mb-2 text-slate-700" />
                   <p className="text-sm text-slate-500">暂无评价</p>
