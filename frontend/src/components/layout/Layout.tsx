@@ -7,7 +7,7 @@ import {
   CreditCard, HelpCircle, Mail, Github, ExternalLink, CheckCircle, History, Search, Star
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
-import { notificationApi, messageApi } from '../../api';
+import { useUnreadCount } from '../../hooks/useQueries';
 import { useToast } from '../ui/Toast';
 import MobileTabBar from './MobileTabBar';
 
@@ -17,8 +17,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [msgUnreadCount, setMsgUnreadCount] = useState(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -67,37 +65,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     localStorage.removeItem('delta_recent_searches');
   };
 
-  // Poll for notifications + messages (with retry on failure)
-  useEffect(() => {
-    if (!token) return;
-
-    const fetchCounts = async (retries = 2) => {
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-          const [notifRes, msgRes] = await Promise.all([
-            notificationApi.getUnreadCount(),
-            messageApi.getUnreadCount(),
-          ]);
-          const notifData = notifRes.data?.data;
-          const msgData = msgRes.data?.data;
-          setUnreadCount(typeof notifData === 'number' ? notifData : (notifData?.notificationCount ?? 0));
-          setMsgUnreadCount(typeof msgData === 'number' ? msgData : (msgData?.messageCount ?? 0));
-          return; // Success
-        } catch (err) {
-          if (attempt < retries) {
-            // Exponential backoff: 1s, 2s
-            await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
-            continue;
-          }
-          console.warn('[Layout] Failed to refresh unread counts after retries:', err);
-        }
-      }
-    };
-
-    fetchCounts();
-    const interval = setInterval(fetchCounts, 30000);
-    return () => clearInterval(interval);
-  }, [token]);
+  // Unread counts via React Query (auto-refreshes every 30s with retry/backoff)
+  const { data: unreadData } = useUnreadCount();
+  const unreadCount = unreadData?.notificationCount ?? 0;
+  const msgUnreadCount = unreadData?.messageCount ?? 0;
 
   // Close mobile menu on route change
   useEffect(() => {

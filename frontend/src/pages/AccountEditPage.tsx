@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { accountApi } from '../api';
@@ -5,6 +6,7 @@ import { Account } from '../types';
 import { Plus, X, DollarSign, Info, Gamepad2, BarChart3, RefreshCw } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useAccount, queryKeys } from '../hooks/useQueries';
 import SkeletonBase from '../components/ui/Skeleton';
 
 const PLATFORM_FEE_RATE = 0.05;
@@ -40,7 +42,7 @@ const AccountEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -55,31 +57,31 @@ const AccountEditPage: React.FC = () => {
   });
   const [newImage, setNewImage] = useState('');
 
+  const accountId = useMemo(() => id ? Number(id) : null, [id]);
+  const { data, isLoading } = useAccount(accountId!);
+
   useEffect(() => {
-    const fetchAccount = async () => {
-      try {
-        const res = await accountApi.getById(Number(id));
-        const account: Account = res.data.data;
-        setFormData({
-          title: account.title,
-          gameType: account.gameType || '王者荣耀',
-          gameRank: account.gameRank || '',
-          skinCount: account.skinCount,
-          weapons: account.weapons || '',
-          price: String(account.price),
-          rentalPrice: account.rentalPrice ? String(account.rentalPrice) : '',
-          description: account.description || '',
-          images: account.images || [],
-        });
-      } catch (error) {
-        showToast('账号不存在', 'error');
-        navigate('/profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAccount();
-  }, [id]);
+    if (!data?.data?.data) return;
+    const account: Account = data.data.data;
+    setFormData({
+      title: account.title,
+      gameType: account.gameType || '王者荣耀',
+      gameRank: account.gameRank || '',
+      skinCount: account.skinCount,
+      weapons: account.weapons || '',
+      price: String(account.price),
+      rentalPrice: account.rentalPrice ? String(account.rentalPrice) : '',
+      description: account.description || '',
+      images: account.images || [],
+    });
+  }, [data]);
+
+  useEffect(() => {
+    if (!isLoading && !data?.data?.data) {
+      showToast('账号不存在', 'error');
+      navigate('/profile');
+    }
+  }, [isLoading, data]);
 
   // Live price suggestion
   const priceSuggestion = useMemo(() => {
@@ -110,6 +112,7 @@ const AccountEditPage: React.FC = () => {
         description: formData.description || undefined,
         images: formData.images,
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.detail(Number(id)) });
       showToast('账号信息已更新', 'success');
       navigate('/profile');
     } catch (error: any) {
@@ -141,7 +144,7 @@ const AccountEditPage: React.FC = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">编辑账号</h1>
