@@ -792,14 +792,31 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
         {/* Star rating */}
         <div className="mb-4">
           <p className="text-sm text-slate-400 mb-3">您的评分</p>
-          <div className="flex items-center gap-1">
+          <div
+            role="radiogroup"
+            aria-label="选择评分"
+            className="flex items-center gap-1"
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                setRating((r) => Math.min(r + 1, 5));
+              }
+              if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                setRating((r) => Math.max(r - 1, 1));
+              }
+            }}
+          >
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
+                role="radio"
+                aria-checked={star === rating}
+                tabIndex={star === rating ? 0 : -1}
                 onClick={() => setRating(star)}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
-                className="p-1 transition-transform hover:scale-110"
+                className="p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded"
               >
                 <Star
                   className={`w-8 h-8 transition-colors ${
@@ -859,6 +876,16 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
           )}
           {reviewMutation.isPending ? '提交中...' : '提交评价'}
         </button>
+
+        {/* Pending overlay — prevents interaction during submission */}
+        {reviewMutation.isPending && (
+          <div className="absolute inset-0 bg-dark-card/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-3">
+              <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+              <p className="text-sm text-slate-400">提交评价中...</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
