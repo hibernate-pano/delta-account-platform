@@ -13,7 +13,7 @@ import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
   MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload, Eye, ShoppingCart,
-  Image, Pencil, Smartphone, Mail, Crown, Sparkles
+  Image, Pencil, Smartphone, Mail, Crown, Sparkles, ShoppingBag
 } from 'lucide-react';
 
 import { Review } from '../types';
@@ -751,12 +751,12 @@ const ProfilePage: React.FC = () => {
                     {orders.slice(0, 5).map((order: any) => {
                       const isBuy = ['BUY', 'RENT'].includes(order.type);
                       return (
-                        <div key={order.id} className="flex items-start gap-3">
+                        <div key={order.id} className="flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-dark-lighter/50 transition-colors cursor-default">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                             isBuy ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'
                           }`}>
                             {isBuy
-                              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                              ? <ShoppingBag className="w-4 h-4" />
                               : <TrendingUp className="w-4 h-4" />}
                           </div>
                           <div className="flex-1 min-w-0">
