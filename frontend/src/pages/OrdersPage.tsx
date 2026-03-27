@@ -489,10 +489,14 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
         className="flex items-center gap-3 p-4 cursor-pointer group"
         onClick={handleToggleExpand}
       >
-        {/* Account thumbnail */}
-        <div className="w-14 h-14 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative">
+        {/* Account thumbnail — click to view account */}
+        <div
+          className="w-14 h-14 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative cursor-pointer group/thumb"
+          onClick={(e) => { e.stopPropagation(); handleViewAccount(); }}
+          title="查看账号"
+        >
           {order.account?.images?.[0] ? (
-            <img src={order.account.images[0]} alt="" className="w-full h-full object-cover" />
+            <img src={order.account.images[0]} alt="" className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package className="w-5 h-5 text-slate-600" />
@@ -503,6 +507,10 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             order.type === 'BUY' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
           }`}>
             {order.type === 'BUY' ? '买' : '租'}
+          </div>
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
+            <ExternalLink className="w-4 h-4 text-white" />
           </div>
         </div>
 
