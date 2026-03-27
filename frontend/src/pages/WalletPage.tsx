@@ -10,7 +10,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
   RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X,
-  ShoppingBag, ArrowUpRight, AlertCircle, Download
+  ShoppingBag, ArrowUpRight, AlertCircle, Download, Lightbulb
 } from 'lucide-react';
 
 interface Transaction {
@@ -813,8 +813,9 @@ const WalletPage: React.FC = () => {
                   </button>
                 ))}
               </div>
-              <div className="text-xs text-slate-500 mb-4 p-3 bg-dark/50 rounded-lg">
-                💡 提示：充值金额将立即到账，支持支付宝、微信等支付方式
+              <div className="text-xs text-slate-400 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-start gap-2">
+                <Lightbulb className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>提示：充值金额将立即到账，支持支付宝、微信等支付方式</span>
               </div>
               <div className="flex gap-3">
                 <button
@@ -940,8 +941,9 @@ const WalletPage: React.FC = () => {
                   required
                 />
               </div>
-              <div className="text-xs text-slate-500 mb-4 p-3 bg-dark/50 rounded-lg">
-                💡 提示：提现申请提交后，1-3个工作日内到账，节假日顺延
+              <div className="text-xs text-slate-400 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-start gap-2">
+                <Lightbulb className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>提示：提现申请提交后，1-3个工作日内到账，节假日顺延</span>
               </div>
               <div className="flex gap-3">
                 <button

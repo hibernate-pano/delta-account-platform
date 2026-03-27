@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Account } from '../../types';
-import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus, Star, Zap } from 'lucide-react';
+import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus, Star, Zap, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { ConfirmInline } from './ConfirmInline';
 
 interface CompareItem {
@@ -180,21 +180,21 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
     { label: '段位', values: accounts.map((a) => a.gameRank || '未填写') },
     { label: '皮肤数量', values: accounts.map((a) => `${a.skinCount || 0} 个`), bestIdx: skinBest },
     { label: '所属英雄', values: accounts.map((a) => a.weapons || '未填写') },
-    { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '✅ 已认证' : '⏳ 待认证') },
+    { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '已认证' : '待认证') },
     { label: '时租价', values: accounts.map((a) => a.rentalPrice ? `¥${a.rentalPrice}/时` : '不支持') },
     {
-      label: '💎 性价比',
+      label: '性价比',
       values: accounts.map((a, i) => a.price > 0 ? `${((a.skinCount || 0) / a.price * 1000).toFixed(1)} 皮肤/千元` : '—'),
       bestIdx: valueBest,
       highlight: true,
     },
     {
-      label: '⭐ 卖家信用',
+      label: '卖家信用',
       values: accounts.map((a) => a.sellerCreditScore ? `${a.sellerCreditScore} 分` : '—'),
       bestIdx: creditBest,
     },
     {
-      label: '🕐 上架时间',
+      label: '上架时间',
       values: accounts.map((a) => freshnessLabel(a.createdAt)),
     },
     { label: '描述', values: accounts.map((a) => a.description?.slice(0, 60) || '暂无') },
