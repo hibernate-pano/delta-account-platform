@@ -491,6 +491,38 @@ const WishlistPage: React.FC = () => {
             </button>
           </div>
           <p className="text-sm text-slate-400 mb-4">当价格低于设置金额时，我们将通知您</p>
+          {(() => {
+            const target = wishlistItems.find((a) => a.id === showAlertModal);
+            return target ? (
+              <div className="mb-3 px-3 py-2 bg-dark-lighter rounded-lg text-xs text-slate-500 flex items-center justify-between">
+                <span>当前价格</span>
+                <span className="text-white font-medium">¥{target.price?.toLocaleString()}</span>
+              </div>
+            ) : null;
+          })()}
+          <div className="flex gap-1.5 mb-3 flex-wrap">
+            {[0.9, 0.8, 0.7].map((pct) => {
+              const target = wishlistItems.find((a) => a.id === showAlertModal);
+              if (!target) return null;
+              const targetPrice = Math.floor(target.price * pct);
+              const label = pct === 0.9 ? '-10%' : pct === 0.8 ? '-20%' : '-30%';
+              return (
+                <button
+                  key={pct}
+                  onClick={() => setAlertPrice(targetPrice.toString())}
+                  className={`flex-1 py-1.5 text-xs rounded-lg border transition-all ${
+                    parseFloat(alertPrice) === targetPrice
+                      ? 'border-primary bg-primary/20 text-primary'
+                      : 'border-dark-border text-slate-400 hover:border-primary/50 hover:text-white'
+                  }`}
+                >
+                  {label}
+                  <br />
+                  <span className="font-medium">¥{targetPrice.toLocaleString()}</span>
+                </button>
+              );
+            })}
+          </div>
           <div className="flex items-center gap-2 mb-4 bg-dark rounded-xl p-3">
             <span className="text-2xl text-slate-500">¥</span>
             <input

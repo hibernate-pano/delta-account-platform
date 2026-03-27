@@ -707,6 +707,16 @@ const isOwner = user?.id === account?.sellerId;
                     </>
                   )}
                 </button>
+                {account.rentalPrice && token && (
+                  <div className="flex items-center justify-end gap-2 mb-1.5">
+                    <span className={userBalance >= account.rentalPrice * rentHours ? 'text-green-400 text-xs' : 'text-yellow-400 text-xs'}>
+                      余额 ¥{userBalance.toFixed(2)}
+                    </span>
+                    {userBalance < account.rentalPrice * rentHours && (
+                      <span className="text-[10px] text-red-400/80">余额不足，租 ¥{(account.rentalPrice * rentHours).toFixed(0)}</span>
+                    )}
+                  </div>
+                )}
                 {account.rentalPrice && (
                   <div className="flex gap-3">
                     <select
