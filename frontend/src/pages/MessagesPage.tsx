@@ -9,9 +9,10 @@ import {
 import { messageApi } from '../api';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { MessageSkeleton } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles, HelpCircle
 } from 'lucide-react';
 
 interface Session {
@@ -132,10 +133,15 @@ const MessagesPage: React.FC = () => {
     }
     if (filteredSessions.length === 0) {
       return (
-        <div className="text-center py-10">
-          <MessageCircle className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-          <p className="text-slate-600 text-sm">暂无会话</p>
-        </div>
+        <EmptyState
+          icon={MessageCircle}
+          title="暂无会话"
+          description="浏览感兴趣的账号，与卖家直接沟通"
+          actions={[
+            { label: '浏览账号', to: '/accounts', icon: Gamepad2 },
+            { label: '查看帮助', to: '/faq', icon: HelpCircle, variant: 'secondary' },
+          ]}
+        />
       );
     }
     return filteredSessions.map((session) => (

@@ -8,7 +8,8 @@ import { useCreateAccount } from '../hooks/useQueries';
 import {
   Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
   Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical,
-  Shield, Clock, BarChart3, CheckCircle, Edit3, User, RefreshCw, AlertCircle
+  Shield, Clock, BarChart3, CheckCircle, Edit3, User, RefreshCw, AlertCircle,
+  Circle
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
@@ -363,11 +364,31 @@ const SellPage: React.FC = () => {
             />
           </div>
           <div className="flex gap-4 mt-2.5 text-[10px]">
-            <span className={formData.title ? 'text-green-400' : 'text-slate-600'}>标题 {formData.title ? '✓' : '○'}</span>
-            <span className={formData.gameRank ? 'text-green-400' : 'text-slate-600'}>段位 {formData.gameRank ? '✓' : '○'}</span>
-            <span className={formData.price ? 'text-green-400' : 'text-slate-600'}>价格 {formData.price ? '✓' : '○'}</span>
-            <span className={images.length > 0 ? 'text-green-400' : 'text-slate-600'}>图片 {images.length > 0 ? '✓' : '○'}</span>
-            <span className={formData.description.length >= 10 ? 'text-green-400' : 'text-slate-600'}>描述 {formData.description.length >= 10 ? '✓' : '○'}</span>
+            <span className={formData.title ? 'text-green-400' : 'text-slate-600'}>
+              {formData.title
+                ? <span className="flex items-center gap-0.5"><Check className="w-3 h-3" /> 标题</span>
+                : <span className="flex items-center gap-0.5"><Circle className="w-3 h-3" /> 标题</span>}
+            </span>
+            <span className={formData.gameRank ? 'text-green-400' : 'text-slate-600'}>
+              {formData.gameRank
+                ? <span className="flex items-center gap-0.5"><Check className="w-3 h-3" /> 段位</span>
+                : <span className="flex items-center gap-0.5"><Circle className="w-3 h-3" /> 段位</span>}
+            </span>
+            <span className={formData.price ? 'text-green-400' : 'text-slate-600'}>
+              {formData.price
+                ? <span className="flex items-center gap-0.5"><Check className="w-3 h-3" /> 价格</span>
+                : <span className="flex items-center gap-0.5"><Circle className="w-3 h-3" /> 价格</span>}
+            </span>
+            <span className={images.length > 0 ? 'text-green-400' : 'text-slate-600'}>
+              {images.length > 0
+                ? <span className="flex items-center gap-0.5"><Check className="w-3 h-3" /> 图片</span>
+                : <span className="flex items-center gap-0.5"><Circle className="w-3 h-3" /> 图片</span>}
+            </span>
+            <span className={formData.description.length >= 10 ? 'text-green-400' : 'text-slate-600'}>
+              {formData.description.length >= 10
+                ? <span className="flex items-center gap-0.5"><Check className="w-3 h-3" /> 描述</span>
+                : <span className="flex items-center gap-0.5"><Circle className="w-3 h-3" /> 描述</span>}
+            </span>
           </div>
         </div>
       )}
@@ -585,7 +606,7 @@ const SellPage: React.FC = () => {
                       {price < suggestion.min
                         ? `低于市价（参考 ¥${suggestion.min}-${suggestion.max}）`
                         : price <= suggestion.max
-                        ? '✓ 价格在合理区间'
+                        ? <><Check className="w-3 h-3 inline" /> 价格在合理区间</>
                         : '价格偏高，建议参考市场定价'}
                     </div>
                   )}
@@ -612,7 +633,7 @@ const SellPage: React.FC = () => {
                       {rentalPrice < rentalSuggestion.min
                         ? `低于市价（参考 ¥${rentalSuggestion.min}-${rentalSuggestion.max}/时）`
                         : rentalPrice <= rentalSuggestion.max
-                        ? '✓ 时租价格合理'
+                        ? <><Check className="w-3 h-3 inline" /> 时租价格合理</>
                         : '时租偏高，建议参考 ¥' + rentalSuggestion.min + '-' + rentalSuggestion.max + '/时'}
                     </div>
                   )}
