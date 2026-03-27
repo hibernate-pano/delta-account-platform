@@ -3,6 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
+import { formatDateTime } from '../utils/format';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth';
+import { useWishlistStore } from '../store/wishlist';
+import { useToast } from '../components/ui/Toast';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { favoriteApi } from '../api';
 import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile, useSellerReviews, useReplyReview } from '../hooks/useQueries';
@@ -120,6 +125,7 @@ const ProfilePage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist' | 'reviews'>('accounts');
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
 
   const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useAuthProfile();
@@ -542,7 +548,7 @@ const ProfilePage: React.FC = () => {
                           {order.account?.gameRank && (
                             <span className="text-slate-600">{order.account.gameRank}</span>
                           )}
-                          <span>{order.createdAt}</span>
+                          <span>{formatDateTime(order.createdAt)}</span>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
@@ -886,13 +892,21 @@ const ProfilePage: React.FC = () => {
             <TrendingUp className="w-4 h-4" />
             退款记录
           </Link>
-          <button
-            onClick={handleLogout}
-            className="btn-secondary text-sm flex items-center gap-2 text-red-400 hover:bg-red-500/10"
-          >
-            <LogOut className="w-4 h-4" />
-            退出登录
-          </button>
+          {showLogoutConfirm ? (
+            <div className="flex items-center gap-2 py-2">
+              <span className="text-xs text-slate-500">确定退出?</span>
+              <button onClick={handleLogout} className="text-xs text-red-400 hover:text-red-300 font-medium">确认</button>
+              <button onClick={() => setShowLogoutConfirm(false)} className="text-xs text-slate-500 hover:text-slate-300">取消</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLogoutConfirm(true)}
+              className="btn-secondary text-sm flex items-center gap-2 text-red-400 hover:bg-red-500/10"
+            >
+              <LogOut className="w-4 h-4" />
+              退出登录
+            </button>
+          )}
         </div>
       </div>
       {/* Edit Profile Modal */}

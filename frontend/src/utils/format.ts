@@ -10,3 +10,31 @@ export const formatPrice = (price: number | undefined | null): string => {
     maximumFractionDigits: 2,
   });
 };
+
+/**
+ * 格式化日期时间 (YYYY年M月D日 HH:mm)
+ */
+export const formatDateTime = (dateStr: string | undefined | null): string => {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+/**
+ * 格式化相对时间 (刚刚 / N分钟前 / N小时前 / Nd天前)
+ */
+export const formatRelativeTime = (dateStr: string | number | undefined | null): string => {
+  if (!dateStr) return '-';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  const h = Math.floor(diff / 3600000);
+  if (h < 24) return `${h}小时前`;
+  return `${Math.floor(h / 24)}天前`;
+};
