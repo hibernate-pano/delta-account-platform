@@ -227,6 +227,11 @@ const WalletPage: React.FC = () => {
   const [accountNo, setAccountNo] = useState('');
   const [accountName, setAccountName] = useState('');
   const [txSearch, setTxSearch] = useState('');
+  const pendingWithdrawals = useMemo(() =>
+    transactions.filter((t) => t.type === 'WITHDRAW' && t.status === 'PENDING').reduce((s, t) => s + t.amount, 0),
+    [transactions]
+  );
+  const availableBalance = useMemo(() => Math.max(0, balance - pendingWithdrawals), [balance, pendingWithdrawals]);
   const rechargeModalRef = useRef<HTMLDivElement>(null);
   const withdrawModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(rechargeModalRef, showRechargeModal);
@@ -399,12 +404,9 @@ const WalletPage: React.FC = () => {
             <div>
               <p className="text-slate-400 text-sm">账户余额</p>
               <p className="text-3xl font-bold text-white">¥{balance.toFixed(2)}</p>
-              {(() => {
-                const pending = transactions.filter((t) => t.type === 'WITHDRAW' && t.status === 'PENDING').reduce((s, t) => s + t.amount, 0);
-                return pending > 0 ? (
-                  <p className="text-xs text-yellow-400/80 mt-0.5">待提现 ¥{pending.toFixed(2)} · 可用 ¥{(balance - pending).toFixed(2)}</p>
-                ) : null;
-              })()}
+              {pendingWithdrawals > 0 && (
+                  <p className="text-xs text-yellow-400/80 mt-0.5">待提现 ¥{pendingWithdrawals.toFixed(2)} · 可用 ¥{availableBalance.toFixed(2)}</p>
+                )}
             </div>
           </div>
         </div>
@@ -773,7 +775,7 @@ const WalletPage: React.FC = () => {
                   <label className="block text-sm text-slate-400">提现金额</label>
                   <button
                     type="button"
-                    onClick={() => setWithdrawAmount(balance.toFixed(2))}
+                    onClick={() => setWithdrawAmount(availableBalance.toFixed(2))}
                     className="text-xs text-primary hover:text-primary-light transition-colors"
                   >
                     全部提现
@@ -795,11 +797,11 @@ const WalletPage: React.FC = () => {
                   />
                 </div>
                 <p className="text-sm text-slate-500 mt-1">
-                  可用余额: <span className="text-primary font-medium">¥{balance.toFixed(2)}</span>
+                  可用余额: <span className="text-primary font-medium">¥{availableBalance.toFixed(2)}</span>
                 </p>
               </div>
               <div className="grid grid-cols-4 gap-2 mb-4">
-                {[50, 100, 200, 500].filter((a) => a <= balance).map((amount) => (
+                {[50, 100, 200, 500].filter((a) => a <= availableBalance).map((amount) => (
                   <button
                     key={amount}
                     type="button"

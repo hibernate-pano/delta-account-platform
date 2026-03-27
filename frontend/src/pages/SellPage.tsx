@@ -699,6 +699,11 @@ const SellPage: React.FC = () => {
                   showToast('请至少上传1张图片', 'warning');
                   return;
                 }
+                if (formData.description.trim().length < 10) {
+                  showToast('账号描述至少需要10个字，方便买家了解商品详情', 'warning');
+                  document.getElementById('sell-description')?.focus();
+                  return;
+                }
                 handleNext(3);
               }} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2">
                 下一步 <ArrowRight className="w-5 h-5" />
