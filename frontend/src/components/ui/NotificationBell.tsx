@@ -1,16 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCircle, AlertCircle, MessageSquare, Clock, ChevronRight } from 'lucide-react';
-import { notificationApi } from '../../api';
-
-interface Notification {
-  id: number;
-  type: string;
-  title: string;
-  content: string;
-  status: string;
-  createdAt: string;
-}
+import { useNotifications, useUnreadCount, useMarkNotificationRead, useMarkAllNotificationsRead } from '../../hooks/useQueries';
 
 const formatTime = (dateStr: string) => {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -24,16 +15,16 @@ const formatTime = (dateStr: string) => {
 
 export const NotificationBell: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const { data: unreadData } = useUnreadCount();
+  const unreadCount = unreadData?.notificationCount ?? 0;
+
+  const { data: notificationsData } = useNotifications();
+  const markReadMutation = useMarkNotificationRead();
+  const markAllReadMutation = useMarkAllNotificationsRead();
+  const notifications = notificationsData?.data?.data || [];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -45,39 +36,8 @@ export const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchUnreadCount = async () => {
-    try {
-      const res = await notificationApi.getUnreadCount();
-      setUnreadCount(res.data.data);
-    } catch (e) {
-      // Silently fail - notification count is not critical
-    }
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await notificationApi.getList();
-      setNotifications(res.data.data || []);
-    } catch (e) {
-      // Silently fail - notifications are not critical
-    }
-  };
-
-  const handleOpen = () => {
-    if (!showDropdown) {
-      fetchNotifications();
-    }
-    setShowDropdown(!showDropdown);
-  };
-
-  const handleMarkAllRead = async () => {
-    try {
-      await notificationApi.markAllAsRead();
-      setUnreadCount(0);
-      setNotifications(prev => prev.map(n => ({ ...n, status: 'READ' })));
-    } catch (e) {
-      // Silently fail
-    }
+  const handleMarkAllRead = () => {
+    markAllReadMutation.mutate();
   };
 
   const getIcon = (type: string) => {
@@ -103,8 +63,7 @@ export const NotificationBell: React.FC = () => {
     }
   };
 
-  // Smart navigation per notification type
-  const getNavTarget = (n: Notification) => {
+  const getNavTarget = (n: { type: string }) => {
     switch (n.type) {
       case 'ORDER_PAID':
       case 'ORDER_COMPLETED':
@@ -125,7 +84,7 @@ export const NotificationBell: React.FC = () => {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={handleOpen}
+        onClick={() => setShowDropdown(!showDropdown)}
         className="relative p-2 text-slate-400 hover:text-white transition-colors"
         aria-label={`通知${unreadCount > 0 ? `，${unreadCount}条未读` : ''}`}
         aria-expanded={showDropdown}
@@ -144,8 +103,12 @@ export const NotificationBell: React.FC = () => {
           <div className="p-3 border-b border-dark-border flex items-center justify-between">
             <h3 className="font-semibold">通知</h3>
             {unreadCount > 0 && (
-              <button onClick={handleMarkAllRead} className="text-xs text-primary hover:underline">
-                全部已读
+              <button
+                onClick={handleMarkAllRead}
+                disabled={markAllReadMutation.isPending}
+                className="text-xs text-primary hover:underline disabled:opacity-50"
+              >
+                {markAllReadMutation.isPending ? '处理中...' : '全部已读'}
               </button>
             )}
           </div>
@@ -161,14 +124,10 @@ export const NotificationBell: React.FC = () => {
                   <div
                     key={n.id}
                     className={`p-3 rounded-lg cursor-pointer hover:bg-dark ${n.status === 'UNREAD' ? 'bg-primary/5' : ''}`}
-                    onClick={async (e) => {
-                      // Mark as read
+                    onClick={() => {
                       if (n.status === 'UNREAD') {
-                        await notificationApi.markAsRead(n.id);
-                        setUnreadCount(prev => Math.max(0, prev - 1));
-                        setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, status: 'READ' } : item));
+                        markReadMutation.mutate(n.id);
                       }
-                      // Smart navigate
                       const target = getNavTarget(n);
                       if (target) {
                         setShowDropdown(false);

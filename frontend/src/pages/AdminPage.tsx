@@ -486,7 +486,11 @@ const AdminPage: React.FC = () => {
                       disabled={verifyMutation.isPending}
                       className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
                     >
-                      <CheckCircle className="w-3.5 h-3.5" />
+                      {verifyMutation.isPending ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-3.5 h-3.5" />
+                      )}
                       批量通过
                     </button>
                     {accountFilter === 'PENDING' && (
@@ -495,7 +499,11 @@ const AdminPage: React.FC = () => {
                         disabled={verifyMutation.isPending}
                         className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
                       >
-                        <XCircle className="w-3.5 h-3.5" />
+                        {verifyMutation.isPending ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5" />
+                        )}
                         批量拒绝
                       </button>
                     )}
