@@ -679,12 +679,17 @@ const SellPage: React.FC = () => {
 
               {/* Drop zone */}
               <div
-                className={`border-2 border-dashed rounded-xl p-6 text-center transition-all mb-4 cursor-pointer ${
-                  dragOver ? 'border-primary bg-primary/5' : 'border-dark-border hover:border-slate-600'
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-all mb-4 ${
+                  compressingCount > 0
+                    ? 'border-slate-700 cursor-not-allowed opacity-50'
+                    : dragOver
+                      ? 'border-primary bg-primary/5 cursor-pointer'
+                      : 'border-dark-border hover:border-slate-600 cursor-pointer'
                 }`}
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
+                onDragOver={(e) => { if (compressingCount > 0) return; e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => { if (compressingCount > 0) return; setDragOver(false); }}
                 onDrop={(e) => {
+                  if (compressingCount > 0) return;
                   e.preventDefault(); setDragOver(false);
                   // Try to read dropped files first
                   const files = Array.from(e.dataTransfer.files);
@@ -704,7 +709,7 @@ const SellPage: React.FC = () => {
                     try { new URL(url); setImages([...images, url]); } catch {}
                   }
                 }}
-                onClick={() => document.getElementById('url-input')?.focus()}
+                onClick={() => { if (compressingCount > 0) return; document.getElementById('url-input')?.focus(); }}
               >
                 {dragOver ? (
                   <p className="text-primary text-sm font-medium">松开以添加图片</p>
