@@ -593,16 +593,37 @@ const WalletPage: React.FC = () => {
             ))}
           </div>
         ) : filteredTransactions.length === 0 ? (
-          <div className="text-center py-12">
-            <Wallet className="w-12 h-12 mx-auto mb-4 text-slate-700" />
-            <p className="text-slate-500">{txSearch ? '没有找到匹配的交易记录' : '暂无交易记录'}</p>
-            {!txSearch && (
-              <p className="text-slate-600 text-xs mt-1 mb-4">购买或出售账号后，交易记录将显示在这里</p>
-            )}
-            <Link to="/accounts" className="btn-primary inline-flex items-center gap-2 text-sm">
-              <ShoppingBag className="w-4 h-4" />
-              去逛逛账号市场
-            </Link>
+          <div className="text-center py-16 animate-fade-in">
+            <div className="w-24 h-24 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-6 animate-float">
+              <Wallet className="w-12 h-12 text-slate-700" />
+            </div>
+            <h3 className="text-lg font-medium mb-2 text-slate-400">
+              {txSearch ? '没有找到匹配的交易记录' : '暂无交易记录'}
+            </h3>
+            <p className="text-slate-600 text-sm mb-6">
+              {txSearch ? '换个关键词试试' : '开始交易后，这里会显示您的每一笔收支'}
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {txSearch ? (
+                <button onClick={() => setTxSearch('')} className="btn-secondary text-sm">
+                  清除搜索
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowRechargeModal(true)}
+                    className="btn-primary text-sm inline-flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    充值
+                  </button>
+                  <Link to="/accounts" className="btn-secondary text-sm inline-flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4" />
+                    逛逛市场
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         ) : (
           <div className="divide-y divide-slate-800">
