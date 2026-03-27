@@ -301,12 +301,20 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
           <div className="bg-dark rounded-xl p-4">
             <p className="text-xs text-slate-500 mb-3">订单时间线</p>
             <div className="space-y-3">
-              {[
-                { label: '下单', time: order.createdAt, done: true },
-                { label: '支付', time: order.status !== 'PENDING' ? '—' : '待支付', done: ['PAID', 'PROCESSING', 'COMPLETED'].includes(order.status) },
-                { label: '交付', time: ['PROCESSING', 'COMPLETED'].includes(order.status) ? '—' : '—', done: order.status === 'COMPLETED' },
-                { label: '完成', time: order.status === 'COMPLETED' ? '—' : '—', done: order.status === 'COMPLETED' },
-              ].map((item, i) => (
+              {(order.type === 'RENT'
+                ? [
+                    { label: '下单', time: order.createdAt, done: true },
+                    { label: '支付', time: ['PAID', 'PROCESSING', 'COMPLETED'].includes(order.status) ? '—' : '待支付', done: ['PAID', 'PROCESSING', 'COMPLETED'].includes(order.status) },
+                    { label: '使用中', time: order.status === 'PROCESSING' ? '—' : '—', done: ['PROCESSING', 'COMPLETED'].includes(order.status) },
+                    { label: '完成', time: '—', done: order.status === 'COMPLETED' },
+                  ]
+                : [
+                    { label: '下单', time: order.createdAt, done: true },
+                    { label: '支付', time: order.status !== 'PENDING' ? '—' : '待支付', done: ['PAID', 'PROCESSING', 'COMPLETED'].includes(order.status) },
+                    { label: '交付', time: ['PROCESSING', 'COMPLETED'].includes(order.status) ? '—' : '—', done: order.status === 'COMPLETED' },
+                    { label: '完成', time: '—', done: order.status === 'COMPLETED' },
+                  ]
+              ).map((item, i) => (
                 <div key={item.label} className="flex items-center gap-3">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                     item.done ? 'bg-primary/20 text-primary' : 'bg-dark-lighter text-slate-600'

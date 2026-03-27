@@ -308,6 +308,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
                 if (lowestPriceIdx >= 0) recommendations.push({ idx: lowestPriceIdx, label: '价格最优', color: 'text-primary' });
                 if (bestValueIdx >= 0 && valueScores[bestValueIdx] > 0) recommendations.push({ idx: bestValueIdx, label: '性价比最高', color: 'text-yellow-400' });
                 if (bestCreditIdx >= 0 && credits[bestCreditIdx] > 0) recommendations.push({ idx: bestCreditIdx, label: '卖家信用最佳', color: 'text-blue-400' });
+                if (mostSkinsIdx >= 0 && skins[mostSkinsIdx] > 0) recommendations.push({ idx: mostSkinsIdx, label: '皮肤最多', color: 'text-purple-400' });
 
                 if (recommendations.length === 0) return null;
                 return (

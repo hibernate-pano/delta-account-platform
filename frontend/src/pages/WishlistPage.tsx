@@ -461,6 +461,11 @@ const WishlistPage: React.FC = () => {
                   — ¥{Math.max(...sortedItems.map((a) => a.price), -Infinity).toFixed(0)}
                 </p>
               )}
+              {sortedItems.length > 1 && (
+                <p className="text-xs text-slate-500 mt-0.5">
+                  预估总价: ¥{sortedItems.reduce((sum, a) => sum + a.price, 0).toLocaleString()}
+                </p>
+              )}
             </div>
             <Link to="/accounts" className="btn-primary !py-2 text-sm flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" />
