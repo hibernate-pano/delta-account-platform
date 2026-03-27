@@ -796,7 +796,14 @@ const AdminPage: React.FC = () => {
                         );
                       })}
                       {filteredUsers.length === 0 && (
-                        <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500">暂无用户记录</td></tr>
+                        <tr>
+                          <td colSpan={8} className="px-4 py-12 text-center">
+                            <div className="flex flex-col items-center gap-2">
+                              <Users className="w-10 h-10 text-slate-600" />
+                              <p className="text-slate-500">暂无用户记录</p>
+                            </div>
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>
