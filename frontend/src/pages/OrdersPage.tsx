@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { TransactionSkeleton } from '../components/ui/Skeleton';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder, useReviewOrder } from '../hooks/useQueries';
@@ -127,6 +128,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
   const { showToast } = useToast();
   const payMutation = usePayOrder();
   const cancelMutation = useCancelOrder();
+  const [pendingCancel, setPendingCancel] = useState(false);
   const isBuyer = user?.id === order.buyerId;
   const isSeller = user?.id === order.sellerId;
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
@@ -368,24 +370,33 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
                 {payMutation.isPending ? '支付中...' : '立即支付'}
               </button>
             )}
-            {order.status === 'PENDING' && (
+            {order.status === 'PENDING' && !pendingCancel && (
               <button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (!window.confirm('确定要取消该订单吗？')) return;
+                onClick={(e) => { e.stopPropagation(); setPendingCancel(true); }}
+                disabled={cancelMutation.isPending}
+                className="btn-secondary !py-2.5 !px-3 text-sm text-slate-400 hover:text-red-400 disabled:opacity-50"
+              >
+                取消订单
+              </button>
+            )}
+            {order.status === 'PENDING' && pendingCancel && (
+              <ConfirmInline
+                message="确定要取消该订单吗？"
+                confirmLabel="确认取消"
+                onConfirm={async (e: any) => {
+                  e?.stopPropagation?.();
                   try {
                     await cancelMutation.mutateAsync(order.id);
                     showToast('订单已取消', 'success');
                     onClose();
                   } catch (err: any) {
                     showToast(err.response?.data?.message || '取消失败', 'error');
+                  } finally {
+                    setPendingCancel(false);
                   }
                 }}
-                disabled={cancelMutation.isPending}
-                className="btn-secondary !py-2.5 !px-3 text-sm text-slate-400 hover:text-red-400 disabled:opacity-50"
-              >
-                {cancelMutation.isPending ? '取消中...' : '取消订单'}
-              </button>
+                onCancel={() => setPendingCancel(false)}
+              />
             )}
           </div>
         </div>
@@ -399,6 +410,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
   const [expanded, setExpanded] = useState(false);
   const [countdown, setCountdown] = useState('');
   const [paymentCountdown, setPaymentCountdown] = useState('');
+  const [pendingCancel, setPendingCancel] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
   const payMutation = usePayOrder();
@@ -657,21 +669,30 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 立即支付
               </button>
             )}
-            {isPending && (
+            {isPending && !pendingCancel && (
               <button
-                onClick={() => {
-                  if (!window.confirm('确定要取消该订单吗？')) return;
-                  cancelMutation.mutate(order.id, {
-                    onSuccess: () => showToast('订单已取消', 'success'),
-                    onError: (err: any) => showToast(err.response?.data?.message || '取消失败', 'error'),
-                  });
-                }}
+                onClick={() => setPendingCancel(true)}
                 disabled={cancelMutation.isPending}
                 className="btn-secondary !py-2 !px-2.5 text-xs text-slate-400 hover:text-red-400 disabled:opacity-50"
                 title="取消订单"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
+            )}
+            {isPending && pendingCancel && (
+              <div className="flex-1">
+                <ConfirmInline
+                  message="确定要取消该订单吗？"
+                  confirmLabel="确认"
+                  onConfirm={() => {
+                    cancelMutation.mutate(order.id, {
+                      onSuccess: () => { showToast('订单已取消', 'success'); setPendingCancel(false); },
+                      onError: (err: any) => { showToast(err.response?.data?.message || '取消失败', 'error'); setPendingCancel(false); },
+                    });
+                  }}
+                  onCancel={() => setPendingCancel(false)}
+                />
+              </div>
             )}
             {order.status === 'COMPLETED' && (
               <Link

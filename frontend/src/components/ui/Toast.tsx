@@ -36,13 +36,18 @@ const getAriaLive = (type: ToastType) =>
 
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [dismissing, setDismissing] = useState<Set<string>>(new Set());
 
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setDismissing((prev) => new Set([...prev, id]));
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+        setDismissing((prev) => { const s = new Set(prev); s.delete(id); return s; });
+      }, 200);
     }, TOAST_DURATION);
   }, []);
 
@@ -51,21 +56,26 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [showToast]);
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setDismissing((prev) => new Set([...prev, id]));
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setDismissing((prev) => { const s = new Set(prev); s.delete(id); return s; });
+    }, 200);
   }, []);
 
   return (
     <ToastContext.Provider value={{ toasts, showToast, toast, removeToast }}>
       {children}
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <ToastContainer toasts={toasts} removeToast={removeToast} dismissing={dismissing} />
     </ToastContext.Provider>
   );
 };
 
 
-const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void }> = ({
+const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void; dismissing: Set<string> }> = ({
   toasts,
   removeToast,
+  dismissing,
 }) => {
   if (toasts.length === 0) return null;
 
@@ -99,12 +109,12 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
           key={toast.id}
           role={getAriaRole(toast.type)}
           aria-live={getAriaLive(toast.type)}
-          className={`toast-enter flex flex-col bg-dark-card border border-dark-border border-l-4 ${
+          className={`${dismissing.has(toast.id) ? 'toast-exit' : 'toast-enter'} flex flex-col ${
             toast.type === 'success' ? 'border-l-green-400' :
             toast.type === 'error'   ? 'border-l-red-400'   :
             toast.type === 'warning' ? 'border-l-yellow-400' :
                                        'border-l-blue-400'
-          } rounded-lg shadow-2xl overflow-hidden`}
+          } bg-dark-card border border-dark-border border-l-4 rounded-lg shadow-2xl overflow-hidden`}
         >
           {/* Progress bar */}
           <div
