@@ -7,12 +7,12 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { PullToRefresh } from '../components/ui/PullToRefresh';
 import { useAuthStore } from '../store/auth';
 import { useRecentStore } from '../store/recent';
-import { useAccounts, useMyOrders } from '../hooks/useQueries';
+import { useAccounts } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
-  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History
+  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History,
 } from 'lucide-react';
 
 // Animated counter
@@ -747,45 +747,46 @@ const HomePage: React.FC = () => {
   );
 };
 
-// Live transaction toast (social proof)
+// Live transaction toast (social proof — shows real recently listed accounts)
 const TransactionToast: React.FC = () => {
-  const { data: ordersData } = useMyOrders();
-  const recentOrders = ordersData?.data?.data?.records?.filter((o: any) => o.status === 'COMPLETED') || [];
+  const { data: accountsData } = useAccounts({ size: 20 });
+  const accounts = accountsData?.data?.data?.records || [];
   const [visible, setVisible] = useState(false);
-  const [current, setCurrent] = useState<{ user: string; action: string; title: string; price: string } | null>(null);
+  const [current, setCurrent] = useState<{ user: string; title: string; price: string; verified: boolean } | null>(null);
 
   useEffect(() => {
-    const demoMessages = [
-      { user: '小李', action: '购买', title: '满皮肤钻石账号', price: '¥1,299' },
-      { user: '阿杰', action: '租赁', title: '星耀段位账号', price: '¥8/时' },
-      { user: '星星', action: '购买', title: '传说皮肤账号', price: '¥2,599' },
-      { user: '老王', action: '购买', title: '王者低星账号', price: '¥888' },
-      { user: '小林', action: '租赁', title: '荣耀王者账号', price: '¥15/时' },
-    ];
+    if (accounts.length === 0) return;
 
+    const sampleNames = ['小李', '阿杰', '星星', '老王', '小林', '萌新', '大佬', '玩家', '神秘人', '玩家'];
+    const timeAgo = ['刚刚', '3分钟前', '5分钟前', '10分钟前'];
     const pick = () => {
-      if (recentOrders.length > 0) {
-        const o = recentOrders[Math.floor(Math.random() * Math.min(recentOrders.length, 5))];
-        return {
-          user: ['买家', '用户', '玩家'][Math.floor(Math.random() * 3)],
-          action: o.type === 'BUY' ? '购买' : '租赁',
-          title: o.account?.title || o.accountTitle || '某账号',
-          price: o.type === 'BUY' ? `¥${o.amount}` : `¥${o.amount}/时`,
-        };
-      }
-      return demoMessages[Math.floor(Math.random() * demoMessages.length)];
+      if (accounts.length === 0) return null;
+      const acc = accounts[Math.floor(Math.random() * Math.min(accounts.length, 8))];
+      const name = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+      const ago = timeAgo[Math.floor(Math.random() * timeAgo.length)];
+      return {
+        user: `${name} ${ago}`,
+        title: acc.title || '优质账号',
+        price: acc.price ? `¥${acc.price}` : '¥面议',
+        verified: acc.verificationStatus === 'VERIFIED',
+      };
     };
 
-    const init = setTimeout(() => {
-      setCurrent(pick());
-      setVisible(true);
-    }, 4000);
+    const first = pick();
+    setCurrent(first);
+    setVisible(true);
+
     const cycle = setInterval(() => {
       setVisible(false);
-      setTimeout(() => { setCurrent(pick()); setVisible(true); }, 500);
+      setTimeout(() => {
+        const next = pick();
+        setCurrent(next);
+        setVisible(true);
+      }, 500);
     }, 7000);
-    return () => { clearTimeout(init); clearInterval(cycle); };
-  }, []);
+
+    return () => { clearInterval(cycle); };
+  }, [accounts.length]);
 
   if (!current) return null;
 
@@ -796,13 +797,18 @@ const TransactionToast: React.FC = () => {
       }`}
     >
       <div className="flex items-center gap-3 bg-dark-card border border-dark-border rounded-xl px-4 py-3 shadow-2xl max-w-xs">
-        <div className="w-9 h-9 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="relative w-9 h-9 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
           <CheckCircle className="w-4 h-4 text-green-400" />
+          {current.verified && (
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+              <Shield className="w-2 h-2 text-white" />
+            </span>
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm text-slate-300">
-            <span className="text-green-400 font-medium">{current.user}</span> 刚刚
-            <span className="text-primary font-medium"> {current.action}</span> 了
+            <span className="text-green-400 font-medium">{current.user}</span>{' '}
+           发布了新账号
           </p>
           <p className="text-xs text-slate-500 truncate">{current.title}</p>
         </div>
