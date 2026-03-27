@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useCreateAccount } from '../hooks/useQueries';
 import {
@@ -76,6 +77,9 @@ const SellPage: React.FC = () => {
   const [slideDir, setSlideDir] = useState<'left' | 'right'>('left');
   const [gameType, setGameType] = useState('王者荣耀');
 
+  // Draft restoration dialog state
+  const [draftToRestore, setDraftToRestore] = useState<{ formData: typeof formData; images: string[] } | null>(null);
+
   const handleNext = (target: number) => {
     setSlideDir('left');
     setStep(target);
@@ -118,23 +122,29 @@ const SellPage: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDirty]);
 
-  // Restore draft from localStorage on mount (with confirmation)
+  // Restore draft from localStorage on mount (with inline confirmation)
   useEffect(() => {
     const saved = localStorage.getItem(SELL_DRAFT_KEY);
     if (!saved) return;
     try {
       const { formData: savedForm, images: savedImages } = JSON.parse(saved);
       if (!savedForm && !savedImages?.length) return;
-      const title = savedForm?.title || '未命名';
-      if (window.confirm(`发现未完成的草稿「${title}」，是否继续编辑？`)) {
-        if (savedForm) setFormData((f) => ({ ...f, ...savedForm }));
-        if (savedImages?.length) setImages(savedImages);
-      } else {
-        localStorage.removeItem(SELL_DRAFT_KEY);
-      }
+      setDraftToRestore({ formData: savedForm, images: savedImages });
     } catch { /* ignore corrupt draft */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const confirmRestoreDraft = () => {
+    if (!draftToRestore) return;
+    if (draftToRestore.formData) setFormData((f) => ({ ...f, ...draftToRestore.formData }));
+    if (draftToRestore.images?.length) setImages(draftToRestore.images);
+    setDraftToRestore(null);
+  };
+
+  const dismissDraft = () => {
+    localStorage.removeItem(SELL_DRAFT_KEY);
+    setDraftToRestore(null);
+  };
 
   // Autosave draft to localStorage on changes (debounced 800ms)
   useEffect(() => {
@@ -245,6 +255,18 @@ const SellPage: React.FC = () => {
         <h1 className="text-2xl font-bold mb-1">发布账号</h1>
         <p className="text-slate-500 text-sm">填写信息，快速将账号变现</p>
       </div>
+
+      {/* Draft restoration confirmation */}
+      {draftToRestore && (
+        <div className="mb-6">
+          <ConfirmInline
+            message={`发现未完成的草稿「${draftToRestore.formData?.title || '未命名'}」，是否继续编辑？`}
+            onConfirm={confirmRestoreDraft}
+            onCancel={dismissDraft}
+            confirmLabel="继续编辑"
+          />
+        </div>
+      )}
 
       {/* How it works - 4 steps */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
