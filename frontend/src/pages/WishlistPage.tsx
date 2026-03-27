@@ -9,7 +9,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
   ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye,
-  Bell, X
+  Bell, X, RefreshCw
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
@@ -38,6 +38,7 @@ const WishlistPage: React.FC = () => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState<number | null>(null);
   const [alertPrice, setAlertPrice] = useState('');
+  const [removingId, setRemovingId] = useState<number | null>(null);
   const [priceAlerts, setPriceAlerts] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem('delta_price_alerts') || '{}'); }
     catch { return {}; }
@@ -70,8 +71,12 @@ const WishlistPage: React.FC = () => {
   };
 
   const handleRemove = (id: number) => {
-    removeItem(id);
-    showToast('已从收藏移除', 'info');
+    setRemovingId(id);
+    setTimeout(() => {
+      removeItem(id);
+      showToast('已从收藏移除', 'info');
+      setRemovingId(null);
+    }, 150);
   };
 
   const verifiedCount = useMemo(
@@ -339,10 +344,15 @@ const WishlistPage: React.FC = () => {
                     </Link>
                     <button
                       onClick={() => handleRemove(account.id)}
-                      className="px-3 py-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      disabled={removingId === account.id}
+                      className="px-3 py-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="移除收藏"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {removingId === account.id ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -430,10 +440,15 @@ const WishlistPage: React.FC = () => {
                     </Link>
                     <button
                       onClick={() => handleRemove(account.id)}
-                      className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      disabled={removingId === account.id}
+                      className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="移除"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {removingId === account.id ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>

@@ -213,8 +213,12 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
                     disabled={cancelMutation.isPending}
                     className="btn-ghost flex-1 !py-2.5 text-sm !text-red-400 !border-red-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    <X className="w-4 h-4" />
-                    撤销申请
+                    {cancelMutation.isPending ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                    {cancelMutation.isPending ? '撤销中...' : '撤销申请'}
                   </button>
                 )}
               </>
@@ -524,8 +528,11 @@ const RefundsPage: React.FC = () => {
                             <button
                               onClick={() => handleCancelRefund(refund.id)}
                               disabled={cancelMutation.isPending}
-                              className="text-xs text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-50 mt-1"
+                              className="text-xs text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1 flex items-center gap-1"
                             >
+                              {cancelMutation.isPending ? (
+                                <RefreshCw className="w-3 h-3 animate-spin" />
+                              ) : null}
                               取消申请
                             </button>
                           )
