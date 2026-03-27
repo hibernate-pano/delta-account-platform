@@ -22,6 +22,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('delta_recent_searches') || '[]'); }
     catch { return []; }
@@ -554,6 +555,67 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </div>
       </footer>
+
+      {/* Floating Quick Actions FAB */}
+      {token && (
+        <div className="fixed bottom-20 md:bottom-6 right-4 z-40 flex flex-col items-end gap-2">
+          <div
+            className={`flex flex-col gap-2 mb-2 transition-all duration-300 origin-bottom-right ${
+              quickActionsOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+            }`}
+          >
+            <button
+              onClick={() => { navigate('/sell'); setQuickActionsOpen(false); }}
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-slate-300 group-hover:text-white">发布账号</span>
+            </button>
+            <button
+              onClick={() => { navigate('/wallet'); setQuickActionsOpen(false); }}
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
+            >
+              <Wallet className="w-4 h-4 text-primary" />
+              <span className="text-sm text-slate-300 group-hover:text-white">钱包充值</span>
+            </button>
+            <button
+              onClick={() => { navigate('/messages'); setQuickActionsOpen(false); }}
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
+            >
+              <MessageCircle className="w-4 h-4 text-blue-400" />
+              <span className="text-sm text-slate-300 group-hover:text-white">消息中心</span>
+              {msgUnreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
+                  {msgUnreadCount > 9 ? '9+' : msgUnreadCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => { navigate('/notifications'); setQuickActionsOpen(false); }}
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
+            >
+              <Bell className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm text-slate-300 group-hover:text-white">通知中心</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
+          <button
+            onClick={() => setQuickActionsOpen(!quickActionsOpen)}
+            className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all ${
+              quickActionsOpen
+                ? 'bg-red-500 hover:bg-red-600 rotate-45'
+                : 'bg-primary hover:bg-primary/90'
+            }`}
+            title={quickActionsOpen ? '关闭快捷操作' : '快捷操作'}
+          >
+            {quickActionsOpen ? <X className="w-5 h-5 text-white" /> : <Plus className="w-5 h-5 text-white" />}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
