@@ -109,9 +109,9 @@ const SellPage: React.FC = () => {
   }
 
   const validateStep1 = () => {
-    if (!formData.title.trim()) { showToast('请填写账号标题', 'warning'); return false; }
-    if (!formData.gameRank) { showToast('请选择游戏段位', 'warning'); return false; }
-    if (!formData.price || parseFloat(formData.price) <= 0) { showToast('请填写正确的售价', 'warning'); return false; }
+    if (!formData.title.trim()) { showToast('请填写账号标题', 'warning'); document.getElementById('sell-title')?.focus(); return false; }
+    if (!formData.gameRank) { showToast('请选择游戏段位', 'warning'); document.getElementById('sell-rank')?.focus(); return false; }
+    if (!formData.price || parseFloat(formData.price) <= 0) { showToast('请填写正确的售价', 'warning'); document.getElementById('sell-price')?.focus(); return false; }
     return true;
   };
 
@@ -265,6 +265,7 @@ const SellPage: React.FC = () => {
                   type="text" value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value.slice(0, 30) })}
                   maxLength={30}
+                  id="sell-title"
                   className="input" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
                   required autoFocus
                 />
@@ -302,6 +303,7 @@ const SellPage: React.FC = () => {
                   <select
                     value={formData.gameRank}
                     onChange={(e) => setFormData({ ...formData, gameRank: e.target.value })}
+                    id="sell-rank"
                     className="input"
                   >
                     <option value="">选择段位</option>
@@ -344,6 +346,7 @@ const SellPage: React.FC = () => {
                     <input
                       type="number" value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      id="sell-price"
                       className="input pl-10 text-xl font-bold !text-white" placeholder="0.00" step="0.01" min="1" required
                     />
                   </div>
