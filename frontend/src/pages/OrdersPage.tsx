@@ -1222,40 +1222,56 @@ const OrdersPage: React.FC = () => {
           <div className="w-16 h-16 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-slate-700" />
           </div>
-          <h3 className="text-base font-medium mb-2 text-slate-400">
-            {activeTab === 'all'
-              ? activeType === 'BUY' ? '暂无购买记录'
-              : activeType === 'RENT' ? '暂无租赁记录'
-              : '暂无订单'
-              : activeTab === 'PENDING' ? '暂无待支付订单'
-              : activeTab === 'PROCESSING' ? '暂无进行中订单'
-              : activeTab === 'COMPLETED' ? '暂无已完成订单'
-              : '暂无已取消/退款订单'
-            }
-          </h3>
-          <p className="text-slate-600 text-xs mb-6">开始探索账号市场吧</p>
-          {/* Quick action cards */}
-          <div className="flex justify-center gap-3 mb-6">
-            <Link to="/accounts" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
-              <ShoppingBag className="w-5 h-5 text-blue-400 mb-2" />
-              <p className="text-sm font-medium text-slate-300">购买账号</p>
-              <p className="text-xs text-slate-600">浏览精选账号</p>
-            </Link>
-            <Link to="/accounts?rental=true" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
-              <Clock className="w-5 h-5 text-purple-400 mb-2" />
-              <p className="text-sm font-medium text-slate-300">租赁账号</p>
-              <p className="text-xs text-slate-600">按小时计费</p>
-            </Link>
-            <Link to="/sell" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
-              <TrendingUp className="w-5 h-5 text-green-400 mb-2" />
-              <p className="text-sm font-medium text-slate-300">发布账号</p>
-              <p className="text-xs text-slate-600">快速变现</p>
-            </Link>
-          </div>
-          <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4" />
-            去逛逛
-          </Link>
+          {keyword ? (
+            <>
+              <h3 className="text-base font-medium mb-2 text-slate-400">
+                未找到「{keyword}」相关订单
+              </h3>
+              <button
+                onClick={() => setKeyword('')}
+                className="text-sm text-primary hover:text-primary-light transition-colors"
+              >
+                清除搜索
+              </button>
+            </>
+          ) : (
+            <>
+              <h3 className="text-base font-medium mb-2 text-slate-400">
+                {activeTab === 'all'
+                  ? activeType === 'BUY' ? '暂无购买记录'
+                  : activeType === 'RENT' ? '暂无租赁记录'
+                  : '暂无订单'
+                  : activeTab === 'PENDING' ? '暂无待支付订单'
+                  : activeTab === 'PROCESSING' ? '暂无进行中订单'
+                  : activeTab === 'COMPLETED' ? '暂无已完成订单'
+                  : '暂无已取消/退款订单'
+                }
+              </h3>
+              <p className="text-slate-600 text-xs mb-6">开始探索账号市场吧</p>
+              {/* Quick action cards */}
+              <div className="flex justify-center gap-3 mb-6">
+                <Link to="/accounts" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+                  <ShoppingBag className="w-5 h-5 text-blue-400 mb-2" />
+                  <p className="text-sm font-medium text-slate-300">购买账号</p>
+                  <p className="text-xs text-slate-600">浏览精选账号</p>
+                </Link>
+                <Link to="/accounts?rental=true" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+                  <Clock className="w-5 h-5 text-purple-400 mb-2" />
+                  <p className="text-sm font-medium text-slate-300">租赁账号</p>
+                  <p className="text-xs text-slate-600">按小时计费</p>
+                </Link>
+                <Link to="/sell" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+                  <TrendingUp className="w-5 h-5 text-green-400 mb-2" />
+                  <p className="text-sm font-medium text-slate-300">发布账号</p>
+                  <p className="text-xs text-slate-600">快速变现</p>
+                </Link>
+              </div>
+              <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4" />
+                去逛逛
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-6">
