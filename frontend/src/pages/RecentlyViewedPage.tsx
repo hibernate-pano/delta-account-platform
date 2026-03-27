@@ -151,7 +151,7 @@ const RecentlyViewedPage: React.FC = () => {
                 <WishlistButton account={item.account} size="sm" />
               </div>
 
-              <Link to={`/accounts/${item.account.id}`} className="block">
+              <Link to={`/accounts/${item.account.id}`} className={`block ${item.account.status && item.account.status !== 'ON_SALE' && item.account.status !== 'PENDING' ? 'opacity-70' : ''}`}>
                 {/* Image */}
                 <div className="aspect-video bg-dark rounded-lg mb-4 overflow-hidden relative">
                   {item.account.images?.[0] ? (
@@ -169,6 +169,13 @@ const RecentlyViewedPage: React.FC = () => {
                     <div className="absolute bottom-2 left-2">
                       <span className="px-2 py-0.5 bg-green-500/90 text-white text-xs rounded-full flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" /> 已认证
+                      </span>
+                    </div>
+                  )}
+                  {item.account.status && item.account.status !== 'ON_SALE' && (
+                    <div className="absolute top-2 left-2">
+                      <span className="px-2 py-0.5 bg-slate-800/90 text-slate-400 text-xs rounded-full border border-slate-700">
+                        {item.account.status === 'SOLD' ? '已售出' : item.account.status === 'RENTED' ? '出租中' : '已下架'}
                       </span>
                     </div>
                   )}

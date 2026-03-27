@@ -30,6 +30,7 @@ export const useToast = () => {
 };
 
 const TOAST_DURATION = 4000;
+const MAX_VISIBLE = 3;
 
 const getAriaRole = (type: ToastType) =>
   type === 'error' || type === 'warning' ? 'alert' : 'status';
@@ -58,7 +59,10 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => {
+      const next = [{ id, message, type }, ...prev];
+      return next.length > MAX_VISIBLE ? next.slice(0, MAX_VISIBLE) : next;
+    });
     scheduleDismiss(id, TOAST_DURATION);
   }, [scheduleDismiss]);
 
