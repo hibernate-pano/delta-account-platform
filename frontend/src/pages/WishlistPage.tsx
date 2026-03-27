@@ -297,8 +297,8 @@ const WishlistPage: React.FC = () => {
                           {account.sellerNickname || account.sellerUsername}
                         </span>
                         {account.sellerCreditScore && (
-                          <span className="text-[10px] text-yellow-500/80 flex items-center gap-0.5">
-                            <Star className="w-2.5 h-2.5 fill-yellow-500/80 text-yellow-500/80" />
+                          <span className="text-xs text-yellow-400 flex items-center gap-0.5" title="卖家评分">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                             {account.sellerCreditScore}
                           </span>
                         )}

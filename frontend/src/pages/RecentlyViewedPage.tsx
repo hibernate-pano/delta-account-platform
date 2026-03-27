@@ -204,8 +204,8 @@ const RecentlyViewedPage: React.FC = () => {
                       卖家: {item.account.sellerNickname || item.account.sellerUsername}
                     </span>
                     {item.account.sellerCreditScore != null && (
-                      <span className="flex items-center gap-0.5 text-[11px] text-yellow-400/80">
-                        <Star className="w-3 h-3 fill-yellow-400/80" />
+                      <span className="flex items-center gap-0.5 text-xs text-yellow-400">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                         {item.account.sellerCreditScore}分
                       </span>
                     )}
