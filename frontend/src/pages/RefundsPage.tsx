@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -252,6 +252,19 @@ const RefundsPage: React.FC = () => {
   const refunds: Refund[] = refundsData?.data?.data || [];
   const orders = ordersData?.data?.data?.records || [];
 
+  const refundStats = useMemo(() => {
+    const totalRefunded = refunds
+      .filter(r => r.status === 'APPROVED')
+      .reduce((sum, r) => sum + r.amount, 0);
+    const pendingAmount = refunds
+      .filter(r => r.status === 'PENDING')
+      .reduce((sum, r) => sum + r.amount, 0);
+    const successCount = refunds.filter(r => r.status === 'APPROVED').length;
+    const totalProcessed = refunds.filter(r => ['APPROVED', 'REJECTED', 'CANCELLED'].includes(r.status)).length;
+    const successRate = totalProcessed > 0 ? Math.round((successCount / totalProcessed) * 100) : 0;
+    return { totalRefunded, pendingAmount, successCount, successRate, totalCount: refunds.length };
+  }, [refunds]);
+
   // Orders eligible for refund (PAID or COMPLETED, no existing pending refund)
   const refundableOrders = orders.filter(
     (o: any) =>
@@ -362,6 +375,28 @@ const RefundsPage: React.FC = () => {
           申请退款
         </button>
       </div>
+
+      {/* Refund stats summary */}
+      {refunds.length > 0 && activeTab === 'list' && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="card p-4 text-center">
+            <p className="text-xs text-slate-500 mb-1">总退款申请</p>
+            <p className="text-xl font-bold text-white">{refundStats.totalCount}</p>
+          </div>
+          <div className="card p-4 text-center">
+            <p className="text-xs text-slate-500 mb-1">已退款总额</p>
+            <p className="text-xl font-bold text-green-400">¥{refundStats.totalRefunded.toFixed(2)}</p>
+          </div>
+          <div className="card p-4 text-center">
+            <p className="text-xs text-slate-500 mb-1">待处理金额</p>
+            <p className="text-xl font-bold text-yellow-400">¥{refundStats.pendingAmount.toFixed(2)}</p>
+          </div>
+          <div className="card p-4 text-center">
+            <p className="text-xs text-slate-500 mb-1">成功率</p>
+            <p className="text-xl font-bold text-primary">{refundStats.successRate}%</p>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-dark-lighter rounded-lg p-1 w-fit">
