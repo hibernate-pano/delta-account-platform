@@ -233,6 +233,23 @@ const HomePage: React.FC = () => {
             </div>
           </form>
 
+          {/* Trust badges */}
+          <div className="flex flex-wrap justify-center gap-5 mb-6 animate-fade-in" style={{ animationDelay: '0.35s' }}>
+            {[
+              { icon: Shield, color: 'bg-green-500/20 text-green-400', label: '资金托管' },
+              { icon: CheckCircle, color: 'bg-blue-500/20 text-blue-400', label: '账号认证' },
+              { icon: Clock, color: 'bg-purple-500/20 text-purple-400', label: '快速交付' },
+              { icon: TrendingUp, color: 'bg-yellow-500/20 text-yellow-400', label: '找回包赔' },
+            ].map(({ icon: Icon, color, label }) => (
+              <div key={label} className="flex items-center gap-2 text-sm text-slate-400">
+                <div className={`w-6 h-6 ${color} rounded-full flex items-center justify-center`}>
+                  <Icon className="w-3.5 h-3.5" />
+                </div>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+
           {/* Dual CTA */}
           <div className="flex gap-3 justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <Link

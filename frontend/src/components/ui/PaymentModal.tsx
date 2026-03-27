@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import { paymentApi, orderApi } from '../../api';
 import { useToast } from '../ui/Toast';
-import { X, Wallet, CreditCard, Loader2, AlertCircle, Zap } from 'lucide-react';
+import { X, Wallet, CreditCard, Loader2, AlertCircle, Zap, Clock } from 'lucide-react';
 
 interface PaymentModalProps {
   orderId: number;
@@ -19,6 +19,9 @@ const PAYMENT_METHODS = [
   { id: 'WECHAT', name: '微信支付', icon: CreditCard, desc: '推荐微信用户使用' },
 ];
 
+const PAYMENT_TIMEOUT_SECONDS = 600; // 10 minutes
+const URGENT_THRESHOLD_SECONDS = 120; // 2 minutes — red warning
+
 export const PaymentModal: React.FC<PaymentModalProps> = ({
   orderId,
   amount,
@@ -31,6 +34,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const { showToast } = useToast();
   const [selectedMethod, setSelectedMethod] = useState('BALANCE');
   const [loading, setLoading] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(PAYMENT_TIMEOUT_SECONDS);
+
+  // Countdown timer
+  useEffect(() => {
+    if (timeRemaining <= 0) {
+      showToast('支付超时，请重新下单', 'warning');
+      onClose();
+      return;
+    }
+    const timer = setInterval(() => setTimeRemaining(t => t - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeRemaining, onClose, showToast]);
 
   // Keyboard dismiss
   useEffect(() => {
@@ -93,7 +108,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="p-6">
           {/* Order Info */}
           <div className="mb-6 p-4 bg-dark rounded-xl">
-            <p className="text-sm text-slate-400 mb-1">商品信息</p>
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <p className="text-sm text-slate-400">商品信息</p>
+              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium flex-shrink-0 ${
+                timeRemaining <= URGENT_THRESHOLD_SECONDS
+                  ? 'bg-red-500/20 text-red-400 animate-pulse'
+                  : 'bg-slate-500/20 text-slate-400'
+              }`}>
+                <Clock className="w-3.5 h-3.5" />
+                {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
+              </div>
+            </div>
             <p className="text-white font-medium mb-2 line-clamp-2">{orderTitle}</p>
             <p className="text-2xl font-bold text-primary">¥{amount}</p>
           </div>
