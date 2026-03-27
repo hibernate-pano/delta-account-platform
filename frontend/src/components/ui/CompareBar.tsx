@@ -53,6 +53,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
               )}
               <button
                 onClick={() => onRemove(item.account.id)}
+                aria-label="从对比中移除"
                 className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <X className="w-2.5 h-2.5 text-white" />

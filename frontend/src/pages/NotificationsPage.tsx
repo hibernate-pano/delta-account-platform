@@ -429,6 +429,7 @@ const NotificationsPage: React.FC = () => {
           {keyword && (
             <button
               onClick={() => setKeyword('')}
+              aria-label="清除搜索"
               className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center text-slate-500 hover:text-white"
             >
               <X className="w-3.5 h-3.5" />
