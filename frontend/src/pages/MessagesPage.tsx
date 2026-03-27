@@ -8,6 +8,7 @@ import {
 } from '../hooks/useQueries';
 import { messageApi } from '../api';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { MessageSkeleton } from '../components/ui/Skeleton';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
   Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy
@@ -378,8 +379,8 @@ const MessagesPage: React.FC = () => {
                 </button>
               </div>
             ) : messagesLoading ? (
-              <div className="flex justify-center py-12">
-                <RefreshCw className="w-6 h-6 animate-spin text-slate-500" />
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+                <MessageSkeleton count={4} />
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">

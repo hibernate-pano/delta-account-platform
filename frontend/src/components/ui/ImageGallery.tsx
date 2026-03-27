@@ -116,6 +116,10 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
         onTouchEnd={handleTouchEnd}
         onMouseEnter={() => setGalleryFocused(true)}
         onMouseLeave={() => setGalleryFocused(false)}
+        role="button"
+        aria-label={`点击放大查看图片 ${currentIndex + 1} / ${images.length}`}
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(currentIndex); } }}
       >
         <img
           src={images[currentIndex]}
@@ -133,12 +137,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
           <>
             <button
               onClick={(e) => { e.stopPropagation(); setCurrentIndex((p) => (p === 0 ? images.length - 1 : p - 1)); }}
+              aria-label="上一张图片"
               className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/70 hover:scale-110 active:scale-95"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setCurrentIndex((p) => (p === images.length - 1 ? 0 : p + 1)); }}
+              aria-label="下一张图片"
               className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/70 hover:scale-110 active:scale-95"
             >
               <ChevronRight className="w-5 h-5" />
@@ -171,6 +177,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
+              aria-label={`查看图片 ${idx + 1}，共 ${images.length} 张${idx === currentIndex ? '（当前）' : ''}`}
+              aria-current={idx === currentIndex ? 'true' : undefined}
               className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden transition-all ${
                 idx === currentIndex
                   ? 'ring-2 ring-primary opacity-100 scale-105'
@@ -220,6 +228,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               {/* Close */}
               <button
                 onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); setZoomLevel(1); }}
+                aria-label="关闭图片查看"
                 className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all ml-2"
               >
                 <X className="w-5 h-5" />
@@ -255,12 +264,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); navigatePrev(); }}
+                aria-label="上一张图片"
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
               >
                 <ChevronLeft className="w-7 h-7" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); navigateNext(); }}
+                aria-label="下一张图片"
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
               >
                 <ChevronRight className="w-7 h-7" />
@@ -278,6 +289,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
                 <button
                   key={idx}
                   onClick={() => setLightboxIndex(idx)}
+                  aria-label={`查看图片 ${idx + 1}，共 ${images.length} 张${idx === lightboxIndex ? '（当前）' : ''}`}
+                  aria-current={idx === lightboxIndex ? 'true' : undefined}
                   className={`flex-shrink-0 w-14 h-10 rounded-lg overflow-hidden transition-all ${
                     idx === lightboxIndex
                       ? 'ring-2 ring-primary scale-110'
