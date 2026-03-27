@@ -129,6 +129,8 @@ interface CompareModalProps {
 
 export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onViewAccount }) => {
   const accounts = items.map((i) => i.account);
+  const [loadedIds, setLoadedIds] = useState<Set<number>>(new Set());
+  const [errorIds, setErrorIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -213,9 +215,23 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
           <div /> {/* Spacer for label column */}
           {accounts.map((account) => (
             <div key={account.id} className="text-center">
-              <div className="w-full aspect-video bg-dark rounded-xl overflow-hidden mb-2">
-                {account.images?.[0] ? (
-                  <img src={account.images[0]} alt="" className="w-full h-full object-cover" />
+              <div className="w-full aspect-video bg-dark rounded-xl overflow-hidden mb-2 relative">
+                {account.images?.[0] && !errorIds.has(account.id) ? (
+                  <>
+                    {!loadedIds.has(account.id) && (
+                      <div className="absolute inset-0 bg-dark-lighter animate-pulse flex items-center justify-center">
+                        <span className="text-slate-700 text-xs">加载中</span>
+                      </div>
+                    )}
+                    <img
+                      src={account.images[0]}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      style={{ opacity: loadedIds.has(account.id) ? 1 : 0, transition: 'opacity 0.25s' }}
+                      onLoad={() => setLoadedIds((s) => new Set([...s, account.id]))}
+                      onError={() => setErrorIds((s) => new Set([...s, account.id]))}
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Gamepad2 className="w-8 h-8 text-slate-700" />
