@@ -10,7 +10,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews, useWalletBalance } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { formatDateTime } from '../utils/format';
+import { formatDateTime, formatCompact } from '../utils/format';
 import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
@@ -209,7 +209,7 @@ const isOwner = user?.id === account?.sellerId;
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-500/10 border border-slate-500/20 rounded-full">
                   <Eye className="w-3 h-3 text-slate-400" />
                   <span className="text-xs text-slate-400">
-                    <span className="font-medium text-slate-300">{viewerCount.toLocaleString()}</span> 次浏览
+                    <span className="font-medium text-slate-300">{formatCompact(viewerCount)}</span> 次浏览
                   </span>
                 </div>
               )}
@@ -301,8 +301,8 @@ const isOwner = user?.id === account?.sellerId;
                     ? [{
                         label: '热度数据',
                         value: [
-                          account.viewCount != null ? `浏览 ${account.viewCount}` : null,
-                          account.orderCount != null ? `售出 ${account.orderCount}` : null,
+                          account.viewCount != null ? `浏览 ${formatCompact(account.viewCount)}` : null,
+                          account.orderCount != null ? `售出 ${formatCompact(account.orderCount)}` : null,
                         ].filter(Boolean).join(' · ') || '—',
                       }]
                     : []),

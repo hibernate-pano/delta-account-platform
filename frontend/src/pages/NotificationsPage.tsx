@@ -330,6 +330,13 @@ const NotificationsPage: React.FC = () => {
     catch { showToast('操作失败', 'error'); }
   };
 
+  const handleMarkTypeAsRead = (type: string) => {
+    const typeUnread = notifications.filter((n) => n.type === type && n.status === 'UNREAD');
+    if (typeUnread.length === 0) { showToast('该类型都已读', 'info'); return; }
+    typeUnread.forEach((n) => markReadMutation.mutate(n.id));
+    showToast(`已标记 ${typeUnread.length} 条为已读`, 'success');
+  };
+
   const handleDelete = async (id: number) => {
     // Optimistic update
     setDeletedIds((prev) => new Set([...prev, id]));
@@ -564,16 +571,19 @@ const NotificationsPage: React.FC = () => {
           { key: 'SYSTEM', label: '系统', config: typeConfig.SYSTEM },
         ].map((tab) => {
           const count = tab.key === 'all' ? notifications.length : notifications.filter((n) => n.type === tab.key).length;
+          const unreadCount = tab.key === 'all'
+            ? notifications.filter((n) => n.status === 'UNREAD').length
+            : notifications.filter((n) => n.type === tab.key && n.status === 'UNREAD').length;
           const Icon = tab.config.icon;
           return (
-            <button
+            <div
               key={tab.key}
-              onClick={() => setActiveTypeFilter(tab.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all cursor-pointer ${
                 activeTypeFilter === tab.key
                   ? 'bg-primary/20 text-primary border border-primary/40'
                   : 'bg-dark-lighter text-slate-400 hover:text-white border border-transparent'
               }`}
+              onClick={() => setActiveTypeFilter(tab.key)}
             >
               <Icon className={`w-3.5 h-3.5 ${tab.key !== 'all' && tab.config.color ? tab.config.color : ''}`} />
               {tab.label}
@@ -584,7 +594,16 @@ const NotificationsPage: React.FC = () => {
                   {count}
                 </span>
               )}
-            </button>
+              {unreadCount > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleMarkTypeAsRead(tab.key); }}
+                  className="ml-0.5 w-4 h-4 rounded flex items-center justify-center text-green-400/60 hover:text-green-400 hover:bg-green-500/20 transition-all flex-shrink-0"
+                  title={`将 ${unreadCount} 条标为已读`}
+                >
+                  <CheckCheck className="w-3 h-3" />
+                </button>
+              )}
+            </div>
           );
         })}
       </div>

@@ -11,6 +11,7 @@ import { Pagination } from '../components/ui/Pagination';
 import { usePagination } from '../hooks/usePagination';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { formatCompact } from '../utils/format';
 import { useAccounts, useBuyAccount, useCreateSession } from '../hooks/useQueries';
 import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
@@ -604,7 +605,7 @@ const AccountsPage: React.FC = () => {
                   <div className="flex items-center gap-2 text-[10px]">
                     {account.viewCount != null && (
                       <span className="flex items-center gap-0.5 text-slate-600">
-                        <Eye className="w-3 h-3" />{account.viewCount}
+                        <Eye className="w-3 h-3" />{formatCompact(account.viewCount)}
                       </span>
                     )}
                     {account.orderCount != null && account.orderCount > 0 && (
@@ -728,7 +729,7 @@ const AccountsPage: React.FC = () => {
                   <div className="flex items-center gap-3 text-xs text-slate-600 mt-1.5">
                     {account.viewCount != null && (
                       <span className="flex items-center gap-0.5">
-                        <Eye className="w-3 h-3" />{account.viewCount}
+                        <Eye className="w-3 h-3" />{formatCompact(account.viewCount)}
                       </span>
                     )}
                     {account.orderCount != null && account.orderCount > 0 && (

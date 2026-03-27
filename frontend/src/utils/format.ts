@@ -26,6 +26,20 @@ export const formatDateTime = (dateStr: string | undefined | null): string => {
 };
 
 /**
+ * 格式化大数字为紧凑形式
+ * formatCompact(999) => "999"
+ * formatCompact(12543) => "1.3万"
+ * formatCompact(1500000) => "150万"
+ */
+export const formatCompact = (num: number | undefined | null): string => {
+  if (num == null || num < 0) return '0';
+  if (num < 1000) return String(num);
+  if (num < 10000) return num.toLocaleString('zh-CN');
+  if (num < 100000000) return `${(num / 10000).toFixed(num % 10000 === 0 ? 0 : 1)}万`;
+  return `${(num / 100000000).toFixed(1)}亿`;
+};
+
+/**
  * 格式化相对时间 (< 7天: 刚刚/N分钟前/N小时前/N天前; ≥ 7天: 3月27日)
  */
 export const formatRelativeTime = (dateStr: string | number | undefined | null): string => {
