@@ -18,6 +18,7 @@ const LoginPage: React.FC = () => {
   const nextUrl = searchParams.get('next') || '/';
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [loadingAccountId, setLoadingAccountId] = useState<string | null>(null);
   const [error, setError] = useState(searchParams.get('expired') === '1' ? '登录已过期，请重新登录' : '');
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -81,7 +82,7 @@ const LoginPage: React.FC = () => {
 
   const handleDemoLogin = async (username: string) => {
     setFormData({ username, password: 'password123' });
-    setLoading(true);
+    setLoadingAccountId(username);
     try {
       const res = await authApi.login({ username, password: 'password123' });
       const { token, userId, username: uname, role } = res.data.data;
@@ -92,7 +93,7 @@ const LoginPage: React.FC = () => {
       triggerShake();
       usernameRef.current?.focus();
     } finally {
-      setLoading(false);
+      setLoadingAccountId(null);
     }
   };
 
@@ -283,25 +284,26 @@ const LoginPage: React.FC = () => {
               <div className="space-y-2.5">
                 {demoAccounts.map((acc) => {
                   const Icon = acc.icon;
+                  const isLoading = loadingAccountId === acc.id;
                   return (
                     <button
                       key={acc.id}
                       onClick={() => handleDemoLogin(acc.id)}
-                      disabled={loading}
+                      disabled={!!loadingAccountId}
                       className={`w-full flex items-center gap-4 p-4 bg-dark-lighter border border-transparent rounded-xl text-left transition-all disabled:opacity-50 ${acc.bg}`}
                     >
                       <div className={`w-11 h-11 rounded-xl bg-dark flex items-center justify-center flex-shrink-0 border border-slate-700/50`}>
-                        {loading ? (
+                        {isLoading ? (
                           <RefreshCw className="w-5 h-5 text-slate-400 animate-spin" />
                         ) : (
                           <Icon className={`w-5 h-5 ${acc.color}`} />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-white text-sm">{loading ? '登录中...' : acc.label}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{loading ? '正在验证...' : acc.sub}</p>
+                        <p className="font-medium text-white text-sm">{isLoading ? '登录中...' : acc.label}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{isLoading ? '正在验证...' : acc.sub}</p>
                       </div>
-                      {!loading && <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />}
+                      {!isLoading && <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0" />}
                     </button>
                   );
                 })}

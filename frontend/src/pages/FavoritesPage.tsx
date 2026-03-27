@@ -4,6 +4,7 @@ import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star }
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
 import { GridSkeleton } from '../components/ui/Skeleton';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { useFavorites, useToggleFavorite } from '../hooks/useQueries';
 import { Account } from '../types';
 
@@ -13,6 +14,7 @@ const FavoritesPage: React.FC = () => {
   const { data, isLoading, isError, refetch } = useFavorites();
   const toggleMutation = useToggleFavorite();
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [clearingAll, setClearingAll] = useState(false);
 
   const accounts: Account[] = data?.data?.data || [];
 
@@ -32,11 +34,14 @@ const FavoritesPage: React.FC = () => {
 
   const handleClearAll = async () => {
     if (accounts.length === 0) return;
+    setClearingAll(true);
     try {
       await Promise.all(accounts.map((a) => toggleMutation.mutateAsync(a.id)));
       showToast(`已清空全部 ${accounts.length} 个收藏`, 'success');
     } catch {
       showToast('清空失败，请重试', 'error');
+    } finally {
+      setClearingAll(false);
     }
   };
 
@@ -84,14 +89,19 @@ const FavoritesPage: React.FC = () => {
             {accounts.length} 个
           </span>
         </div>
-        {accounts.length > 0 && (
-          <button
-            onClick={handleClearAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-          >
-            <Trash2 className="w-4 h-4" />
-            清空全部
-          </button>
+        {accounts.length > 0 && !clearingAll && (
+          <ConfirmInline
+            message={`确定要清空全部 ${accounts.length} 个收藏吗？`}
+            onConfirm={handleClearAll}
+            confirmLabel="清空"
+            cancelLabel="取消"
+          />
+        )}
+        {clearingAll && (
+          <span className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-400">
+            <RefreshCw className="w-4 h-4 animate-spin" />
+            清空中...
+          </span>
         )}
       </div>
 
