@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
@@ -18,6 +19,7 @@ const ProfilePage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist'>('accounts');
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
 
   const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useAuthProfile();
   const { data: ordersData, isLoading: ordersLoading, isError: ordersError } = useMyOrders();
@@ -523,18 +525,30 @@ const ProfilePage: React.FC = () => {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">我的收藏</h3>
-                <button
-                  onClick={() => {
-                    if (wishlistCount > 0 && confirm(`确定清空全部 ${wishlistCount} 个收藏？`)) {
+                {wishlistCount > 0 && (
+                  <button
+                    onClick={() => setShowClearWishlistConfirm(true)}
+                    className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    清空全部 ({wishlistCount})
+                  </button>
+                )}
+              </div>
+
+              {showClearWishlistConfirm && (
+                <div className="mb-4">
+                  <ConfirmInline
+                    message={`确定要清空全部 ${wishlistCount} 个收藏吗？`}
+                    onConfirm={() => {
                       useWishlistStore.getState().clearAll();
                       showToast('已清空全部收藏', 'success');
-                    }
-                  }}
-                  className="text-sm text-red-400 hover:text-red-300 transition-colors"
-                >
-                  {wishlistCount > 0 ? `清空全部 (${wishlistCount})` : ''}
-                </button>
-              </div>
+                      setShowClearWishlistConfirm(false);
+                    }}
+                    onCancel={() => setShowClearWishlistConfirm(false)}
+                    confirmLabel="清空"
+                  />
+                </div>
+              )}
 
               {wishlistCount === 0 ? (
                 <div className="card text-center py-16">

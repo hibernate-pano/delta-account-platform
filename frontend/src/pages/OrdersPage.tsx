@@ -267,10 +267,15 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
                       </span>
                     )}
                     {order.account?.sellerCreditScore != null && (
-                      <span className="flex-shrink-0 flex items-center gap-0.5 text-[10px] text-yellow-400">
-                        <Star className="w-2.5 h-2.5 fill-yellow-400" />
-                        {(order.account.sellerCreditScore / 20).toFixed(1)}
-                      </span>
+                      <div className="flex-shrink-0 flex items-center gap-0.5">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-2.5 h-2.5 ${i < Math.round((order.account!.sellerCreditScore || 50) / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`}
+                          />
+                        ))}
+                        <span className="text-[10px] text-yellow-400/70 ml-0.5">{order.account.sellerCreditScore}分</span>
+                      </div>
                     )}
                   </div>
                   <p className="text-[10px] text-slate-500 mt-0.5">
@@ -564,10 +569,15 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                       </span>
                     )}
                     {order.account?.sellerCreditScore != null && (
-                      <span className="flex-shrink-0 flex items-center gap-0.5 text-[10px] text-yellow-400">
-                        <Star className="w-2.5 h-2.5 fill-yellow-400" />
-                        {(order.account.sellerCreditScore / 20).toFixed(1)}
-                      </span>
+                      <div className="flex-shrink-0 flex items-center gap-0.5">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-2.5 h-2.5 ${i < Math.round((order.account!.sellerCreditScore || 50) / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`}
+                          />
+                        ))}
+                        <span className="text-[10px] text-yellow-400/70 ml-0.5">{order.account.sellerCreditScore}分</span>
+                      </div>
                     )}
                   </div>
                   <p className="text-[10px] text-slate-500 mt-0.5">
