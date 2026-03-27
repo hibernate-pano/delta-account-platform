@@ -235,9 +235,7 @@ const MessagesPage: React.FC = () => {
       if (newCount > lastMessageCountRef.current) {
         const latestMsg = msgs[newCount - 1];
         if (latestMsg && latestMsg.senderId !== user?.id) {
-          setShowTypingIndicator(true);
-          setTimeout(() => setShowTypingIndicator(false), 2000);
-          // Mark partner as online and set 60s timer
+          // Partner is online when they send a message
           setPartnerOnline(true);
           if (partnerOnlineTimerRef.current) clearTimeout(partnerOnlineTimerRef.current);
           partnerOnlineTimerRef.current = setTimeout(() => setPartnerOnline(false), 60_000);

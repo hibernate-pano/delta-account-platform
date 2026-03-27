@@ -879,20 +879,51 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
         </div>
 
         {/* Quick tags */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          {['账号真实', '交付快速', '服务态度好', '性价比高', '值得推荐'].map((tag) => (
-            <button
-              key={tag}
-              onClick={() => setContent((c) => c.includes(tag) ? c.replace(tag + '，', '').replace(tag, '') : c + (c ? '，' : '') + tag + '，')}
-              className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
-                content.includes(tag)
-                  ? 'bg-primary/20 border-primary/50 text-primary'
-                  : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
+        <div className="space-y-2 mb-5">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-[10px] text-slate-600 self-center mr-1">好评</span>
+            {['账号真实', '交付快速', '服务态度好', '性价比高', '值得推荐'].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setContent((c) => {
+                  // Remove any negative tags first
+                  const negTags = ['账号不符', '交付延迟', '态度恶劣', '信息虚假'];
+                  let cleaned = c;
+                  negTags.forEach(nt => { cleaned = cleaned.replace(nt + '，', '').replace(nt, ''); });
+                  return cleaned.includes(tag) ? cleaned.replace(tag + '，', '').replace(tag, '') : cleaned + (cleaned ? '，' : '') + tag + '，';
+                })}
+                className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+                  content.includes(tag)
+                    ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                    : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="text-[10px] text-slate-600 self-center mr-1">差评</span>
+            {['账号不符', '交付延迟', '态度恶劣', '信息虚假'].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setContent((c) => {
+                  // Remove positive tags first
+                  const posTags = ['账号真实', '交付快速', '服务态度好', '性价比高', '值得推荐'];
+                  let cleaned = c;
+                  posTags.forEach(pt => { cleaned = cleaned.replace(pt + '，', '').replace(pt, ''); });
+                  return cleaned.includes(tag) ? cleaned.replace(tag + '，', '').replace(tag, '') : cleaned + (cleaned ? '，' : '') + tag + '，';
+                })}
+                className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+                  content.includes(tag)
+                    ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                    : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
