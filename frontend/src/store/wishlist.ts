@@ -9,6 +9,11 @@ interface WishlistState {
   isWishlisted: (accountId: number) => boolean;
   clearAll: () => void;
   seed: (accounts: Account[]) => void;
+  // Computed selectors
+  getVerifiedCount: () => number;
+  getPriceRange: () => { min: number; max: number };
+  getTotalValue: () => number;
+  getVerifiedItems: () => Account[];
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -40,6 +45,18 @@ export const useWishlistStore = create<WishlistState>()(
       seed: (accounts) => {
         set({ items: accounts });
       },
+
+      getVerifiedCount: () => get().items.filter((a) => a.verificationStatus === 'VERIFIED').length,
+
+      getPriceRange: () => {
+        const prices = get().items.map((a) => a.price).filter((p) => p > 0);
+        if (prices.length === 0) return { min: 0, max: 0 };
+        return { min: Math.min(...prices), max: Math.max(...prices) };
+      },
+
+      getTotalValue: () => get().items.reduce((sum, a) => sum + (a.price || 0), 0),
+
+      getVerifiedItems: () => get().items.filter((a) => a.verificationStatus === 'VERIFIED'),
     }),
     {
       name: 'wishlist-storage',

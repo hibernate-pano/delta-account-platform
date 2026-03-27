@@ -21,7 +21,9 @@ const WishlistPage: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { showToast } = useToast();
-  const { items: wishlistItems, removeItem, clearAll } = useWishlistStore();
+  const { items: wishlistItems, removeItem, clearAll, getVerifiedCount, getPriceRange } = useWishlistStore();
+  const verifiedCount = getVerifiedCount();
+  const priceRange = getPriceRange();
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortMode, setSortMode] = useState<SortMode>('default');
@@ -81,11 +83,6 @@ const WishlistPage: React.FC = () => {
     }, 150);
   };
 
-  const verifiedCount = useMemo(
-    () => wishlistItems.filter((a) => a.verificationStatus === 'VERIFIED').length,
-    [wishlistItems]
-  );
-
   if (!token) {
     return (
       <div className="max-w-4xl mx-auto text-center py-20">
@@ -112,7 +109,7 @@ const WishlistPage: React.FC = () => {
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {wishlistItems.length > 0
-              ? `${wishlistItems.length} 个收藏账号 · ${verifiedCount} 个已认证`
+              ? `${wishlistItems.length} 个收藏 · ${verifiedCount} 个已认证${priceRange.max > 0 ? ` · ¥${priceRange.min}-${priceRange.max}` : ''}`
               : '暂无收藏'}
           </p>
         </div>
@@ -264,8 +261,14 @@ const WishlistPage: React.FC = () => {
                       {/* Price overlay */}
                       <div className="absolute bottom-2 right-2 flex items-center gap-1">
                         {priceAlerts[account.id] && (
-                          <span className="text-[10px] bg-yellow-500/90 text-black px-1.5 py-0.5 rounded-full font-medium">
-                            ¥{priceAlerts[account.id]}
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                            account.price <= priceAlerts[account.id]
+                              ? 'bg-green-500/90 text-white animate-pulse'
+                              : 'bg-yellow-500/90 text-black'
+                          }`}>
+                            {account.price <= priceAlerts[account.id]
+                              ? '价格已降至 ¥' + account.price
+                              : '目标 ¥' + priceAlerts[account.id]}
                           </span>
                         )}
                         <span className="text-lg font-bold text-white drop-shadow-lg">¥{account.price}</span>
