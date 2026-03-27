@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import {
   Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star
 } from 'lucide-react';
@@ -24,6 +25,7 @@ const RecentlyViewedPage: React.FC = () => {
   usePageTitle('最近浏览');
   const { items: recentItems, removeItem, clearAll } = useRecentStore();
   const { token } = useAuthStore();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   if (!token) {
     return (
@@ -58,10 +60,7 @@ const RecentlyViewedPage: React.FC = () => {
         <div className="flex items-center gap-2">
           {recentItems.length > 0 && (
             <button
-              onClick={() => {
-                if (!confirm(`确定要清空全部 ${recentItems.length} 条浏览记录吗？`)) return;
-                clearAll();
-              }}
+              onClick={() => setShowClearConfirm(true)}
               className="btn-ghost !text-red-400 !border-red-500/30 flex items-center gap-1.5 text-sm"
             >
               <Trash2 className="w-4 h-4" />
@@ -76,6 +75,17 @@ const RecentlyViewedPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {showClearConfirm && (
+        <div className="mb-4">
+          <ConfirmInline
+            message={`确定要清空全部 ${recentItems.length} 条浏览记录吗？`}
+            onConfirm={() => { clearAll(); setShowClearConfirm(false); }}
+            onCancel={() => setShowClearConfirm(false)}
+            confirmLabel="清空"
+          />
+        </div>
+      )}
 
       {recentItems.length === 0 ? (
         /* Empty State */

@@ -422,8 +422,8 @@ const WishlistPage: React.FC = () => {
               </p>
               {sortedItems.length > 0 && (
                 <p className="text-xs text-slate-500 mt-0.5">
-                  价格区间: ¥{Math.min(...sortedItems.map((a) => a.price))}
-                  — ¥{Math.max(...sortedItems.map((a) => a.price))}
+                  价格区间: ¥{Math.min(...sortedItems.map((a) => a.price), Infinity).toFixed(0)}
+                  — ¥{Math.max(...sortedItems.map((a) => a.price), -Infinity).toFixed(0)}
                 </p>
               )}
             </div>

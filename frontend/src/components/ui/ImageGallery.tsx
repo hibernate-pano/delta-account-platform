@@ -46,7 +46,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [lightboxOpen, galleryFocused, images.length]);
+  }, [lightboxOpen, galleryFocused, images.length, navigatePrev, navigateNext]);
 
   // Reset zoom on image change
   useEffect(() => {
