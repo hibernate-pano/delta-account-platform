@@ -185,14 +185,34 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div
+          role="tablist"
+          aria-label="图片缩略图"
+          className="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide"
+        >
           {images.map((img, idx) => (
             <button
               key={idx}
+              role="tab"
+              aria-selected={idx === currentIndex}
+              aria-label={`图片 ${idx + 1} / ${images.length}${idx === currentIndex ? '（当前）' : ''}`}
+              tabIndex={idx === currentIndex ? 0 : -1}
               onClick={() => setCurrentIndex(idx)}
-              aria-label={`查看图片 ${idx + 1}，共 ${images.length} 张${idx === currentIndex ? '（当前）' : ''}`}
-              aria-current={idx === currentIndex ? 'true' : undefined}
-              className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden transition-all ${
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  const next = Math.min(idx + 1, images.length - 1);
+                  setCurrentIndex(next);
+                  galleryRef.current?.querySelectorAll('[role="tab"]')[next]?.focus();
+                }
+                if (e.key === 'ArrowLeft') {
+                  e.preventDefault();
+                  const prev = Math.max(idx - 1, 0);
+                  setCurrentIndex(prev);
+                  galleryRef.current?.querySelectorAll('[role="tab"]')[prev]?.focus();
+                }
+              }}
+              className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 idx === currentIndex
                   ? 'ring-2 ring-primary opacity-100 scale-105'
                   : 'opacity-50 hover:opacity-80'

@@ -29,7 +29,7 @@ const AccountDetailPage: React.FC = () => {
   const buyMutation = useBuyAccount();
   const rentMutation = useRentAccount();
   const createSessionMutation = useCreateSession();
-  const { data: reviewStatsData } = useSellerReviewStats(account?.sellerId);
+  const { data: reviewStatsData, isLoading: reviewStatsLoading } = useSellerReviewStats(account?.sellerId);
   const reviewStats = reviewStatsData?.data?.data;
   const { data: sellerReviewsData, isLoading: reviewsLoading, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
   const sellerReviews = sellerReviewsData?.data?.data || [];
@@ -445,7 +445,18 @@ const isOwner = user?.id === account?.sellerId;
                 </div>
               </div>
               {/* Trust stats grid */}
-              {reviewStats && (
+              {reviewStatsLoading ? (
+                <div className="mt-3 pt-3 border-t border-primary/10">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="bg-dark/40 rounded-lg p-2 text-center">
+                        <div className="h-5 w-10 bg-dark-lighter rounded skeleton mx-auto mb-0.5" />
+                        <div className="h-2.5 w-8 bg-dark-lighter rounded skeleton mx-auto mt-1" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : reviewStats && (
                 <div className="mt-3 pt-3 border-t border-primary/10">
                   <div className="grid grid-cols-4 gap-2">
                     {(() => {
