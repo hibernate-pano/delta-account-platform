@@ -442,24 +442,46 @@ const RefundsPage: React.FC = () => {
               ))}
             </div>
           ) : isError ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertCircle className="w-10 h-10 text-red-400" />
+            <div className="text-center py-16 animate-fade-in">
+              <div className="relative w-24 h-24 mx-auto mb-6">
+                <div className="absolute inset-0 bg-red-500/10 rounded-full blur-xl" />
+                <div className="relative w-full h-full bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
+                  <AlertCircle className="w-12 h-12 text-red-400" />
+                </div>
               </div>
-              <h3 className="text-lg font-medium mb-2 text-slate-400">加载失败</h3>
-              <p className="text-slate-500 text-sm mb-4">无法获取退款记录</p>
+              <h3 className="text-lg font-bold mb-2 text-slate-400">加载失败</h3>
+              <p className="text-slate-500 text-sm mb-5">无法获取退款记录，请检查网络后重试</p>
               <button onClick={() => refetch()} className="btn-primary text-sm inline-flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" />
                 重试
               </button>
             </div>
           ) : refunds.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
-                <RefreshCw className="w-10 h-10 text-slate-700" />
+            <div className="text-center py-16 animate-fade-in">
+              {/* Receipt SVG illustration */}
+              <div className="w-32 h-32 mx-auto mb-6 relative">
+                <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                  <circle cx="64" cy="64" r="56" fill="rgba(239,68,68,0.05)" />
+                  <circle cx="64" cy="64" r="48" fill="rgba(239,68,68,0.04)" />
+                  {/* Receipt body */}
+                  <rect x="36" y="28" width="56" height="72" rx="6" fill="#1e293b" stroke="rgba(239,68,68,0.3)" strokeWidth="2" />
+                  {/* Receipt torn edge */}
+                  <path d="M36 100 L42 94 L48 100 L54 94 L60 100 L66 94 L72 100 L78 94 L84 100 L90 94 L92 100" stroke="rgba(239,68,68,0.3)" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  {/* Lines on receipt */}
+                  <rect x="44" y="40" width="40" height="4" rx="2" fill="rgba(255,255,255,0.1)" />
+                  <rect x="44" y="50" width="28" height="3" rx="1.5" fill="rgba(255,255,255,0.06)" />
+                  <rect x="44" y="58" width="36" height="3" rx="1.5" fill="rgba(255,255,255,0.06)" />
+                  <rect x="44" y="66" width="20" height="3" rx="1.5" fill="rgba(255,255,255,0.06)" />
+                  {/* Dollar sign */}
+                  <text x="64" y="84" textAnchor="middle" fontSize="16" fill="rgba(239,68,68,0.5)" fontWeight="bold">¥</text>
+                  {/* X mark over receipt */}
+                  <path d="M52 52 L76 76 M76 52 L52 76" stroke="rgba(239,68,68,0.4)" strokeWidth="3" strokeLinecap="round" />
+                </svg>
               </div>
-              <h3 className="text-lg font-medium mb-2 text-slate-400">暂无退款记录</h3>
-              <p className="text-slate-600 text-sm mb-6">您的退款记录将显示在这里</p>
+              <h3 className="text-lg font-bold mb-2 text-slate-400">暂无退款记录</h3>
+              <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto leading-relaxed">
+                您的退款记录将显示在这里<br />如有退款申请会第一时间通知您
+              </p>
               <button onClick={() => setActiveTab('apply')} className="btn-primary inline-flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 申请退款
@@ -585,12 +607,27 @@ const RefundsPage: React.FC = () => {
               </button>
             </div>
           ) : refundableOrders.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-10 h-10 text-green-500/50" />
+            <div className="text-center py-16 animate-fade-in">
+              {/* Green shield check SVG */}
+              <div className="w-32 h-32 mx-auto mb-6 relative">
+                <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                  <circle cx="64" cy="64" r="56" fill="rgba(34,197,94,0.05)" />
+                  <circle cx="64" cy="64" r="48" fill="rgba(34,197,94,0.04)" />
+                  {/* Shield */}
+                  <path d="M64 24 L96 36 L96 68 C96 84 82 96 64 104 C46 96 32 84 32 68 L32 36 Z"
+                    fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.35)" strokeWidth="2.5" />
+                  {/* Checkmark */}
+                  <path d="M52 64 L62 74 L78 54" stroke="rgba(34,197,94,0.8)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Sparkles */}
+                  <circle cx="96" cy="36" r="2" fill="rgba(34,197,94,0.3)" />
+                  <circle cx="32" cy="44" r="1.5" fill="rgba(34,197,94,0.2)" />
+                  <circle cx="100" cy="68" r="1" fill="rgba(34,197,94,0.2)" />
+                </svg>
               </div>
-              <h3 className="text-lg font-medium mb-2 text-slate-400">没有可退款的订单</h3>
-              <p className="text-slate-600 text-sm mb-4">进行中或已完成的订单可申请退款</p>
+              <h3 className="text-lg font-bold mb-2 text-slate-400">没有可退款的订单</h3>
+              <p className="text-slate-500 text-sm mb-5 max-w-xs mx-auto leading-relaxed">
+                进行中或已完成的订单可申请退款<br />如有需要随时回来
+              </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/orders" className="btn-primary inline-flex items-center gap-2">
                   查看我的订单
