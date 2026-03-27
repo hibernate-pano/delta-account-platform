@@ -337,6 +337,18 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
+  const handleBulkMarkAsRead = async () => {
+    if (selectedIds.size === 0) return;
+    const unreadIds = [...selectedIds].filter((id) => {
+      const n = notifications.find((n) => n.id === id);
+      return n?.status === 'UNREAD';
+    });
+    if (unreadIds.length === 0) { showToast('选中的通知都已读', 'info'); return; }
+    unreadIds.forEach((id) => markReadMutation.mutate(id));
+    setSelectedIds(new Set());
+    showToast(`已标记 ${unreadIds.length} 条为已读`, 'success');
+  };
+
   // Keyboard dismiss for detail modal
   useEffect(() => {
     if (!selectedNotification) return;
@@ -465,6 +477,12 @@ const NotificationsPage: React.FC = () => {
           >
             {selectedIds.size > 0 ? <X className="w-4 h-4 text-primary" /> : <CheckCircle className="w-4 h-4" />}
           </button>
+          {selectedIds.size > 0 && (
+            <button onClick={handleBulkMarkAsRead} className="btn-secondary !py-1.5 !px-3 text-sm flex items-center gap-1.5">
+              <CheckCheck className="w-3.5 h-3.5" />
+              已读 ({[...selectedIds].filter((id) => notifications.find((n) => n.id === id)?.status === 'UNREAD').length})
+            </button>
+          )}
           {selectedIds.size > 0 && (
             <button onClick={handleBulkDelete} className="btn-secondary !py-1.5 !px-3 text-sm flex items-center gap-1.5">
               <Trash2 className="w-3.5 h-3.5" />

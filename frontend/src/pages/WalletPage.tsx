@@ -123,6 +123,72 @@ const BalanceSparkline: React.FC<{ transactions: Transaction[] }> = ({ transacti
   );
 };
 
+// SVG Donut chart for spending breakdown
+const SpendingDonut: React.FC<{ transactions: Transaction[] }> = ({ transactions }) => {
+  const data = useMemo(() => {
+    const totals: Record<string, number> = {};
+    transactions
+      .filter((t) => ['BUY', 'RENT', 'WITHDRAW'].includes(t.type) && t.status === 'COMPLETED')
+      .forEach((t) => { totals[t.type] = (totals[t.type] || 0) + t.amount; });
+    return totals;
+  }, [transactions]);
+
+  const total = Object.values(data).reduce((a, b) => a + b, 0);
+  if (total === 0) return null;
+
+  const colors: Record<string, string> = { BUY: '#3b82f6', RENT: '#a855f7', WITHDRAW: '#ef4444' };
+  const labels: Record<string, string> = { BUY: '购买', RENT: '租赁', WITHDRAW: '提现' };
+
+  const R = 24, C = 2 * Math.PI * R;
+  let cumulative = 0;
+  const segments = Object.entries(data).map(([type, amount]) => {
+    const pct = amount / total;
+    const dashArray = `${(pct * C).toFixed(2)} ${C.toFixed(2)}`;
+    const rotation = (cumulative * 360 - 90);
+    cumulative += pct;
+    return { type, amount, pct, dashArray, rotation, color: colors[type], label: labels[type] };
+  });
+
+  return (
+    <div className="mt-4 pt-4 border-t border-dark-border">
+      <p className="text-xs text-slate-500 mb-3">支出分布</p>
+      <div className="flex items-center gap-4">
+        <svg viewBox={`0 0 ${R * 2 + 4} ${R * 2 + 4}`} className="w-16 h-16 flex-shrink-0">
+          <circle cx={R + 2} cy={R + 2} r={R} fill="none" stroke="#1e293b" strokeWidth="12" />
+          {segments.map((s) => (
+            <circle
+              key={s.type} cx={R + 2} cy={R + 2} r={R}
+              fill="none" stroke={s.color} strokeWidth="12"
+              strokeDasharray={s.dashArray}
+              strokeDashoffset={(-s.rotation * C / 360).toFixed(2)}
+              strokeLinecap="round"
+              transform={`rotate(${s.rotation} ${R + 2} ${R + 2})`}
+            />
+          ))}
+        </svg>
+        <div className="flex-1 space-y-1.5">
+          {segments.map((s) => (
+            <div key={s.type} className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
+                <span className="text-slate-400">{s.label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-300 font-medium">¥{s.amount.toFixed(0)}</span>
+                <span className="text-slate-600">{(s.pct * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          ))}
+          <div className="flex items-center justify-between text-xs border-t border-dark-border pt-1.5 mt-1">
+            <span className="text-slate-500">合计</span>
+            <span className="text-slate-300 font-semibold">¥{total.toFixed(0)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Transaction Detail Modal
 const TransactionDetailModal: React.FC<{ tx: Transaction; onClose: () => void }> = ({ tx, onClose }) => {
   const cfg = typeConfig[tx.type] || typeConfig.RECHARGE;
@@ -480,6 +546,7 @@ const WalletPage: React.FC = () => {
           </div>
         </div>
         <BalanceSparkline transactions={transactions} />
+        {stats.periodExpense > 0 && <SpendingDonut transactions={transactions} />}
       </div>
 
       {/* Tab Filter */}

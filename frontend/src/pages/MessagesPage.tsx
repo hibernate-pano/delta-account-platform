@@ -198,13 +198,16 @@ const MessagesPage: React.FC = () => {
 
   const [newMessage, setNewMessage] = useState('');
   const [optimisticMessages, setOptimisticMessages] = useState<Message[]>([]);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastMessageCountRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Restore draft from localStorage when session changes
   useEffect(() => {
     setOptimisticMessages([]);
+    lastMessageCountRef.current = 0;
     if (currentSessionId != null) {
       const draft = localStorage.getItem(`delta_msg_draft_${currentSessionId}`);
       if (draft) setNewMessage(draft);
@@ -221,9 +224,21 @@ const MessagesPage: React.FC = () => {
   // Poll messages every 5s when in chat
   useEffect(() => {
     if (!currentSessionId) return;
-    pollRef.current = setInterval(() => refetch(), 5000);
+    pollRef.current = setInterval(async () => {
+      const { data } = await refetch();
+      const msgs = data?.data?.data ?? [];
+      const newCount = msgs.length;
+      if (newCount > lastMessageCountRef.current) {
+        const latestMsg = msgs[newCount - 1];
+        if (latestMsg && latestMsg.senderId !== user?.id) {
+          setShowTypingIndicator(true);
+          setTimeout(() => setShowTypingIndicator(false), 2000);
+        }
+      }
+      lastMessageCountRef.current = newCount;
+    }, 5000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [currentSessionId, refetch]);
+  }, [currentSessionId, refetch, user?.id]);
 
   // Mark messages as read when chat is opened
   useEffect(() => {
@@ -529,6 +544,16 @@ const MessagesPage: React.FC = () => {
 
           {/* Input bar */}
           <div className="border-t border-dark-border p-3 bg-dark/50">
+            {showTypingIndicator && (
+              <div className="text-xs text-slate-500 px-1 pb-2 flex items-center gap-1 animate-pulse">
+                <div className="flex gap-0.5">
+                  <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                对方正在输入...
+              </div>
+            )}
             <form onSubmit={handleSendMessage} className="flex gap-2">
               <input
                 ref={inputRef}
