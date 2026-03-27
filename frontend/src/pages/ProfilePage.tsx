@@ -641,6 +641,85 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Activity Timeline */}
+              {!ordersLoading && orders.length > 0 && (
+                <div className="card">
+                  <h3 className="font-medium mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-primary" />
+                    近期活动
+                  </h3>
+                  <div className="space-y-3">
+                    {orders.slice(0, 5).map((order: any) => {
+                      const isBuy = ['BUY', 'RENT'].includes(order.type);
+                      return (
+                        <div key={order.id} className="flex items-start gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            isBuy ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'
+                          }`}>
+                            {isBuy
+                              ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                              : <TrendingUp className="w-4 h-4" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-slate-300 truncate">
+                              {isBuy ? '购买' : '出售'}了
+                              <span className="text-primary ml-1">{order.account?.title || `订单 #${order.id}`}</span>
+                            </p>
+                            <p className="text-xs text-slate-600 mt-0.5">
+                              {order.createdAt
+                                ? new Date(order.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+                                : ''}
+                              {order.status && (
+                                <span className={`ml-2 ${
+                                  order.status === 'COMPLETED' ? 'text-green-400' :
+                                  order.status === 'PENDING' ? 'text-yellow-400' :
+                                  order.status === 'CANCELLED' ? 'text-red-400' : 'text-slate-500'
+                                }`}>
+                                  {order.status === 'COMPLETED' ? '已完成' :
+                                   order.status === 'PENDING' ? '进行中' :
+                                   order.status === 'CANCELLED' ? '已取消' : order.status}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <span className={`text-sm font-medium flex-shrink-0 ${
+                            isBuy ? 'text-red-400' : 'text-green-400'
+                          }`}>
+                            {isBuy ? '-' : '+'}¥{(order.amount || 0).toFixed(0)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Achievement badges */}
+                  {(stats.totalAccounts > 0 || stats.sold > 0 || stats.totalEarned > 0) && (
+                    <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-dark-border">
+                      <span className="text-xs text-slate-500">成就:</span>
+                      {stats.totalAccounts >= 1 && (
+                        <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-400 rounded-full flex items-center gap-1">
+                          <Star className="w-3 h-3" /> 首发账号
+                        </span>
+                      )}
+                      {stats.sold >= 5 && (
+                        <span className="text-xs px-2 py-1 bg-green-500/10 text-green-400 rounded-full flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3" /> 成功卖家
+                        </span>
+                      )}
+                      {stats.totalEarned >= 1000 && (
+                        <span className="text-xs px-2 py-1 bg-purple-500/10 text-purple-400 rounded-full flex items-center gap-1">
+                          <Wallet className="w-3 h-3" /> 千元收入
+                        </span>
+                      )}
+                      {stats.totalAccounts >= 10 && (
+                        <span className="text-xs px-2 py-1 bg-blue-500/10 text-blue-400 rounded-full flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> 资深卖家
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
           {/* Wishlist Tab */}

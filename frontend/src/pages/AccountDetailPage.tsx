@@ -415,6 +415,29 @@ const isOwner = user?.id === account?.sellerId;
                   <span>快速交付</span>
                 </div>
               </div>
+              {/* Trust stats grid */}
+              {reviewStats && (
+                <div className="mt-3 pt-3 border-t border-primary/10">
+                  <div className="grid grid-cols-4 gap-2">
+                    {(() => {
+                      const positive = (reviewStats.fiveStar || 0) + (reviewStats.fourStar || 0);
+                      const rate = reviewStats.totalCount > 0
+                        ? Math.round(positive / reviewStats.totalCount * 100) : 0;
+                      return [
+                        { label: '好评率', value: `${rate}%`, color: rate >= 90 ? 'text-emerald-400' : rate >= 70 ? 'text-yellow-400' : 'text-red-400' },
+                        { label: '评价总数', value: `${reviewStats.totalCount}条`, color: 'text-blue-400' },
+                        { label: '平均分', value: `${(reviewStats.avgRating || 0).toFixed(1)}`, color: 'text-yellow-400' },
+                        { label: '信誉分', value: account.sellerCreditScore != null ? `${account.sellerCreditScore}` : '—', color: 'text-purple-400' },
+                      ];
+                    })().map((stat) => (
+                      <div key={stat.label} className="bg-dark/40 rounded-lg p-2 text-center">
+                        <div className={`text-base font-bold ${stat.color}`}>{stat.value}</div>
+                        <div className="text-[10px] text-slate-600 mt-0.5">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
