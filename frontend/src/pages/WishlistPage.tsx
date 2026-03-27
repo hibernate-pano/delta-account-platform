@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
-type SortMode = 'default' | 'price_asc' | 'price_desc' | 'recent';
+type SortMode = 'default' | 'price_asc' | 'price_desc' | 'recent' | 'value' | 'seller_rating';
 
 const WishlistPage: React.FC = () => {
   usePageTitle('我的心愿单');
@@ -48,6 +48,8 @@ const WishlistPage: React.FC = () => {
         if (sortMode === 'price_asc') return a.price - b.price;
         if (sortMode === 'price_desc') return b.price - a.price;
         if (sortMode === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (sortMode === 'value') return ((b.skinCount || 0) / b.price) - ((a.skinCount || 0) / a.price);
+        if (sortMode === 'seller_rating') return (b.sellerCreditScore || 0) - (a.sellerCreditScore || 0);
         return 0;
       });
   }, [wishlistItems, filterVerified, sortMode]);
@@ -180,6 +182,8 @@ const WishlistPage: React.FC = () => {
               <option value="price_asc">价格从低到高</option>
               <option value="price_desc">价格从高到低</option>
               <option value="recent">最近添加</option>
+              <option value="value">性价比最高</option>
+              <option value="seller_rating">卖家评分</option>
             </select>
 
             {/* Sort icon hints */}

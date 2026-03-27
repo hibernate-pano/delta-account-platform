@@ -7,7 +7,7 @@ import { useToast } from '../components/ui/Toast';
 import { formatDateTime } from '../utils/format';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { favoriteApi } from '../api';
-import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile, useSellerReviews, useReplyReview } from '../hooks/useQueries';
+import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile, useSellerReviews, useReplyReview, useSellerReviewStats } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
@@ -134,6 +134,8 @@ const ProfilePage: React.FC = () => {
   const profileId = profile?.id ?? user?.id;
   const { data: sellerAccounts, isLoading: accountsLoading, isError: accountsError } = useSellerAccounts(profileId);
   const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchReviews } = useSellerReviews(profileId);
+  const { data: reviewStatsData, isLoading: reviewStatsLoading } = useSellerReviewStats(profileId);
+  const reviewStats = reviewStatsData?.data?.data;
   const replyMutation = useReplyReview();
 
   const accounts = sellerAccounts || [];
@@ -879,6 +881,31 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : (
                 <>
+                  {/* Trust stats summary */}
+                  {reviewStatsLoading ? (
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="bg-dark border border-dark-border rounded-xl p-3 text-center">
+                          <div className="h-6 w-12 bg-dark-lighter rounded skeleton mx-auto mb-1" />
+                          <div className="h-2.5 w-10 bg-dark-lighter rounded skeleton mx-auto" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : reviewStats && reviewStats.totalCount > 0 && (
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      {[
+                        { label: '好评率', value: `${Math.round(reviewStats.positiveRate || 0)}%`, color: (reviewStats.positiveRate || 0) >= 90 ? 'text-emerald-400' : (reviewStats.positiveRate || 0) >= 70 ? 'text-yellow-400' : 'text-red-400' },
+                        { label: '评价总数', value: `${reviewStats.totalCount}条`, color: 'text-blue-400' },
+                        { label: '平均分', value: `${(reviewStats.avgRating || 0).toFixed(1)}`, color: 'text-yellow-400' },
+                        { label: '信誉分', value: `${profile?.creditScore ?? profile?.sellerCreditScore ?? '—'}`, color: 'text-purple-400' },
+                      ].map((stat) => (
+                        <div key={stat.label} className="bg-dark border border-dark-border rounded-xl p-3 text-center">
+                          <div className={`text-base font-bold ${stat.color}`}>{stat.value}</div>
+                          <div className="text-[10px] text-slate-600 mt-0.5">{stat.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {/* Rating distribution */}
                   <div className="card mb-4 p-4">
                     <div className="flex items-center gap-1 mb-3">
