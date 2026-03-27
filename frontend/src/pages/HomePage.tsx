@@ -12,7 +12,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
-  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History,
+  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History, X,
 } from 'lucide-react';
 
 // Animated counter
@@ -794,6 +794,7 @@ const TransactionToast: React.FC = () => {
   const accounts = accountsData?.data?.data?.records || [];
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<{ user: string; title: string; price: string; verified: boolean } | null>(null);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     if (accounts.length === 0) return;
@@ -827,9 +828,9 @@ const TransactionToast: React.FC = () => {
     }, 7000);
 
     return () => { clearInterval(cycle); };
-  }, [accounts.length]);
+  }, [accounts.length, dismissed]);
 
-  if (!current) return null;
+  if (!current || dismissed) return null;
 
   return (
     <div
@@ -837,7 +838,14 @@ const TransactionToast: React.FC = () => {
         visible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'
       }`}
     >
-      <div className="flex items-center gap-3 bg-dark-card border border-dark-border rounded-xl px-4 py-3 shadow-2xl max-w-xs">
+      <div className="flex items-center gap-3 bg-dark-card border border-dark-border rounded-xl px-4 py-3 shadow-2xl max-w-xs relative">
+        <button
+          onClick={() => setDismissed(true)}
+          className="absolute top-1 right-1 p-1 text-slate-600 hover:text-slate-400 rounded transition-colors"
+          aria-label="关闭提示"
+        >
+          <X className="w-3 h-3" />
+        </button>
         <div className="relative w-9 h-9 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
           <CheckCircle className="w-4 h-4 text-green-400" />
           {current.verified && (

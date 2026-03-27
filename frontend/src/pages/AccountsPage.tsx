@@ -5,6 +5,7 @@ import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale,
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
+import { StarRating } from '../components/ui/StarRating';
 import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -942,10 +943,7 @@ const AccountsPage: React.FC = () => {
                   <div className="flex-1">
                     <p className="text-sm font-medium text-white">{quickViewAccount.sellerNickname || quickViewAccount.sellerUsername || '卖家'}</p>
                     <div className="flex items-center gap-1 mt-0.5">
-                      {[1,2,3,4,5].map((s) => (
-                        <Star key={s} className={`w-3 h-3 ${s <= Math.round((quickViewAccount.sellerCreditScore || 50) / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`} />
-                      ))}
-                      <span className="text-xs text-yellow-400 ml-1">{quickViewAccount.sellerCreditScore || '—'}</span>
+                      <StarRating score={quickViewAccount.sellerCreditScore || 50} size="sm" showScore scoreText={`${quickViewAccount.sellerCreditScore || '—'}`} />
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-500">

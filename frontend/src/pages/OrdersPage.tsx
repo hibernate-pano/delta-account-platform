@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { OrderCardSkeleton } from '../components/ui/Skeleton';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
+import { StarRating } from '../components/ui/StarRating';
 import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder, useReviewOrder } from '../hooks/useQueries';
@@ -272,12 +273,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
                     )}
                     {order.account?.sellerCreditScore != null && (
                       <div className="flex-shrink-0 flex items-center gap-0.5">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-2.5 h-2.5 ${i < Math.round((order.account!.sellerCreditScore || 50) / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`}
-                          />
-                        ))}
+                        <StarRating score={order.account!.sellerCreditScore || 50} size="xs" />
                         <span className="text-[10px] text-yellow-400/70 ml-0.5">{order.account.sellerCreditScore}分</span>
                       </div>
                     )}
@@ -643,12 +639,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                     )}
                     {order.account?.sellerCreditScore != null && (
                       <div className="flex-shrink-0 flex items-center gap-0.5">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-2.5 h-2.5 ${i < Math.round((order.account!.sellerCreditScore || 50) / 20) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`}
-                          />
-                        ))}
+                        <StarRating score={order.account!.sellerCreditScore || 50} size="xs" />
                         <span className="text-[10px] text-yellow-400/70 ml-0.5">{order.account.sellerCreditScore}分</span>
                       </div>
                     )}

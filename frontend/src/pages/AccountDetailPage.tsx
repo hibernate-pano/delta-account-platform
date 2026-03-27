@@ -11,6 +11,7 @@ import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews, useWalletBalance } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { formatDateTime } from '../utils/format';
+import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
@@ -353,21 +354,10 @@ const isOwner = user?.id === account?.sellerId;
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Star rating from real review stats */}
-                    <div className="flex items-center gap-0.5">
-                      {[1,2,3,4,5].map((s) => {
-                        const avg = reviewStats?.avgRating ?? (account.sellerCreditScore || 50) / 20;
-                        return (
-                          <Star
-                            key={s}
-                            className={`w-3 h-3 ${
-                              s <= Math.round(avg)
-                                ? 'text-yellow-400 fill-yellow-400'
-                                : 'text-slate-600'
-                            }`}
-                          />
-                        );
-                      })}
-                    </div>
+                    <StarRating
+                      score={(reviewStats?.avgRating ?? (account.sellerCreditScore || 50) / 20) * 20}
+                      size="sm"
+                    />
                     {reviewStats ? (
                       <span className="text-xs text-yellow-400 font-medium">
                         {(reviewStats.avgRating || 0).toFixed(1)}
