@@ -137,14 +137,14 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
 
   // Find best values
   const prices = accounts.map((a) => a.price);
-  const priceBest = prices.map((p, i) => p === Math.min(...prices) && prices.filter(x => x === p).length === 1 ? i : -1);
+  const priceBest = prices.map((p, i) => p === Math.min(...prices, Infinity) && prices.filter(x => x === p).length === 1 ? i : -1);
   const skins = accounts.map((a) => a.skinCount || 0);
-  const skinBest = skins.map((s, i) => s === Math.max(...skins) && skins.filter(x => x === s).length === 1 ? i : -1);
+  const skinBest = skins.map((s, i) => s === Math.max(...skins, -Infinity) && skins.filter(x => x === s).length === 1 ? i : -1);
   const credits = accounts.map((a) => a.sellerCreditScore || 0);
-  const creditBest = credits.map((c, i) => c > 0 && c === Math.max(...credits) && credits.filter(x => x === c).length === 1 ? i : -1);
+  const creditBest = credits.map((c, i) => c > 0 && c === Math.max(...credits, -Infinity) && credits.filter(x => x === c).length === 1 ? i : -1);
   // Value = skins per 1000 yuan (higher = better deal)
   const valueScores = accounts.map((a) => a.price > 0 ? ((a.skinCount || 0) / a.price * 1000) : 0);
-  const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores) && valueScores.filter(x => x === v).length === 1 ? i : -1);
+  const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores, -Infinity) && valueScores.filter(x => x === v).length === 1 ? i : -1);
 
   const freshnessLabel = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -273,10 +273,10 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
             </p>
             <p className="text-sm text-slate-300">
               {(() => {
-                const lowestPriceIdx = prices.indexOf(Math.min(...prices));
-                const mostSkinsIdx = skins.indexOf(Math.max(...skins));
-                const bestValueIdx = valueScores.indexOf(Math.max(...valueScores));
-                const bestCreditIdx = credits.indexOf(Math.max(...credits));
+                const lowestPriceIdx = prices.indexOf(Math.min(...prices, Infinity));
+                const mostSkinsIdx = skins.indexOf(Math.max(...skins, -Infinity));
+                const bestValueIdx = valueScores.indexOf(Math.max(...valueScores, -Infinity));
+                const bestCreditIdx = credits.indexOf(Math.max(...credits, -Infinity));
                 const recommendations = [];
                 if (lowestPriceIdx >= 0) recommendations.push({ idx: lowestPriceIdx, label: '价格最优', color: 'text-primary' });
                 if (bestValueIdx >= 0 && valueScores[bestValueIdx] > 0) recommendations.push({ idx: bestValueIdx, label: '性价比最高', color: 'text-yellow-400' });
