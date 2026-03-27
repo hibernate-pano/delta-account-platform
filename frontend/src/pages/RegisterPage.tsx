@@ -23,6 +23,7 @@ const RegisterPage: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
 
   // Password strength checker
   const getPasswordStrength = (pwd: string) => {
@@ -76,6 +77,7 @@ const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
     if (!validateForm()) return;
 
@@ -138,14 +140,24 @@ const RegisterPage: React.FC = () => {
               <input
                 type="text"
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                onChange={(e) => { setFormData({ ...formData, username: e.target.value }); setFieldErrors(f => { const n = { ...f }; delete n.username; return n; }); }}
                 onFocus={() => setFocusedField('username')}
-                onBlur={() => setFocusedField(null)}
-                className={`input transition-all ${focusedField === 'username' ? 'ring-2 ring-primary/50' : ''}`}
+                onBlur={() => {
+                  setFocusedField(null);
+                  if (!formData.username.trim()) setFieldErrors(f => ({ ...f, username: '请输入用户名' }));
+                  else if (formData.username.length < 3 || formData.username.length > 20) setFieldErrors(f => ({ ...f, username: '用户名需要3-20个字符' }));
+                  else setFieldErrors(f => { const n = { ...f }; delete n.username; return n; });
+                }}
+                className={`input transition-all ${focusedField === 'username' ? 'ring-2 ring-primary/50' : ''} ${fieldErrors.username ? 'border-red-500 focus:border-red-500' : ''}`}
                 placeholder="3-20个字符"
                 autoComplete="username"
                 autoFocus
               />
+              {fieldErrors.username && (
+                <p className="text-xs text-red-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />{fieldErrors.username}
+                </p>
+              )}
             </div>
 
             {/* Nickname */}
@@ -181,10 +193,15 @@ const RegisterPage: React.FC = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, password: e.target.value }); setFieldErrors(f => { const n = { ...f }; delete n.password; return n; }); }}
                   onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  className="input pr-10"
+                  onBlur={() => {
+                    setFocusedField(null);
+                    if (!formData.password) setFieldErrors(f => ({ ...f, password: '请输入密码' }));
+                    else if (formData.password.length < 6) setFieldErrors(f => ({ ...f, password: '密码至少需要6位' }));
+                    else setFieldErrors(f => { const n = { ...f }; delete n.password; return n; });
+                  }}
+                  className={`input pr-10 ${fieldErrors.password ? 'border-red-500 focus:border-red-500' : ''}`}
                   placeholder="至少6位"
                   autoComplete="new-password"
                 />
@@ -213,6 +230,11 @@ const RegisterPage: React.FC = () => {
                     密码强度: {passwordStrength.label}
                   </p>
                 </div>
+              )}
+              {fieldErrors.password && (
+                <p className="text-xs text-red-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />{fieldErrors.password}
+                </p>
               )}
             </div>
 

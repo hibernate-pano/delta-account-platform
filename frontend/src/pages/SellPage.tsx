@@ -58,6 +58,13 @@ const getPriceSuggestion = (rank: string, skinCount: number) => {
   return { min: Math.round(mid * 0.75), max: Math.round(mid * 1.25) };
 };
 
+const getRentalSuggestion = (rank: string, skinCount: number) => {
+  const base = RANK_BASE_PRICES[rank] ?? 50;
+  const mult = getSkinMultiplier(skinCount);
+  const mid = Math.round(Math.min(base * mult * 0.15, 50));
+  return { min: Math.max(5, Math.round(mid * 0.6)), max: Math.round(mid * 1.4) };
+};
+
 const gamePresets = [
   { label: '王者荣耀', ranks: ['青铜', '白银', '黄金', '铂金', '钻石', '星耀', '王者', '荣耀王者', '百星王者'] },
   { label: '英雄联盟', ranks: ['黑铁', '青铜', '白银', '黄金', '铂金', '钻石', '大师', '宗师', '王者'] },
@@ -168,7 +175,9 @@ const SellPage: React.FC = () => {
 
   // Derived values
   const price = parseFloat(formData.price) || 0;
+  const rentalPrice = parseFloat(formData.rentalPrice) || 0;
   const suggestion = useMemo(() => getPriceSuggestion(formData.gameRank, formData.skinCount), [formData.gameRank, formData.skinCount]);
+  const rentalSuggestion = useMemo(() => getRentalSuggestion(formData.gameRank, formData.skinCount), [formData.gameRank, formData.skinCount]);
   const platformFee = price * PLATFORM_FEE_RATE;
   const tax = price * TAX_RATE;
   const youGet = price - platformFee - tax;
@@ -505,6 +514,21 @@ const SellPage: React.FC = () => {
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">/时</span>
                   </div>
+                  {formData.rentalPrice && (formData.gameRank || formData.skinCount > 0) && (
+                    <div className={`text-xs mt-1 px-2 py-1 rounded-lg ${
+                      rentalPrice < rentalSuggestion.min
+                        ? 'text-yellow-400 bg-yellow-500/10'
+                        : rentalPrice <= rentalSuggestion.max
+                        ? 'text-green-400 bg-green-500/10'
+                        : 'text-slate-500 bg-dark-lighter'
+                    }`}>
+                      {rentalPrice < rentalSuggestion.min
+                        ? `低于市价（参考 ¥${rentalSuggestion.min}-${rentalSuggestion.max}/时）`
+                        : rentalPrice <= rentalSuggestion.max
+                        ? '✓ 时租价格合理'
+                        : '时租偏高，建议参考 ¥' + rentalSuggestion.min + '-' + rentalSuggestion.max + '/时'}
+                    </div>
+                  )}
                 </div>
               </div>
 
