@@ -691,6 +691,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                     });
                   }}
                   onCancel={() => setPendingCancel(false)}
+                  isPending={cancelMutation.isPending}
                 />
               </div>
             )}

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ConfirmInlineProps {
   message: string;
@@ -7,6 +7,7 @@ interface ConfirmInlineProps {
   onCancel: () => void;
   confirmLabel?: string;
   confirmVariant?: 'danger' | 'primary';
+  isPending?: boolean;
 }
 
 export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
@@ -15,12 +16,13 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
   onCancel,
   confirmLabel = '确认',
   confirmVariant = 'danger',
+  isPending = false,
 }) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    cancelRef.current?.focus();
-  }, []);
+    if (!isPending) cancelRef.current?.focus();
+  }, [isPending]);
 
   return (
     <div
@@ -37,21 +39,30 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
         <button
           ref={cancelRef}
           onClick={onCancel}
+          disabled={isPending}
           onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
-          className="px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-dark-lighter rounded-lg hover:bg-dark-border transition-colors"
+          className="px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-dark-lighter rounded-lg hover:bg-dark-border transition-colors disabled:opacity-50"
         >
           取消
         </button>
         <button
           onClick={onConfirm}
+          disabled={isPending}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onConfirm(); }}
-          className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${
+          className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed ${
             confirmVariant === 'danger'
               ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
               : 'bg-primary/20 text-primary hover:bg-primary/30'
           }`}
         >
-          {confirmLabel}
+          {isPending ? (
+            <>
+              <RefreshCw className="w-3 h-3 animate-spin" />
+              {confirmLabel === '确认' ? '处理中...' : confirmLabel + '中...'}
+            </>
+          ) : (
+            confirmLabel
+          )}
         </button>
       </div>
     </div>

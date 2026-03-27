@@ -67,29 +67,35 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     localStorage.removeItem('delta_recent_searches');
   };
 
-  // Poll for notifications + messages
+  // Poll for notifications + messages (with retry on failure)
   useEffect(() => {
     if (!token) return;
 
-    const fetchCounts = async () => {
-      try {
-        const [notifRes, msgRes] = await Promise.all([
-          notificationApi.getUnreadCount(),
-          messageApi.getUnreadCount(),
-        ]);
-        const notifData = notifRes.data?.data;
-        const msgData = msgRes.data?.data;
-        // Handle both number and object response formats
-        setUnreadCount(typeof notifData === 'number' ? notifData : (notifData?.notificationCount ?? 0));
-        setMsgUnreadCount(typeof msgData === 'number' ? msgData : (msgData?.messageCount ?? 0));
-      } catch (err) {
-        // Badge counts are non-critical; stale counts are acceptable
-        console.warn('[Layout] Failed to refresh unread counts:', err);
+    const fetchCounts = async (retries = 2) => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const [notifRes, msgRes] = await Promise.all([
+            notificationApi.getUnreadCount(),
+            messageApi.getUnreadCount(),
+          ]);
+          const notifData = notifRes.data?.data;
+          const msgData = msgRes.data?.data;
+          setUnreadCount(typeof notifData === 'number' ? notifData : (notifData?.notificationCount ?? 0));
+          setMsgUnreadCount(typeof msgData === 'number' ? msgData : (msgData?.messageCount ?? 0));
+          return; // Success
+        } catch (err) {
+          if (attempt < retries) {
+            // Exponential backoff: 1s, 2s
+            await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+            continue;
+          }
+          console.warn('[Layout] Failed to refresh unread counts after retries:', err);
+        }
       }
     };
 
     fetchCounts();
-    const interval = setInterval(fetchCounts, 30000); // Poll every 30s
+    const interval = setInterval(fetchCounts, 30000);
     return () => clearInterval(interval);
   }, [token]);
 
