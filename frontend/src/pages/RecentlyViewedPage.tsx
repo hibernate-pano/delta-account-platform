@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { WishlistButton } from '../components/ui/WishlistButton';
@@ -13,6 +13,7 @@ import {
 
 const RecentlyViewedPage: React.FC = () => {
   usePageTitle('最近浏览');
+  const navigate = useNavigate();
   const { items: recentItems, removeItem, clearAll } = useRecentStore();
   const { token } = useAuthStore();
   const { showToast } = useToast();
@@ -239,6 +240,26 @@ const RecentlyViewedPage: React.FC = () => {
                   </div>
                 )}
               </Link>
+
+              {/* Quick actions */}
+              {item.account.status === 'ON_SALE' && (
+                <div className="flex gap-2 pt-2 px-1">
+                  <button
+                    onClick={() => navigate(`/accounts/${item.account.id}`)}
+                    className="flex-1 btn-secondary !py-1.5 text-xs flex items-center justify-center gap-1"
+                  >
+                    <ArrowRight className="w-3 h-3" /> 查看详情
+                  </button>
+                  {token && (
+                    <button
+                      onClick={() => navigate(`/accounts/${item.account.id}?action=buy`)}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors text-xs"
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" /> 立即购买
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Remove */}
               <button
