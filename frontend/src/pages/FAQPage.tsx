@@ -162,10 +162,10 @@ const FAQPage: React.FC = () => {
       <div className="flex gap-2 mb-6 flex-wrap">
         <button
           onClick={() => setActiveCategory('全部')}
-          className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+          className={`px-3 py-1.5 rounded-full text-sm transition-all hover:scale-105 active:scale-95 ${
             activeCategory === '全部'
-              ? 'bg-primary text-white'
-              : 'bg-dark-lighter text-slate-400 hover:text-white border border-dark-border'
+              ? 'bg-primary text-white shadow-lg shadow-primary/20 ring-2 ring-primary/30'
+              : 'bg-dark-lighter text-slate-400 hover:text-white border border-dark-border hover:border-slate-600'
           }`}
         >
           全部 ({searchQuery ? filteredFAQ.length : faqData.length})
@@ -174,10 +174,10 @@ const FAQPage: React.FC = () => {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+            className={`px-3 py-1.5 rounded-full text-sm transition-all hover:scale-105 active:scale-95 ${
               activeCategory === cat
-                ? 'bg-primary text-white'
-                : 'bg-dark-lighter text-slate-400 hover:text-white border border-dark-border'
+                ? 'bg-primary text-white shadow-lg shadow-primary/20 ring-2 ring-primary/30'
+                : 'bg-dark-lighter text-slate-400 hover:text-white border border-dark-border hover:border-slate-600'
             }`}
           >
             {cat}
@@ -206,10 +206,10 @@ const FAQPage: React.FC = () => {
             >
               <button
                 onClick={() => setOpenQuestion(isOpen ? null : idx)}
-                className="w-full flex items-center gap-3 py-4 px-4 text-left"
+                className="w-full flex items-center gap-3 py-4 px-4 text-left hover:bg-dark-lighter/30 transition-colors rounded-xl"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isOpen ? 'bg-primary/20' : 'bg-dark-lighter'}`}>
-                  <Icon className={`w-4 h-4 ${isOpen ? 'text-primary' : 'text-slate-500'}`} />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover/section:scale-110 ${isOpen ? 'bg-primary/20' : 'bg-dark-lighter group-hover/section:bg-slate-700/30'}`}>
+                  <Icon className={`w-4 h-4 transition-colors ${isOpen ? 'text-primary' : 'text-slate-500'}`} />
                 </div>
                 <span className={`flex-1 text-sm font-medium ${isOpen ? 'text-primary' : 'text-slate-300'}`}>
                   {faq.question}
@@ -219,9 +219,11 @@ const FAQPage: React.FC = () => {
               {isOpen && (
                 <div className="px-4 pb-4 animate-fade-in">
                   <div className="h-px bg-dark-border mb-4" />
-                  <p className="text-sm text-slate-400 leading-relaxed pl-2 border-l-2 border-primary/30">
-                    {faq.answer}
-                  </p>
+                  <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg px-4 py-3 border-l-2 border-primary/40">
+                    <p className="text-sm text-slate-400 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
                   {votedFAQ[idx] ? (
                     <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
                       {votedFAQ[idx] === 'up' ? (
@@ -254,13 +256,13 @@ const FAQPage: React.FC = () => {
                             </div>
                             <button
                               onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'up' }))}
-                              className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-green-500/20 hover:text-green-400 border border-dark-border hover:border-green-500/30 transition-all"
+                              className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-green-500/20 hover:text-green-400 border border-dark-border hover:border-green-500/30 transition-all hover:scale-105 active:scale-95"
                             >
                               <ThumbsUp className="w-3 h-3" /> 有帮助
                             </button>
                             <button
                               onClick={() => setVotedFAQ(v => ({ ...v, [idx]: 'down' }))}
-                              className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-red-500/20 hover:text-red-400 border border-dark-border hover:border-red-500/30 transition-all"
+                              className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-dark hover:bg-red-500/20 hover:text-red-400 border border-dark-border hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
                             >
                               <ThumbsDown className="w-3 h-3" /> 没帮助
                             </button>
@@ -277,12 +279,15 @@ const FAQPage: React.FC = () => {
       </div>
 
       {/* Still need help */}
-      <div className="mt-10 card text-center py-10">
-        <div className="w-14 h-14 bg-dark-lighter rounded-full flex items-center justify-center mx-auto mb-4">
-          <MessageCircle className="w-7 h-7 text-slate-600" />
+      <div className="mt-10 card bg-gradient-to-br from-primary/8 to-purple-500/5 border-primary/20 text-center py-10">
+        <div className="relative w-16 h-16 mx-auto mb-5">
+          <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl" />
+          <div className="relative w-full h-full bg-dark-lighter rounded-2xl flex items-center justify-center animate-float border border-primary/20">
+            <MessageCircle className="w-8 h-8 text-primary/80" />
+          </div>
         </div>
-        <h3 className="text-lg font-bold mb-2">没有找到答案？</h3>
-        <p className="text-slate-500 text-sm mb-5">我们的客服团队随时为您解答疑问</p>
+        <h3 className="text-lg font-bold mb-2 text-white">没有找到答案？</h3>
+        <p className="text-slate-400 text-sm mb-5">我们的客服团队随时为您解答疑问</p>
         <div className="flex justify-center gap-3">
           <Link to="/notifications" className="btn-secondary text-sm flex items-center gap-2">
             <MessageCircle className="w-4 h-4" />
