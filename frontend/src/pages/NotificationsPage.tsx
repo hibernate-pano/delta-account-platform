@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '../hooks/useQueries';
@@ -11,7 +11,7 @@ import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
   XCircle, ShieldOff, CreditCard, AlertTriangle, Lock, CheckCircle, CheckCheck,
-  DollarSign, Gamepad2, History, RefreshCcw
+  DollarSign, Gamepad2, History, RefreshCcw, HelpCircle
 } from 'lucide-react';
 
 interface Notification {
@@ -220,7 +220,7 @@ const NotificationItem: React.FC<{
         >
           {/* Icon */}
           <div className={`relative flex-shrink-0`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${config.bg} ${isHigh && isUnread ? 'ring-2 ring-red-500/40' : ''}`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${config.bg} ${isHigh && isUnread ? 'ring-2 ring-red-500/40 animate-pulse' : ''}`}>
               <Icon className={`w-5 h-5 ${config.color}`} />
             </div>
             {isUnread && (
@@ -612,25 +612,40 @@ const NotificationsPage: React.FC = () => {
       <div className="card p-0 overflow-hidden">
         {filteredNotifications.length === 0 ? (
           <div className="text-center py-20 animate-fade-in">
-            <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4 animate-float">
-              <BellOff className="w-10 h-10 text-slate-700" />
+            {/* Glow background */}
+            <div className="relative w-24 h-24 mx-auto mb-5">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-full blur-xl" />
+              <div className="relative w-full h-full bg-dark-lighter rounded-2xl flex items-center justify-center animate-float border border-dark-border/60">
+                <BellOff className="w-10 h-10 text-slate-700" />
+              </div>
             </div>
-            <h3 className="text-lg font-medium mb-2 text-slate-400">
+            <h3 className="text-lg font-bold mb-2 text-slate-400">
               {activeFilter === 'UNREAD' ? '太棒了！全部已读'
                : activeTypeFilter !== 'all' ? '该分类暂无通知'
                : '暂无通知'}
             </h3>
-            <p className="text-slate-600 text-sm mb-6">
+            <p className="text-slate-600 text-sm mb-6 max-w-xs mx-auto leading-relaxed">
               {activeFilter === 'UNREAD' ? '没有遗漏任何重要消息'
                : activeFilter === 'all' && activeTypeFilter === 'all' ? '有新消息时会在这里显示'
                : '切换到全部查看'}
             </p>
-            {(activeFilter !== 'all' || activeTypeFilter !== 'all') && (
-              <button onClick={() => { setActiveFilter('all'); setActiveTypeFilter('all'); }} className="btn-secondary text-sm">查看全部</button>
-            )}
-            {activeFilter === 'UNREAD' && (
-              <button onClick={() => navigate('/accounts')} className="btn-primary text-sm mt-2">去逛逛账号市场</button>
-            )}
+            <div className="flex justify-center gap-3 flex-wrap">
+              {(activeFilter !== 'all' || activeTypeFilter !== 'all') && (
+                <button onClick={() => { setActiveFilter('all'); setActiveTypeFilter('all'); }} className="btn-secondary text-sm">查看全部</button>
+              )}
+              {activeFilter === 'UNREAD' && (
+                <button onClick={() => navigate('/accounts')} className="btn-primary text-sm flex items-center gap-2">
+                  <Gamepad2 className="w-4 h-4" />
+                  去逛逛账号市场
+                </button>
+              )}
+              {activeFilter === 'all' && activeTypeFilter === 'all' && (
+                <Link to="/faq" className="btn-secondary text-sm flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4" />
+                  查看帮助中心
+                </Link>
+              )}
+            </div>
           </div>
         ) : (
           <div>
