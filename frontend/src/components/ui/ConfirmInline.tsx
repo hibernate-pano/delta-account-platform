@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Info } from 'lucide-react';
 
 interface ConfirmInlineProps {
   message: string;
@@ -10,6 +10,23 @@ interface ConfirmInlineProps {
   isPending?: boolean;
 }
 
+const variantStyles = {
+  danger: {
+    border: 'border-red-500/20',
+    iconBg: 'bg-red-500/20',
+    iconColor: 'text-red-400',
+    icon: AlertTriangle,
+    messageColor: 'text-slate-300',
+  },
+  primary: {
+    border: 'border-blue-500/20',
+    iconBg: 'bg-blue-500/20',
+    iconColor: 'text-blue-400',
+    icon: Info,
+    messageColor: 'text-slate-300',
+  },
+} as const;
+
 export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
   message,
   onConfirm,
@@ -19,6 +36,8 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
   isPending = false,
 }) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const style = variantStyles[confirmVariant];
+  const Icon = style.icon;
 
   useEffect(() => {
     if (!isPending) cancelRef.current?.focus();
@@ -29,12 +48,12 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
       role="alertdialog"
       aria-live="polite"
       aria-label="请确认此操作"
-      className="flex items-center gap-3 p-3 bg-dark rounded-xl border border-red-500/20 animate-fade-in"
+      className={`flex items-center gap-3 p-3 bg-dark rounded-xl border ${style.border} animate-fade-in`}
     >
-      <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
-        <AlertTriangle className="w-4 h-4 text-red-400" />
+      <div className={`w-8 h-8 rounded-lg ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
+        <Icon className={`w-4 h-4 ${style.iconColor}`} />
       </div>
-      <p className="text-sm text-slate-300 flex-1">{message}</p>
+      <p className={`text-sm ${style.messageColor} flex-1`}>{message}</p>
       <div className="flex gap-2 flex-shrink-0">
         <button
           ref={cancelRef}

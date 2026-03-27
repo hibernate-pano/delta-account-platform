@@ -115,6 +115,7 @@ const SellPage: React.FC = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [publishedAccountId, setPublishedAccountId] = useState<number | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [descPreview, setDescPreview] = useState(false);
 
   // Inline field validation
   const validateField = (field: string, value: string) => {
@@ -714,17 +715,41 @@ const SellPage: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-sm font-medium text-slate-300">账号描述</label>
-                  <span className={`text-xs ${formData.description.length > 500 ? 'text-red-400' : 'text-slate-500'}`}>
-                    {formData.description.length}/500
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs ${formData.description.length > 500 ? 'text-red-400' : 'text-slate-500'}`}>
+                      {formData.description.length}/500
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setDescPreview(v => !v)}
+                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg border transition-all ${
+                        descPreview
+                          ? 'bg-primary/20 text-primary border-primary/30'
+                          : 'text-slate-500 border-dark-border hover:text-white hover:border-slate-600'
+                      }`}
+                    >
+                      <Eye className="w-3 h-3" />
+                      {descPreview ? '编辑' : '预览'}
+                    </button>
+                  </div>
                 </div>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value.slice(0, 500) })}
-                  maxLength={500}
-                  disabled={isSubmitting}
-                  className="input h-28 resize-none disabled:opacity-50 disabled:cursor-not-allowed" placeholder="详细描述：绑定信息、历史充值、特殊角色..."
-                />
+                {descPreview ? (
+                  <div className="input h-28 overflow-auto flex items-start pt-2">
+                    {formData.description ? (
+                      <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">{formData.description}</p>
+                    ) : (
+                      <p className="text-sm text-slate-600 italic">暂无描述</p>
+                    )}
+                  </div>
+                ) : (
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value.slice(0, 500) })}
+                    maxLength={500}
+                    disabled={isSubmitting}
+                    className="input h-28 resize-none disabled:opacity-50 disabled:cursor-not-allowed" placeholder="详细描述：绑定信息、历史充值、特殊角色..."
+                  />
+                )}
               </div>
             </div>
 
