@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -544,8 +544,14 @@ const AccountsPage: React.FC = () => {
                 </div>
                 {/* NEW badge */}
                 {isNewAccount(account.createdAt) && (
-                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-primary/90 text-white text-[10px] rounded flex items-center gap-0.5">
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-primary/90 text-white text-[10px] rounded flex items-center gap-0.5 z-10">
                     <Zap className="w-3 h-3" /> NEW
+                  </span>
+                )}
+                {/* HOT badge */}
+                {((account.viewCount ?? 0) >= 100 || (account.orderCount ?? 0) >= 5) && (
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-orange-500/90 text-white text-[10px] rounded flex items-center gap-0.5 z-10" style={isNewAccount(account.createdAt) ? { top: '1.75rem' } : {}}>
+                    <Flame className="w-3 h-3" /> 热门
                   </span>
                 )}
                 {/* Verified badge */}
@@ -678,9 +684,21 @@ const AccountsPage: React.FC = () => {
                 </button>
               </div>
               <div className="flex-1 py-1">
-                <h3 className="font-medium mb-2 group-hover:text-primary transition-colors">
-                  {account.title}
-                </h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-medium group-hover:text-primary transition-colors">
+                    {account.title}
+                  </h3>
+                  {((account.viewCount ?? 0) >= 100 || (account.orderCount ?? 0) >= 5) && (
+                    <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-[10px] rounded flex items-center gap-0.5">
+                      <Flame className="w-3 h-3" /> 热门
+                    </span>
+                  )}
+                  {account.verificationStatus === 'VERIFIED' && (
+                    <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex items-center gap-0.5">
+                      <ShieldCheck className="w-3 h-3" /> 已认证
+                    </span>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-2">
                   <span className="px-2 py-0.5 bg-dark rounded">{account.gameType}</span>
                   <span className="px-2 py-0.5 bg-dark rounded">{account.gameRank || '暂无'}</span>
