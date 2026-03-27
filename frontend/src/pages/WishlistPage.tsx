@@ -253,7 +253,12 @@ const WishlistPage: React.FC = () => {
                         </div>
                       )}
                       {/* Price overlay */}
-                      <div className="absolute bottom-2 right-2">
+                      <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                        {priceAlerts[account.id] && (
+                          <span className="text-[10px] bg-yellow-500/90 text-black px-1.5 py-0.5 rounded-full font-medium">
+                            ¥{priceAlerts[account.id]}
+                          </span>
+                        )}
                         <span className="text-lg font-bold text-white drop-shadow-lg">¥{account.price}</span>
                       </div>
                     </div>

@@ -470,27 +470,35 @@ const RefundsPage: React.FC = () => {
                           </span>
                           <span className="text-sm text-slate-500 font-mono">#{refund.orderId}</span>
                         </div>
-                        {/* Mini refund progress bar */}
-                        <div className="flex items-center gap-1 mb-2">
-                          {(['申请', '审核', '完成'] as const).map((step, i) => {
+                        {/* Visual 3-step timeline */}
+                        <div className="flex items-center gap-0 mb-3">
+                          {([
+                            { label: '申请', icon: FileText, idx: 0 },
+                            { label: '审核', icon: Clock, idx: 1 },
+                            { label: refund.status === 'REFUNDED' ? '已退款' : refund.status === 'REJECTED' || refund.status === 'CANCELLED' ? '已拒绝' : '处理中', icon: refund.status === 'REJECTED' || refund.status === 'CANCELLED' ? XCircle : refund.status === 'REFUNDED' || refund.status === 'APPROVED' ? CheckCircle : Clock, idx: 2 },
+                          ] as const).map(({ label, icon: Icon, idx }) => {
                             const statusOrder = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'REFUNDED'];
-                            const refundOrder = statusOrder.indexOf(refund.status);
-                            const isDone = i < refundOrder;
-                            const isActive = i === refundOrder && refund.status === 'PENDING';
+                            const refundIdx = statusOrder.indexOf(refund.status);
+                            const isDone = idx < refundIdx && refund.status !== 'PENDING';
+                            const isActive = (idx === refundIdx && refund.status === 'PENDING') || (refund.status === 'APPROVED' && idx < 2);
                             const isRejected = refund.status === 'REJECTED' || refund.status === 'CANCELLED';
+                            const isSuccess = refund.status === 'REFUNDED';
+                            const color = isSuccess ? 'text-green-400' : isRejected ? 'text-red-400' : isActive ? 'text-yellow-400' : 'text-slate-600';
+                            const bg = isSuccess ? 'bg-green-400' : isRejected ? 'bg-red-400' : isActive ? 'bg-yellow-400' : 'bg-slate-700';
                             return (
-                              <React.Fragment key={step}>
-                                <div className={`h-1 flex-1 rounded-full transition-all ${
-                                  isRejected ? (i === 0 ? 'bg-red-500/60' : 'bg-dark-lighter') :
-                                  isDone ? 'bg-primary' :
-                                  isActive ? 'bg-yellow-400 animate-pulse' :
-                                  'bg-dark-lighter'
-                                }`} />
-                                {i < 2 && (
-                                  <div className={`w-1 h-1 rounded-full flex-shrink-0 ${
-                                    isRejected ? (i === 0 ? 'bg-red-500/60' : 'bg-dark-lighter') :
-                                    isDone ? 'bg-primary' :
-                                    'bg-dark-lighter'
+                              <React.Fragment key={idx}>
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${bg} ${idx === 1 && refund.status === 'PENDING' ? 'animate-pulse' : ''}`}>
+                                    <Icon className={`w-3 h-3 ${isActive || isDone || isSuccess || isRejected ? 'text-white' : 'text-slate-600'}`} />
+                                  </div>
+                                  <span className={`text-[9px] ${color}`}>{label}</span>
+                                </div>
+                                {idx < 2 && (
+                                  <div className={`flex-1 h-0.5 mb-4 rounded-full ${
+                                    isRejected ? (idx === 0 ? 'bg-red-500/50' : 'bg-slate-700') :
+                                    idx === 0 && (isActive || isDone) ? 'bg-green-400/60' :
+                                    idx === 0 && refund.status === 'APPROVED' ? 'bg-green-400/60' :
+                                    isActive ? 'bg-yellow-400/60' : 'bg-slate-700'
                                   }`} />
                                 )}
                               </React.Fragment>
