@@ -20,15 +20,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 401 软跳转：清除 store 状态，用 React Router 跳转而非硬刷新
+  // 401 软跳转：清除 store 状态，用 React Router 跳转而非硬刷新
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (!error.response) {
-      console.error('网络错误:', error.message);
-    }
+    const status = error.response?.status;
 
-    if (error.response?.status === 401) {
+    if (!error.response) {
+      // 网络错误：超时、离线等
+      window.dispatchEvent(new CustomEvent('delta:api-error', {
+        detail: { status: 0, message: '网络连接失败，请检查网络' },
+      }));
+    } else if (status === 401) {
       const { logout } = useAuthStore.getState();
       logout();
       const currentPath = window.location.pathname;
@@ -36,7 +39,16 @@ api.interceptors.response.use(
         window.history.replaceState(null, '', '/login');
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
+    } else if (status === 403) {
+      window.dispatchEvent(new CustomEvent('delta:api-error', {
+        detail: { status: 403, message: '无权限执行此操作' },
+      }));
+    } else if (status >= 500) {
+      window.dispatchEvent(new CustomEvent('delta:api-error', {
+        detail: { status, message: '服务器异常，请稍后重试' },
+      }));
     }
+
     return Promise.reject(error);
   }
 );

@@ -22,7 +22,7 @@ import RecentlyViewedPage from './pages/RecentlyViewedPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import FAQPage from './pages/FAQPage';
-import { ToastProvider } from './components/ui/Toast';
+import { ToastProvider, useToast } from './components/ui/Toast';
 import { BrowserTabBadge, UnreadIndicator } from './components/ui/BrowserTabBadge';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GlobalLoadingProvider, useGlobalLoading } from './components/GlobalLoading';
@@ -45,7 +45,18 @@ const PageLoader: React.FC = () => (
 
 const queryClient = createQueryClient();
 
-// Global loading progress bar
+// Global API error listener — catches 403/500/network errors and shows toast
+const ApiErrorListener: React.FC = () => {
+  const { showToast } = useToast();
+  useEffect(() => {
+    const handler = (e: CustomEvent<{ status: number; message: string }>) => {
+      showToast(e.detail.message, 'error');
+    };
+    window.addEventListener('delta:api-error', handler as EventListener);
+    return () => window.removeEventListener('delta:api-error', handler as EventListener);
+  }, [showToast]);
+  return null;
+};
 const LoadingProgressBar: React.FC = () => {
   const { isLoading } = useGlobalLoading();
 
@@ -233,6 +244,7 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
+        <ApiErrorListener />
         <GlobalLoadingProvider>
           <ErrorBoundary>
             <BrowserRouter>

@@ -429,11 +429,38 @@ const RefundsPage: React.FC = () => {
                         <StatusIcon className={`w-5 h-5 ${config.color}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-2">
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.color} ${refund.status === 'PENDING' ? 'animate-pulse' : ''}`}>
                             {config.label}
                           </span>
                           <span className="text-sm text-slate-500 font-mono">#{refund.orderId}</span>
+                        </div>
+                        {/* Mini refund progress bar */}
+                        <div className="flex items-center gap-1 mb-2">
+                          {(['申请', '审核', '完成'] as const).map((step, i) => {
+                            const statusOrder = ['PENDING', 'APPROVED', 'REFUNDED'];
+                            const refundOrder = statusOrder.indexOf(refund.status);
+                            const isDone = i < refundOrder;
+                            const isActive = i === refundOrder && refund.status === 'PENDING';
+                            const isRejected = refund.status === 'REJECTED' || refund.status === 'CANCELLED';
+                            return (
+                              <React.Fragment key={step}>
+                                <div className={`h-1 flex-1 rounded-full transition-all ${
+                                  isRejected ? (i === 0 ? 'bg-red-500/60' : 'bg-dark-lighter') :
+                                  isDone ? 'bg-primary' :
+                                  isActive ? 'bg-yellow-400 animate-pulse' :
+                                  'bg-dark-lighter'
+                                }`} />
+                                {i < 2 && (
+                                  <div className={`w-1 h-1 rounded-full flex-shrink-0 ${
+                                    isRejected ? (i === 0 ? 'bg-red-500/60' : 'bg-dark-lighter') :
+                                    isDone ? 'bg-primary' :
+                                    'bg-dark-lighter'
+                                  }`} />
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
                         </div>
                         <p className="text-sm text-slate-300 mb-1">{refund.reason}</p>
                         <p className="text-xs text-slate-600">{formatDate(refund.createdAt)}</p>
