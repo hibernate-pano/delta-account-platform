@@ -149,9 +149,14 @@ export const NotificationBell: React.FC = () => {
                   <div
                     key={n.id}
                     className={`p-3 rounded-lg cursor-pointer hover:bg-dark ${n.status === 'UNREAD' ? 'bg-primary/5' : ''}`}
-                    onClick={() => {
+                    onClick={async () => {
                       if (n.status === 'UNREAD') {
-                        markReadMutation.mutate(n.id);
+                        try {
+                          await markReadMutation.mutateAsync(n.id);
+                        } catch {
+                          showToast('操作失败', 'error');
+                          return;
+                        }
                       }
                       const target = getNavTarget(n);
                       if (target) {

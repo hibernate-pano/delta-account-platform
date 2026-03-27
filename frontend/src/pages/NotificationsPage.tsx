@@ -331,11 +331,15 @@ const NotificationsPage: React.FC = () => {
     catch { showToast('操作失败', 'error'); }
   };
 
-  const handleMarkTypeAsRead = (type: string) => {
+  const handleMarkTypeAsRead = async (type: string) => {
     const typeUnread = notifications.filter((n) => n.type === type && n.status === 'UNREAD');
     if (typeUnread.length === 0) { showToast('该类型都已读', 'info'); return; }
-    typeUnread.forEach((n) => markReadMutation.mutate(n.id));
-    showToast(`已标记 ${typeUnread.length} 条为已读`, 'success');
+    try {
+      await Promise.all(typeUnread.map((n) => markReadMutation.mutateAsync(n.id)));
+      showToast(`已标记 ${typeUnread.length} 条为已读`, 'success');
+    } catch {
+      showToast('操作失败', 'error');
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -375,9 +379,14 @@ const NotificationsPage: React.FC = () => {
       return n?.status === 'UNREAD';
     });
     if (unreadIds.length === 0) { showToast('选中的通知都已读', 'info'); return; }
-    unreadIds.forEach((id) => markReadMutation.mutate(id));
-    setSelectedIds(new Set());
-    showToast(`已标记 ${unreadIds.length} 条为已读`, 'success');
+    try {
+      await Promise.all(unreadIds.map((id) => markReadMutation.mutateAsync(id)));
+      showToast(`已标记 ${unreadIds.length} 条为已读`, 'success');
+    } catch {
+      showToast('操作失败', 'error');
+    } finally {
+      setSelectedIds(new Set());
+    }
   };
 
   // Keyboard dismiss for detail modal
