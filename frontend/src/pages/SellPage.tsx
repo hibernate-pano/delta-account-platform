@@ -8,7 +8,7 @@ import { useCreateAccount } from '../hooks/useQueries';
 import {
   Gamepad2, Plus, X, Upload, Check, Sparkles, ArrowRight, ArrowLeft,
   Camera, Image as ImageIcon, Eye, DollarSign, Info, GripVertical,
-  Shield, Clock, BarChart3, CheckCircle, Edit3, User, RefreshCw
+  Shield, Clock, BarChart3, CheckCircle, Edit3, User, RefreshCw, AlertCircle
 } from 'lucide-react';
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
@@ -114,6 +114,21 @@ const SellPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [publishedAccountId, setPublishedAccountId] = useState<number | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Inline field validation
+  const validateField = (field: string, value: string) => {
+    if (field === 'title') {
+      if (!value.trim()) setFieldErrors(e => ({ ...e, title: '标题不能为空' }));
+      else setFieldErrors(e => { const n = { ...e }; delete n.title; return n; });
+    }
+    if (field === 'price') {
+      const p = parseFloat(value);
+      if (!value) setFieldErrors(e => ({ ...e, price: '请填写售价' }));
+      else if (p <= 0) setFieldErrors(e => ({ ...e, price: '售价必须大于0' }));
+      else setFieldErrors(e => { const n = { ...e }; delete n.price; return n; });
+    }
+  };
 
   // Mark form as dirty when user edits anything
   useEffect(() => {
@@ -196,10 +211,23 @@ const SellPage: React.FC = () => {
   }
 
   const validateStep1 = () => {
-    if (!formData.title.trim()) { showToast('请填写账号标题', 'warning'); document.getElementById('sell-title')?.focus(); return false; }
+    let valid = true;
+    if (!formData.title.trim()) {
+      setFieldErrors(e => ({ ...e, title: '标题不能为空' }));
+      if (valid) document.getElementById('sell-title')?.focus();
+      valid = false;
+    } else {
+      setFieldErrors(e => { const n = { ...e }; delete n.title; return n; });
+    }
     if (!formData.gameRank) { showToast('请选择游戏段位', 'warning'); document.getElementById('sell-rank')?.focus(); return false; }
-    if (!formData.price || parseFloat(formData.price) <= 0) { showToast('请填写正确的售价', 'warning'); document.getElementById('sell-price')?.focus(); return false; }
-    return true;
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      setFieldErrors(e => ({ ...e, price: '请填写正确的售价' }));
+      if (valid) document.getElementById('sell-price')?.focus();
+      valid = false;
+    } else {
+      setFieldErrors(e => { const n = { ...e }; delete n.price; return n; });
+    }
+    return valid;
   };
 
   const handleNextToStep2 = () => {
@@ -424,13 +452,19 @@ const SellPage: React.FC = () => {
                 </div>
                 <input
                   type="text" value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value.slice(0, 30) })}
+                  onChange={(e) => { setFormData({ ...formData, title: e.target.value.slice(0, 30) }); validateField('title', e.target.value); }}
+                  onBlur={(e) => validateField('title', e.target.value)}
                   maxLength={30}
                   id="sell-title"
                   disabled={isSubmitting}
-                  className="input disabled:opacity-50 disabled:cursor-not-allowed" placeholder="例如：满皮肤 · 钻石段位 · 王者局"
+                  className={`input disabled:opacity-50 disabled:cursor-not-allowed ${fieldErrors.title ? '!border-red-500 focus:!border-red-500' : ''}`} placeholder="例如：满皮肤 · 钻石段位 · 王者局"
                   required autoFocus
                 />
+                {fieldErrors.title && (
+                  <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />{fieldErrors.title}
+                  </p>
+                )}
               </div>
 
               {/* Game type selector */}
@@ -528,13 +562,18 @@ const SellPage: React.FC = () => {
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
                     <input
                       type="number" value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      onChange={(e) => { setFormData({ ...formData, price: e.target.value }); validateField('price', e.target.value); }}
+                      onBlur={(e) => validateField('price', e.target.value)}
                       id="sell-price"
                       disabled={isSubmitting}
-                      className="input pl-10 text-xl font-bold !text-white disabled:opacity-50 disabled:cursor-not-allowed" placeholder="0.00" step="0.01" min="1" required
+                      className={`input pl-10 text-xl font-bold !text-white disabled:opacity-50 disabled:cursor-not-allowed ${fieldErrors.price ? '!border-red-500 focus:!border-red-500' : ''}`} placeholder="0.00" step="0.01" min="1" required
                     />
                   </div>
-                  {formData.price && (formData.gameRank || formData.skinCount > 0) && (
+                  {fieldErrors.price ? (
+                    <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />{fieldErrors.price}
+                    </p>
+                  ) : (formData.price && (formData.gameRank || formData.skinCount > 0) && (
                     <div className={`text-xs mt-1 px-2 py-1 rounded-lg ${
                       price < suggestion.min
                         ? 'text-yellow-400 bg-yellow-500/10'

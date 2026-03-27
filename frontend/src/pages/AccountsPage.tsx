@@ -7,6 +7,8 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
 import { StarRating } from '../components/ui/StarRating';
 import { ScrollToTop } from '../components/ui/ScrollToTop';
+import { Pagination } from '../components/ui/Pagination';
+import { usePagination } from '../hooks/usePagination';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAccounts, useBuyAccount, useCreateSession } from '../hooks/useQueries';
@@ -28,8 +30,7 @@ const AccountsPage: React.FC = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [compareItems, setCompareItems] = useState<Array<{ account: Account; addedAt: number }>>([]);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 12;
+  const { currentPage, setCurrentPage, setTotalPages, goNext, goPrev, goFirst, goLast, canGoNext, canGoPrev } = usePagination();
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [quickViewAccount, setQuickViewAccount] = useState<Account | null>(null);
   const quickViewTriggerRef = useRef<HTMLElement | null>(null);
@@ -111,11 +112,13 @@ const AccountsPage: React.FC = () => {
     return () => document.removeEventListener('keydown', handler);
   }, [quickViewAccount]);
 
-  const { data, isLoading, isError, refetch, dataUpdatedAt } = useAccounts({ page: currentPage, size: PAGE_SIZE, keyword: debouncedKeyword, sort });
+  const { data, isLoading, isError, refetch, dataUpdatedAt } = useAccounts({ page: currentPage, size: 12, keyword: debouncedKeyword, sort });
   const totalPages = data?.data?.data?.pages ?? 1;
   const totalRecords = data?.data?.data?.total ?? 0;
   const { items: recentItems } = useRecentStore();
   const recentAccounts = recentItems.slice(0, 6).map((item) => item.account); // Show max 6 recent
+
+  React.useEffect(() => { setTotalPages(data?.data?.data?.pages ?? 1); }, [data?.data?.data?.pages, setTotalPages]);
 
   const allAccounts: Account[] = data?.data?.data?.records || [];
 
@@ -758,66 +761,17 @@ const AccountsPage: React.FC = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <button
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage <= 1}
-            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
-          >
-            首页
-          </button>
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage <= 1}
-            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
-          >
-            上一页
-          </button>
-
-          {/* Page numbers */}
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let page: number;
-            if (totalPages <= 5) {
-              page = i + 1;
-            } else if (currentPage <= 3) {
-              page = i + 1;
-            } else if (currentPage >= totalPages - 2) {
-              page = totalPages - 4 + i;
-            } else {
-              page = currentPage - 2 + i;
-            }
-            return (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                  currentPage === page
-                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                    : 'bg-dark-lighter text-slate-400 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                {page}
-              </button>
-            );
-          })}
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage >= totalPages}
-            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
-          >
-            下一页
-          </button>
-          <button
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage >= totalPages}
-            className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
-          >
-            末页
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+        onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
+        onFirst={() => setCurrentPage(1)}
+        onLast={() => setCurrentPage(totalPages)}
+        canGoNext={currentPage < totalPages}
+        canGoPrev={currentPage > 1}
+      />
 
       {/* Compare floating bar */}
       <CompareBar
