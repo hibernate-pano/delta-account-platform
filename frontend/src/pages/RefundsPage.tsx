@@ -597,9 +597,20 @@ const RefundsPage: React.FC = () => {
               {refundableOrders.map((order: any) => (
                 <div key={order.id} className="py-4 px-2">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Package className="w-6 h-6 text-primary" />
-                    </div>
+                    <div className="w-12 h-12 bg-primary/20 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {order.account?.images?.[0] ? (
+                      <img
+                        src={order.account.images[0]}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <Gamepad2 className="w-6 h-6 text-primary" />
+                    )}
+                  </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{order.account?.title || `订单 #${order.orderNo.slice(-6)}`}</p>
                       <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
@@ -653,8 +664,12 @@ const RefundsPage: React.FC = () => {
                 <div className="p-3 bg-dark rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-primary" />
+                      <div className="w-10 h-10 bg-primary/20 rounded-lg overflow-hidden flex items-center justify-center">
+                        {selectedOrder.account?.images?.[0] ? (
+                          <img src={selectedOrder.account.images[0]} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        ) : (
+                          <Package className="w-5 h-5 text-primary" />
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-medium">{selectedOrder.account?.title || `订单 #${selectedOrder.orderNo.slice(-6)}`}</p>
