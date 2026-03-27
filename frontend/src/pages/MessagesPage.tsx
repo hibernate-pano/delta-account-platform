@@ -451,6 +451,22 @@ const MessagesPage: React.FC = () => {
             )}
           </div>
 
+          {/* Quick reply templates */}
+          {sessionId && (
+            <div className="flex gap-2 px-3 pt-2 overflow-x-auto scrollbar-hide">
+              {['账号还在吗？', '可以便宜一点吗？', '什么时候交易？', '加我私聊'].map((tpl) => (
+                <button
+                  key={tpl}
+                  type="button"
+                  onClick={() => { setNewMessage(tpl); inputRef.current?.focus(); }}
+                  className="flex-shrink-0 px-3 py-1.5 text-xs rounded-full bg-dark-lighter text-slate-400 border border-dark-border hover:border-primary/50 hover:text-white transition-colors whitespace-nowrap"
+                >
+                  {tpl}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Input bar */}
           <div className="border-t border-dark-border p-3 bg-dark/50">
             <form onSubmit={handleSendMessage} className="flex gap-2">

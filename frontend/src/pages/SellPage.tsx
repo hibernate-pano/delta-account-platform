@@ -12,6 +12,7 @@ import {
 
 const PLATFORM_FEE_RATE = 0.05; // 5%
 const TAX_RATE = 0.01; // 1%
+const SELL_DRAFT_KEY = 'delta_sell_draft';
 
 // Rank → base price mapping (yuan)
 const RANK_BASE_PRICES: Record<string, number> = {
@@ -117,6 +118,27 @@ const SellPage: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDirty]);
 
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(SELL_DRAFT_KEY);
+    if (!saved) return;
+    try {
+      const { formData: savedForm, images: savedImages } = JSON.parse(saved);
+      if (savedForm) setFormData((f) => ({ ...f, ...savedForm }));
+      if (savedImages?.length) setImages(savedImages);
+    } catch { /* ignore corrupt draft */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Autosave draft to localStorage on changes (debounced 800ms)
+  useEffect(() => {
+    if (!isDirty) return;
+    const timer = setTimeout(() => {
+      localStorage.setItem(SELL_DRAFT_KEY, JSON.stringify({ formData, images }));
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [formData, images, isDirty]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     files.forEach((file) => {
@@ -168,6 +190,7 @@ const SellPage: React.FC = () => {
         images,
       });
       showToast('发布成功！账号正在审核中', 'success');
+      localStorage.removeItem(SELL_DRAFT_KEY);
       setIsDirty(false);
       setTimeout(() => navigate('/accounts'), 2000);
     } catch (err: any) {
