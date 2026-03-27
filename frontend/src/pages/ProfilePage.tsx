@@ -836,11 +836,47 @@ const ProfilePage: React.FC = () => {
                   <p className="text-slate-600 text-sm">完成交易后买家会留下评价</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} replyMutation={replyMutation} showToast={showToast} />
-                  ))}
-                </div>
+                <>
+                  {/* Rating distribution */}
+                  <div className="card mb-4 p-4">
+                    <div className="flex items-center gap-1 mb-3">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <span className="font-bold text-white">
+                        {(
+                          reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length
+                        ).toFixed(1)}
+                      </span>
+                      <span className="text-slate-500 text-sm">/ 5</span>
+                      <span className="text-slate-600 text-xs ml-2">({reviews.length} 条评价)</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {[5, 4, 3, 2, 1].map((star) => {
+                        const count = reviews.filter((r: any) => r.rating === star).length;
+                        const pct = reviews.length > 0 ? (count / reviews.length * 100) : 0;
+                        return (
+                          <div key={star} className="flex items-center gap-2 text-xs">
+                            <div className="flex items-center gap-0.5 w-8">
+                              <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                              <span className="text-slate-400">{star}</span>
+                            </div>
+                            <div className="flex-1 h-2 bg-dark rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-yellow-400 rounded-full transition-all"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="text-slate-600 w-5 text-right">{count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {reviews.map((review) => (
+                      <ReviewCard key={review.id} review={review} replyMutation={replyMutation} showToast={showToast} />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}

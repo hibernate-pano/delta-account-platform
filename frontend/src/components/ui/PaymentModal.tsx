@@ -133,33 +133,46 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           {/* Payment Methods */}
           <div className="space-y-3 mb-5">
             <p className="text-sm text-slate-400 mb-2">选择支付方式</p>
-            {PAYMENT_METHODS.map((method) => (
-              <button
-                key={method.id}
-                onClick={() => setSelectedMethod(method.id)}
-                disabled={method.id !== 'BALANCE'}
-                className={`w-full p-4 rounded-xl border-2 flex items-center gap-4 transition-all ${
-                  selectedMethod === method.id
-                    ? 'border-primary bg-primary/10'
-                    : 'border-dark-border hover:border-slate-600'
-                } ${method.id !== 'BALANCE' ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  selectedMethod === method.id ? 'bg-primary' : 'bg-dark-lighter'
-                }`}>
-                  <method.icon className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="text-white font-medium">{method.name}</p>
-                  <p className="text-xs text-slate-400">{method.desc}</p>
-                </div>
-                {selectedMethod === method.id && (
-                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white" />
+            {PAYMENT_METHODS.map((method) => {
+              const isDisabled = method.id !== 'BALANCE';
+              const isSelected = selectedMethod === method.id;
+              return (
+                <button
+                  key={method.id}
+                  onClick={() => !isDisabled && setSelectedMethod(method.id)}
+                  disabled={isDisabled}
+                  className={`w-full p-4 rounded-xl border-2 flex items-center gap-4 transition-all ${
+                    isSelected
+                      ? 'border-primary bg-primary/10'
+                      : 'border-dark-border hover:border-slate-600'
+                  } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    isSelected ? 'bg-primary' : 'bg-dark-lighter'
+                  }`}>
+                    <method.icon className="w-5 h-5 text-white" />
                   </div>
-                )}
-              </button>
-            ))}
+                  <div className="flex-1 text-left">
+                    <p className="text-white font-medium flex items-center gap-2">
+                      {method.name}
+                      {isDisabled && (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-500/30 text-slate-400 rounded">
+                          即将上线
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {isDisabled ? '暂不可用' : method.desc}
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Pay Button */}
