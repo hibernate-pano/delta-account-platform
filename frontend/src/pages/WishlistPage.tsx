@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlistStore } from '../store/wishlist';
 import { useAuthStore } from '../store/auth';
@@ -8,7 +8,8 @@ import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
-  ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye
+  ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye,
+  Bell, X
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
@@ -35,6 +36,17 @@ const WishlistPage: React.FC = () => {
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [filterVerified, setFilterVerified] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState<number | null>(null);
+  const [alertPrice, setAlertPrice] = useState('');
+  const [priceAlerts, setPriceAlerts] = useState<Record<number, number>>(() => {
+    try { return JSON.parse(localStorage.getItem('delta_price_alerts') || '{}'); }
+    catch { return {}; }
+  });
+
+  // Persist price alerts
+  useEffect(() => {
+    localStorage.setItem('delta_price_alerts', JSON.stringify(priceAlerts));
+  }, [priceAlerts]);
 
   const sortedItems = useMemo(() => {
     return [...wishlistItems]
@@ -203,8 +215,19 @@ const WishlistPage: React.FC = () => {
               {sortedItems.map((account) => (
                 <div key={account.id} className="card group relative">
                   {/* Wishlist btn */}
-                  <div className="absolute top-2 right-2 z-10">
+                  <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
                     <WishlistButton account={account} size="sm" />
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAlertModal(account.id); setAlertPrice(account.price.toString()); }}
+                      className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                        priceAlerts[account.id]
+                          ? 'bg-yellow-500/90 text-black hover:bg-yellow-400'
+                          : 'bg-black/50 hover:bg-yellow-500/90 hover:text-black text-white/70'
+                      }`}
+                      title={priceAlerts[account.id] ? `降价提醒 ¥${priceAlerts[account.id]}` : '设置降价提醒'}
+                    >
+                      <Bell className="w-3.5 h-3.5" />
+                    </button>
                   </div>
 
                   <Link to={`/accounts/${account.id}`} className="block">
@@ -435,6 +458,65 @@ const WishlistPage: React.FC = () => {
         </>
       )}
     </div>
+
+    {/* Price alert modal */}
+    {showAlertModal !== null && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowAlertModal(null)}>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        <div className="relative card max-w-sm w-full animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Bell className="w-5 h-5 text-yellow-400" />
+              设置降价提醒
+            </h3>
+            <button onClick={() => setShowAlertModal(null)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-dark-lighter text-slate-500 hover:text-white transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-sm text-slate-400 mb-4">当价格低于设置金额时，我们将通知您</p>
+          <div className="flex items-center gap-2 mb-4 bg-dark rounded-xl p-3">
+            <span className="text-2xl text-slate-500">¥</span>
+            <input
+              type="number"
+              value={alertPrice}
+              onChange={(e) => setAlertPrice(e.target.value)}
+              className="flex-1 bg-transparent text-2xl font-bold outline-none placeholder-slate-600"
+              placeholder="输入目标价格"
+              min="1"
+              autoFocus
+            />
+          </div>
+          <div className="flex gap-2">
+            {priceAlerts[showAlertModal] && (
+              <button
+                onClick={() => {
+                  const next = { ...priceAlerts };
+                  delete next[showAlertModal];
+                  setPriceAlerts(next);
+                  setShowAlertModal(null);
+                }}
+                className="btn-secondary flex-1"
+              >
+                取消提醒
+              </button>
+            )}
+            <button
+              onClick={() => {
+                const price = parseFloat(alertPrice);
+                if (price > 0) {
+                  setPriceAlerts({ ...priceAlerts, [showAlertModal]: price });
+                  showToast(`已设置 ¥${price} 的降价提醒`, 'success');
+                }
+                setShowAlertModal(null);
+              }}
+              className="btn-primary flex-1"
+            >
+              确认设置
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 };
 

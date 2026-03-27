@@ -658,6 +658,33 @@ const RefundsPage: React.FC = () => {
                     </button>
                   )}
                 </div>
+                {/* Visual slider */}
+                {selectedOrder && (
+                  <div className="mb-3">
+                    <input
+                      type="range"
+                      min={0}
+                      max={selectedOrder.amount || 100}
+                      step={0.01}
+                      value={refundAmount || 0}
+                      onChange={(e) => { setRefundAmount(e.target.value); setAmountError(''); }}
+                      className="w-full h-1.5 bg-dark-lighter rounded-full appearance-none cursor-pointer accent-primary"
+                      style={{
+                        background: selectedOrder.amount > 0
+                          ? `linear-gradient(to right, rgb(99,102,241) 0%, rgb(99,102,241) ${(parseFloat(refundAmount || '0') / selectedOrder.amount) * 100}%, #1e293b ${(parseFloat(refundAmount || '0') / selectedOrder.amount) * 100}%, #1e293b 100%)`
+                          : undefined,
+                      }}
+                    />
+                    <div className="flex justify-between mt-1 text-[10px] text-slate-500">
+                      <span>¥0</span>
+                      <span className={`font-medium ${parseFloat(refundAmount || '0') === selectedOrder.amount ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {selectedOrder.amount > 0 ? ((parseFloat(refundAmount || '0') / selectedOrder.amount) * 100).toFixed(0) : 0}%
+                        {parseFloat(refundAmount || '0') === selectedOrder.amount ? ' 全额' : ''}
+                      </span>
+                      <span>¥{selectedOrder.amount?.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">¥</span>
                   <input
