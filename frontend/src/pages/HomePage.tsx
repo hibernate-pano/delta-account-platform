@@ -12,7 +12,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
-  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History, X,
+  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History, X, User,
 } from 'lucide-react';
 
 // Featured completed orders as testimonials
@@ -22,9 +22,9 @@ const FeaturedOrders: React.FC = () => {
   const completedOrders = orders.filter((o: any) => o.status === 'COMPLETED').slice(0, 3);
 
   const sampleTestimonials = [
-    { name: '阿杰', role: '买家', avatar: '👤', game: '王者荣耀', amount: '¥1,299', content: '第一次在这买账号，整体流程非常顺畅。卖家响应很快，账号信息和描述完全一致，十分钟就完成了交易！', highlight: '交易超快' },
-    { name: '星星', role: '卖家', avatar: '⭐', game: '和平精英', amount: '¥888', content: '闲置账号放了一个月都没卖出去，在 DeltaHub 上架第二天就成交了。提现秒到账，以后有账号都来这里卖。', highlight: '提现秒到' },
-    { name: '小李', role: '买家', avatar: '🎮', game: '英雄联盟', amount: '¥88/天', content: '租号体验超出预期！账号很干净，段位真实，价格比市面便宜很多，有押金保障很放心。', highlight: '价格实惠' },
+    { name: '阿杰', role: '买家', avatar: User, game: '王者荣耀', amount: '¥1,299', content: '第一次在这买账号，整体流程非常顺畅。卖家响应很快，账号信息和描述完全一致，十分钟就完成了交易！', highlight: '交易超快' },
+    { name: '星星', role: '卖家', avatar: Star, game: '和平精英', amount: '¥888', content: '闲置账号放了一个月都没卖出去，在 DeltaHub 上架第二天就成交了。提现秒到账，以后有账号都来这里卖。', highlight: '提现秒到' },
+    { name: '小李', role: '买家', avatar: Gamepad2, game: '英雄联盟', amount: '¥88/天', content: '租号体验超出预期！账号很干净，段位真实，价格比市面便宜很多，有押金保障很放心。', highlight: '价格实惠' },
   ];
 
   const displayOrders = completedOrders.length >= 2 ? completedOrders : [];
@@ -75,8 +75,12 @@ const FeaturedOrders: React.FC = () => {
           </div>
           {/* User */}
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-dark-border">
-            <div className="w-8 h-8 bg-dark rounded-full flex items-center justify-center text-sm">
-              {order.seller?.nickname ? order.seller.nickname[0] : '👤'}
+            <div className="w-8 h-8 bg-dark rounded-full flex items-center justify-center">
+              {order.seller?.nickname ? (
+                <span className="text-sm text-slate-400">{order.seller.nickname[0]}</span>
+              ) : (
+                <User className="w-4 h-4 text-slate-500" />
+              )}
             </div>
             <div>
               <p className="text-sm font-medium">{order.seller?.nickname || '平台用户'}</p>
@@ -107,7 +111,7 @@ const FeaturedOrders: React.FC = () => {
             <ThumbsUp className="w-3 h-3" /> {t.highlight}
           </div>
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-dark-border">
-            <div className="w-8 h-8 bg-dark rounded-full flex items-center justify-center text-sm">{t.avatar}</div>
+            <div className="w-8 h-8 bg-dark rounded-full flex items-center justify-center">{React.createElement(t.avatar, { className: 'w-4 h-4 text-slate-400' })}</div>
             <div>
               <p className="text-sm font-medium">{t.name}</p>
               <p className="text-xs text-slate-600">已完成交易</p>
@@ -318,8 +322,9 @@ const HomePage: React.FC = () => {
                     type="button"
                     onClick={() => setKeyword('')}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    aria-label="清除搜索"
                   >
-                    ×
+                    <X className="w-5 h-5" />
                   </button>
                 )}
               </div>
