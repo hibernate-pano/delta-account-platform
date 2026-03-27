@@ -576,7 +576,10 @@ const AccountsPage: React.FC = () => {
                   </span>
                 )}
                 {account.rentalPrice && (
-                  <span className="text-xs text-slate-500">租 ¥{account.rentalPrice}/时</span>
+                  <span className="text-xs text-slate-500">
+                    租 ¥{account.rentalPrice}/时
+                    {account.deposit != null && account.deposit > 0 && <span className="text-slate-600">(+¥{account.deposit}押金)</span>}
+                  </span>
                 )}
               </div>
               {(account.sellerNickname || account.sellerUsername) && (
@@ -838,6 +841,9 @@ const AccountsPage: React.FC = () => {
                     <div className="text-right">
                       <p className="text-xs text-slate-500 mb-1">时租价</p>
                       <p className="text-xl font-semibold text-purple-400">¥{quickViewAccount.rentalPrice}/时</p>
+                      {quickViewAccount.deposit != null && quickViewAccount.deposit > 0 && (
+                        <p className="text-[10px] text-slate-500 mt-0.5">押金 ¥{quickViewAccount.deposit}</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -896,11 +902,25 @@ const AccountsPage: React.FC = () => {
               {/* Actions */}
               <div className="flex gap-3">
                 <button
-                  onClick={() => { if (!token) { navigate('/login'); return; } buyMutation.mutate(quickViewAccount.id); setQuickViewAccount(null); setTimeout(() => navigate('/orders'), 1000); showToast('购买成功！正在跳转...', 'success'); }}
+                  onClick={async () => {
+                    if (!token) { navigate('/login'); return; }
+                    setQuickViewAccount(null);
+                    try {
+                      await buyMutation.mutateAsync(quickViewAccount.id);
+                      showToast('购买成功！正在跳转...', 'success');
+                      setTimeout(() => navigate('/orders'), 1000);
+                    } catch (err: any) {
+                      showToast(err.response?.data?.message || '购买失败', 'error');
+                    }
+                  }}
                   disabled={buyMutation.isPending || quickViewAccount.status !== 'ON_SALE'}
                   className="btn-primary flex-1 !py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <ShoppingCart className="w-4 h-4" />
+                  {buyMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ShoppingCart className="w-4 h-4" />
+                  )}
                   立即购买
                 </button>
                 <button
