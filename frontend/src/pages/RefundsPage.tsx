@@ -657,14 +657,34 @@ const RefundsPage: React.FC = () => {
             <form onSubmit={handleApplyRefund} className="space-y-4">
               {selectedOrder && (
                 <div className="p-3 bg-dark rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-                      <Package className="w-5 h-5 text-primary" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                        <Package className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{selectedOrder.account?.title || `订单 #${selectedOrder.orderNo.slice(-6)}`}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${selectedOrder.type === 'BUY' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                            {selectedOrder.type === 'BUY' ? '购买' : '租赁'}
+                          </span>
+                          <span className="text-[11px] text-slate-500">订单金额 ¥{selectedOrder.amount?.toFixed(2)}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{selectedOrder.account?.title || `订单 #${selectedOrder.orderNo.slice(-6)}`}</p>
-                      <p className="text-xs text-slate-500">订单金额 ¥{selectedOrder.amount?.toFixed(2)}</p>
-                    </div>
+                    {selectedOrder.status && (
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                        selectedOrder.status === 'PAID' ? 'bg-green-500/20 text-green-400' :
+                        selectedOrder.status === 'PROCESSING' ? 'bg-yellow-500/20 text-yellow-400' :
+                        selectedOrder.status === 'COMPLETED' ? 'bg-slate-500/20 text-slate-400' :
+                        'bg-dark-lighter text-slate-500'
+                      }`}>
+                        {selectedOrder.status === 'PAID' ? '已支付' :
+                         selectedOrder.status === 'PROCESSING' ? '处理中' :
+                         selectedOrder.status === 'COMPLETED' ? '已完成' :
+                         selectedOrder.status}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}

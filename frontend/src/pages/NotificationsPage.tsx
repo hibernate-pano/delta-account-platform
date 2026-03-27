@@ -323,14 +323,18 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    selectedIds.forEach((id) => {
-      setDeletedIds((prev) => new Set([...prev, id]));
-      deleteMutation.mutate(id);
-    });
-    showToast(`${selectedIds.size} 条通知已删除`, 'info');
+    const ids = [...selectedIds];
+    ids.forEach((id) => setDeletedIds((prev) => new Set([...prev, id])));
     setSelectedIds(new Set());
+    const results = await Promise.allSettled(ids.map((id) => deleteMutation.mutateAsync(id)));
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    if (failed === 0) {
+      showToast(`已删除 ${ids.length} 条通知`, 'success');
+    } else {
+      showToast(`删除了 ${ids.length - failed} 条，${failed} 条失败`, 'error');
+    }
   };
 
   // Keyboard dismiss for detail modal
