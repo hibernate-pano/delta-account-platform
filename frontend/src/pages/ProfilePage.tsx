@@ -319,7 +319,7 @@ const ProfilePage: React.FC = () => {
                   onClick={() => setShowEditModal(true)}
                   className="flex items-center gap-1.5 px-2.5 py-1.5 bg-dark-lighter hover:bg-dark-lighter/80 border border-dark-border hover:border-primary/40 rounded-full text-xs text-slate-400 hover:text-primary transition-all"
                 >
-                  <span><field.icon className="w-3.5 h-3.5" /></span>
+                  <span>{React.createElement(field.icon, { className: 'w-3.5 h-3.5' })}</span>
                   <span>{field.label}</span>
                 </button>
               ))}
@@ -490,9 +490,9 @@ const ProfilePage: React.FC = () => {
                           }`}
                         >
                           {account.status === 'ON_SALE'
-                            ? '🔥 出售中'
+                            ? <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-orange-400" /> 出售中</span>
                             : account.status === 'SOLD'
-                            ? '✓ 已出售'
+                            ? <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> 已出售</span>
                             : account.status}
                         </span>
                       </div>
