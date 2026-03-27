@@ -142,8 +142,16 @@ const MessagesPage: React.FC = () => {
       <div
         key={session.id}
         onClick={() => navigate(`/messages/${session.id}`)}
-        className="py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 transition-colors active:bg-dark-lighter"
+        className={`py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 transition-colors active:bg-dark-lighter relative ${
+          session.unreadCount ? 'bg-primary/5' : ''
+        }`}
       >
+        {/* Unread left border */}
+        {session.unreadCount ? (
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r-full" />
+        ) : (
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent" />
+        )}
         <div className="relative flex-shrink-0">
           {session.otherUser?.avatar ? (
             <img src={session.otherUser.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
@@ -158,7 +166,7 @@ const MessagesPage: React.FC = () => {
             </span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pl-1">
           <div className="flex items-center justify-between mb-1">
             <p className={`font-medium truncate text-sm ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
               {session.otherUser?.nickname || session.otherUser?.username || '用户'}
@@ -178,7 +186,7 @@ const MessagesPage: React.FC = () => {
               账号: {session.accountTitle}
             </p>
           )}
-          <p className={`text-xs truncate ${session.unreadCount ? 'text-slate-300' : 'text-slate-500'}`}>
+          <p className={`text-xs truncate ${session.unreadCount ? 'text-slate-300 font-medium' : 'text-slate-500'}`}>
             {session.lastMessage || '暂无消息'}
           </p>
         </div>
@@ -545,7 +553,12 @@ const MessagesPage: React.FC = () => {
 
           {/* Quick reply templates */}
           {sessionId && (
-            <div className="flex gap-2 px-3 pt-2 overflow-x-auto scrollbar-hide">
+            <div className="px-3 pt-2">
+              <div className="flex items-center gap-1.5 mb-2">
+                <MessageSquare className="w-3 h-3 text-slate-600" />
+                <span className="text-[10px] text-slate-600 font-medium">快捷回复</span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
               {['账号还在吗？', '可以便宜一点吗？', '什么时候交易？', '加我私聊'].map((tpl) => (
                 <button
                   key={tpl}
@@ -676,8 +689,8 @@ const MessagesPage: React.FC = () => {
             ))}
           </div>
         ) : sessions.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-20 animate-fade-in">
+            <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-5 animate-float">
               <svg className="w-12 h-12 text-slate-600" viewBox="0 0 48 48" fill="none">
                 <rect x="4" y="8" width="32" height="28" rx="4" stroke="currentColor" strokeWidth="2"/>
                 <path d="M4 16L20 28L36 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -688,11 +701,17 @@ const MessagesPage: React.FC = () => {
                 <path d="M28 8h12M28 11h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </div>
-            <h3 className="text-lg font-medium mb-2 text-slate-400">暂无会话</h3>
-            <p className="text-slate-600 text-sm mb-6">浏览账号并联系卖家开始对话</p>
-            <button onClick={() => navigate('/accounts')} className="btn-primary">
-              去逛逛
-            </button>
+            <h3 className="text-lg font-bold mb-2 text-slate-400">暂无会话</h3>
+            <p className="text-slate-600 text-sm mb-6">浏览感兴趣的账号，与卖家直接沟通</p>
+            <div className="flex justify-center gap-3">
+              <button onClick={() => navigate('/accounts')} className="btn-primary flex items-center gap-2">
+                <Gamepad2 className="w-4 h-4" />
+                浏览账号
+              </button>
+              <Link to="/faq" className="btn-secondary flex items-center gap-2">
+                查看帮助
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="divide-y divide-dark-border">
