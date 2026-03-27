@@ -82,6 +82,7 @@ const SellPage: React.FC = () => {
 
   const [step, setStep] = useState(1);
   const [slideDir, setSlideDir] = useState<'left' | 'right'>('left');
+  const [navigatingStep, setNavigatingStep] = useState(false);
   const [gameType, setGameType] = useState('王者荣耀');
 
   // Draft restoration dialog state
@@ -201,7 +202,10 @@ const SellPage: React.FC = () => {
   };
 
   const handleNextToStep2 = () => {
+    if (navigatingStep) return;
+    setNavigatingStep(true);
     if (validateStep1()) handleNext(2);
+    setTimeout(() => setNavigatingStep(false), 200);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -611,7 +615,7 @@ const SellPage: React.FC = () => {
               </div>
             </div>
 
-            <button type="button" onClick={handleNextToStep2} className="btn-primary w-full py-4 flex items-center justify-center gap-2">
+            <button type="button" onClick={handleNextToStep2} disabled={navigatingStep} className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50">
               下一步 <ArrowRight className="w-5 h-5" />
             </button>
           </div>
@@ -824,18 +828,23 @@ const SellPage: React.FC = () => {
               <button type="button" onClick={() => handleBack(1)} className="btn-secondary flex-1 py-4 flex items-center justify-center gap-2">
                 <ArrowLeft className="w-5 h-5" /> 返回
               </button>
-              <button type="button" onClick={() => {
+              <button type="button" disabled={navigatingStep} onClick={() => {
+                if (navigatingStep) return;
+                setNavigatingStep(true);
                 if (images.length === 0) {
                   showToast('请至少上传1张图片', 'warning');
+                  setNavigatingStep(false);
                   return;
                 }
                 if (formData.description.trim().length < 10) {
                   showToast('账号描述至少需要10个字，方便买家了解商品详情', 'warning');
                   document.getElementById('sell-description')?.focus();
+                  setNavigatingStep(false);
                   return;
                 }
                 handleNext(3);
-              }} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2">
+                setTimeout(() => setNavigatingStep(false), 200);
+              }} className="btn-primary flex-1 py-4 flex items-center justify-center gap-2 disabled:opacity-50">
                 下一步 <ArrowRight className="w-5 h-5" />
               </button>
             </div>

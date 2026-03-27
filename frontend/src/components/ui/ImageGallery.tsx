@@ -22,10 +22,12 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
   const [galleryFocused, setGalleryFocused] = useState(false);
   const [mainImgLoaded, setMainImgLoaded] = useState(false);
   const [lightboxImgLoaded, setLightboxImgLoaded] = useState(false);
+  const [thumbLoaded, setThumbLoaded] = useState<Set<number>>(new Set());
 
   // Reset loaded state when image changes
   useEffect(() => { setMainImgLoaded(false); }, [currentIndex]);
   useEffect(() => { setLightboxImgLoaded(false); }, [lightboxIndex]);
+  useEffect(() => { setThumbLoaded(new Set()); }, [images.length]);
 
   // Keyboard navigation: ←/→ works in main gallery when hovered/focused, and in lightbox
   useEffect(() => {
@@ -218,7 +220,17 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
                   : 'opacity-50 hover:opacity-80'
               }`}
             >
-              <img src={img} alt="" className="w-full h-full object-cover" />
+              {!thumbLoaded.has(idx) && (
+                <div className="w-full h-full bg-dark-lighter animate-pulse" />
+              )}
+              <img
+                src={img}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{ opacity: thumbLoaded.has(idx) ? 1 : 0, transition: 'opacity 0.2s' }}
+                onLoad={() => setThumbLoaded((s) => new Set([...s, idx]))}
+                onError={() => setThumbLoaded((s) => new Set([...s, idx]))}
+              />
             </button>
           ))}
         </div>
