@@ -8,7 +8,7 @@ import { CompareBar, CompareModal } from '../components/ui/CompareBar';
 import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { useAccounts, useBuyAccount } from '../hooks/useQueries';
+import { useAccounts, useBuyAccount, useCreateSession } from '../hooks/useQueries';
 import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
 import { useAuthStore } from '../store/auth';
@@ -37,6 +37,7 @@ const AccountsPage: React.FC = () => {
   const { token } = useAuthStore();
   const { showToast } = useToast();
   const buyMutation = useBuyAccount();
+  const createSessionMutation = useCreateSession();
 
   const debouncedKeyword = useDebounce(keyword, 400);
 
@@ -931,11 +932,28 @@ const AccountsPage: React.FC = () => {
                   查看详情
                 </button>
                 <button
-                  onClick={() => { /* open chat - just show toast for now */ showToast('请先进入账号详情页联系卖家', 'info'); }}
-                  className="btn-secondary !py-3 !px-3"
+                  onClick={async () => {
+                    if (!quickViewAccount?.sellerId) { showToast('无法联系卖家', 'error'); return; }
+                    try {
+                      const { data } = await createSessionMutation.mutateAsync({
+                        accountId: quickViewAccount.id,
+                        sellerId: quickViewAccount.sellerId,
+                      });
+                      setQuickViewAccount(null);
+                      navigate(`/messages/${data.data.data.id}`);
+                    } catch {
+                      showToast('无法发起对话，请重试', 'error');
+                    }
+                  }}
+                  disabled={createSessionMutation.isPending || !quickViewAccount?.sellerId}
+                  className="btn-secondary !py-3 !px-3 disabled:opacity-40"
                   title="联系卖家"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  {createSessionMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MessageCircle className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>

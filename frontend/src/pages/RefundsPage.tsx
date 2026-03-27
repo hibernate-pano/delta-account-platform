@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -254,6 +254,8 @@ const RefundsPage: React.FC = () => {
   const { data: ordersData, isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useMyOrders();
   const applyMutation = useApplyRefund();
   const cancelMutation = useCancelRefund();
+  const [searchParams] = useSearchParams();
+  const preselectedOrderId = searchParams.get('orderId');
 
   const refunds: Refund[] = refundsData?.data?.data || [];
   const orders = ordersData?.data?.data?.records || [];
@@ -292,6 +294,14 @@ const RefundsPage: React.FC = () => {
     }
     setShowApplyModal(true);
   };
+
+  // Auto-open refund modal when navigated from OrdersPage with orderId param
+  useEffect(() => {
+    if (!preselectedOrderId || refundableOrders.length === 0) return;
+    const order = refundableOrders.find((o: any) => o.id === parseInt(preselectedOrderId));
+    if (order) handleOpenApply(order);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectedOrderId, refundableOrders.length]);
 
   const handleApplyRefund = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -580,7 +590,7 @@ const RefundsPage: React.FC = () => {
                 <CheckCircle className="w-10 h-10 text-green-500/50" />
               </div>
               <h3 className="text-lg font-medium mb-2 text-slate-400">没有可退款的订单</h3>
-              <p className="text-slate-600 text-sm mb-4">已完成或已取消的订单无法申请退款</p>
+              <p className="text-slate-600 text-sm mb-4">进行中或已完成的订单可申请退款</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/orders" className="btn-primary inline-flex items-center gap-2">
                   查看我的订单
@@ -622,12 +632,14 @@ const RefundsPage: React.FC = () => {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-lg font-bold">¥{order.amount.toFixed(2)}</p>
-                      <button
-                        onClick={() => handleOpenApply(order)}
-                        className="text-sm text-primary hover:text-primary-light transition-colors mt-1"
-                      >
-                        申请退款 →
-                      </button>
+                      {order.status !== 'REFUNDED' && (
+                        <button
+                          onClick={() => handleOpenApply(order)}
+                          className="text-sm text-primary hover:text-primary-light transition-colors mt-1"
+                        >
+                          申请退款 →
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
