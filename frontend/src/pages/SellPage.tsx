@@ -113,6 +113,7 @@ const SellPage: React.FC = () => {
   const [previewImg, setPreviewImg] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [publishedAccountId, setPublishedAccountId] = useState<number | null>(null);
 
   // Mark form as dirty when user edits anything
   useEffect(() => {
@@ -211,7 +212,7 @@ const SellPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createMutation.mutateAsync({
+      const res = await createMutation.mutateAsync({
         title: formData.title,
         gameType,
         gameRank: formData.gameRank,
@@ -222,10 +223,11 @@ const SellPage: React.FC = () => {
         description: formData.description,
         images,
       });
+      const newId = res?.data?.data?.id;
+      if (newId) setPublishedAccountId(newId);
       showToast('发布成功！账号正在审核中', 'success');
       localStorage.removeItem(SELL_DRAFT_KEY);
       setIsDirty(false);
-      setTimeout(() => navigate('/accounts'), 2000);
     } catch (err: any) {
       showToast(err.response?.data?.message || '发布失败', 'error');
     }
@@ -278,23 +280,37 @@ const SellPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Seller Guide */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1">发布账号</h1>
-        <p className="text-slate-500 text-sm">填写信息，快速将账号变现</p>
-      </div>
-
-      {/* Draft restoration confirmation */}
-      {draftToRestore && (
-        <div className="mb-6">
-          <ConfirmInline
-            message={`发现未完成的草稿「${draftToRestore.formData?.title || '未命名'}」，是否继续编辑？`}
-            onConfirm={confirmRestoreDraft}
-            onCancel={dismissDraft}
-            confirmLabel="继续编辑"
-          />
+      {/* Success Screen */}
+      {publishedAccountId ? (
+        <div className="card p-10 text-center animate-fade-in">
+          <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-green-400" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">发布成功！</h2>
+          <p className="text-slate-500 text-sm mb-6">您的账号正在审核中，预计 1-2 小时内完成</p>
+          <div className="flex gap-3 justify-center">
+            <button onClick={() => navigate(`/accounts/${publishedAccountId}`)} className="btn-primary flex items-center gap-2">
+              <Eye className="w-4 h-4" /> 查看账号
+            </button>
+            <button onClick={() => navigate('/accounts')} className="btn-secondary flex items-center gap-2">
+              <Gamepad2 className="w-4 h-4" /> 浏览市场
+            </button>
+          </div>
+          <p className="text-xs text-slate-600 mt-4">审核通过后，账号将自动上架销售</p>
         </div>
-      )}
+      ) : (
+
+        /* Draft restoration confirmation */
+        <>{draftToRestore && (
+          <div className="mb-6">
+            <ConfirmInline
+              message={`发现未完成的草稿「${draftToRestore.formData?.title || '未命名'}」，是否继续编辑？`}
+              onConfirm={confirmRestoreDraft}
+              onCancel={dismissDraft}
+              confirmLabel="继续编辑"
+            />
+          </div>
+        )}
 
       {/* Form completion progress indicator */}
       {step === 1 && (
@@ -1008,6 +1024,7 @@ const SellPage: React.FC = () => {
           </div>
         )}
       </form>
+      </div> {/* end ternary */}
     </div>
     <style>{`
       @keyframes compress-pulse {
