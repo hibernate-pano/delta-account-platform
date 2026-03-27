@@ -8,7 +8,7 @@ import { useToast } from '../components/ui/Toast';
 import { ImageGallery } from '../components/ui/ImageGallery';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { ReviewSkeleton } from '../components/ui/Skeleton';
-import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews } from '../hooks/useQueries';
+import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews, useWalletBalance } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
@@ -26,6 +26,8 @@ const AccountDetailPage: React.FC = () => {
 
   const accountId = id ? parseInt(id) : 0;
   const { data, isLoading, isError, refetch } = useAccount(accountId);
+  const { data: walletData } = useWalletBalance();
+  const userBalance = walletData?.data?.data ?? 0;
   const buyMutation = useBuyAccount();
   const rentMutation = useRentAccount();
   const createSessionMutation = useCreateSession();
@@ -680,6 +682,19 @@ const isOwner = user?.id === account?.sellerId;
               <div className="text-center py-3 text-slate-500">这是您发布的账号</div>
             ) : isOnSale ? (
               <>
+                {token && (
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span>我的余额</span>
+                    <div className="flex items-center gap-2">
+                      <span className={userBalance >= (account?.price ?? 0) ? 'text-green-400' : 'text-yellow-400'}>
+                        ¥{userBalance.toFixed(2)}
+                      </span>
+                      {userBalance < (account?.price ?? 0) && (
+                        <span className="text-[10px] text-red-400/80">余额不足，需 ¥{(account?.price ?? 0).toFixed(0)}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <button
                   onClick={handleBuy}
                   disabled={isPending}

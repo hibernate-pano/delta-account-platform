@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
 import { GridSkeleton } from '../components/ui/Skeleton';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
-import { useFavorites, useToggleFavorite } from '../hooks/useQueries';
+import { useFavorites, useToggleFavorite, queryKeys } from '../hooks/useQueries';
 import { Account } from '../types';
 
 const FavoritesPage: React.FC = () => {
   usePageTitle('我的收藏');
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, refetch } = useFavorites();
   const toggleMutation = useToggleFavorite();
   const [removingId, setRemovingId] = useState<number | null>(null);
@@ -18,17 +20,22 @@ const FavoritesPage: React.FC = () => {
 
   const accounts: Account[] = data?.data?.data || [];
 
-  const handleRemove = async (e: React.MouseEvent, accountId: number, title: string) => {
+  const handleRemove = async (e: React.MouseEvent, accountId: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setRemovingId(accountId);
+    const previousAccounts = accounts;
+    // Optimistic removal
+    queryClient.setQueryData(queryKeys.favorites.list, (old: any) => ({
+      ...old,
+      data: { ...old?.data, data: old?.data?.data?.filter((a: Account) => a.id !== accountId) },
+    }));
     try {
       await toggleMutation.mutateAsync(accountId);
-      showToast(`已取消收藏「${title}」`, 'success');
+      showToast('已取消收藏', 'success');
     } catch {
+      // Rollback
+      queryClient.setQueryData(queryKeys.favorites.list, previousAccounts);
       showToast('移除失败，请重试', 'error');
-    } finally {
-      setRemovingId(null);
     }
   };
 
@@ -171,7 +178,7 @@ const FavoritesPage: React.FC = () => {
                   </div>
                 )}
                 <button
-                  onClick={(e) => handleRemove(e, account.id, account.title)}
+                  onClick={(e) => handleRemove(e, account.id)}
                   disabled={removingId === account.id}
                   className="absolute top-2 right-2 w-7 h-7 bg-dark/80 hover:bg-red-500 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
                   title="取消收藏"
