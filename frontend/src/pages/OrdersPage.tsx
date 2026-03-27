@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
-import { TransactionSkeleton } from '../components/ui/Skeleton';
+import { OrderCardSkeleton } from '../components/ui/Skeleton';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -911,8 +911,8 @@ const OrdersPage: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">我的订单</h1>
-        <div className="card">
-          {[1, 2, 3].map(i => <TransactionSkeleton key={i} />)}
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => <OrderCardSkeleton key={i} />)}
         </div>
       </div>
     );

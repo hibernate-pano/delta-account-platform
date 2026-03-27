@@ -98,6 +98,24 @@ export const GridSkeleton: React.FC<{ count?: number }> = ({ count = 8 }) => (
   </div>
 );
 
+export const OrderCardSkeleton: React.FC = () => (
+  <div className="card overflow-hidden">
+    <div className="flex items-center gap-3 p-4">
+      <div className="w-14 h-14 bg-dark-lighter rounded-lg skeleton flex-shrink-0 relative">
+        <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full skeleton" />
+      </div>
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-4 w-40 rounded" />
+        <Skeleton className="h-3 w-24 rounded" />
+      </div>
+      <div className="text-right flex-shrink-0 space-y-2">
+        <Skeleton className="h-5 w-20 rounded" />
+        <Skeleton className="h-4 w-16 rounded" />
+      </div>
+    </div>
+  </div>
+);
+
 export const ListSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => (
   <div className="space-y-4">
     {Array.from({ length: count }).map((_, i) => (
