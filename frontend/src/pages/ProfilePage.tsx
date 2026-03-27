@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
 import { formatDateTime } from '../utils/format';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/auth';
-import { useWishlistStore } from '../store/wishlist';
-import { useToast } from '../components/ui/Toast';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { favoriteApi } from '../api';
 import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile, useSellerReviews, useReplyReview } from '../hooks/useQueries';
@@ -829,19 +826,7 @@ const ProfilePage: React.FC = () => {
           {activeTab === 'reviews' && (
             <div>
               {reviewsLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="card p-4 animate-pulse">
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-dark-lighter" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 bg-dark-lighter rounded w-1/4" />
-                          <div className="h-3 bg-dark-lighter rounded w-3/4" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ReviewSkeleton count={3} />
               ) : reviews.length === 0 ? (
                 <div className="card text-center py-16">
                   <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
