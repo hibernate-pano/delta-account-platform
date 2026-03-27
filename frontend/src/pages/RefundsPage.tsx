@@ -550,7 +550,12 @@ const RefundsPage: React.FC = () => {
       {showApplyModal && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => { setAmountError(''); setReasonError(''); setShowApplyModal(false); }}
+          onClick={() => {
+            if (applyMutation.isPending) return;
+            setAmountError('');
+            setReasonError('');
+            setShowApplyModal(false);
+          }}
         >
           <div className="card w-full max-w-lg animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">

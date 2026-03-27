@@ -224,17 +224,17 @@ const MessagesPage: React.FC = () => {
     e.preventDefault();
     if (!newMessage.trim() || !sessionId) return;
     const content = newMessage;
-    setNewMessage('');
 
-    // Optimistically add message
     try {
       await sendMessageMutation.mutateAsync({
         sessionId: parseInt(sessionId),
         content,
       });
+      setNewMessage(''); // only clear on success
       refetch();
     } catch {
       showToast('发送失败，请重试', 'error');
+      // keep input so user can retry
     }
   };
 
