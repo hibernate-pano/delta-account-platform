@@ -192,13 +192,23 @@ const isOwner = user?.id === account?.sellerId;
         <div>
           <h1 className="text-2xl font-bold mb-3">{account.title}</h1>
           {viewerCount > 0 && (
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-500/10 border border-slate-500/20 rounded-full">
-                <Eye className="w-3 h-3 text-slate-400" />
-                <span className="text-xs text-slate-400">
-                  <span className="font-medium text-slate-300">{viewerCount.toLocaleString()}</span> 次浏览
-                </span>
-              </div>
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {viewerCount > 0 && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-500/10 border border-slate-500/20 rounded-full">
+                  <Eye className="w-3 h-3 text-slate-400" />
+                  <span className="text-xs text-slate-400">
+                    <span className="font-medium text-slate-300">{viewerCount.toLocaleString()}</span> 次浏览
+                  </span>
+                </div>
+              )}
+              {account.orderCount != null && account.orderCount > 0 && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+                  <ShoppingCart className="w-3 h-3 text-green-400" />
+                  <span className="text-xs text-green-400">
+                    <span className="font-medium text-green-300">{account.orderCount}</span> 笔售出
+                  </span>
+                </div>
+              )}
             </div>
           )}
           <div className="flex flex-wrap gap-2 mb-6">
