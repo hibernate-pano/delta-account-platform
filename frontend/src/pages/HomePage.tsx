@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Account } from '../types';
@@ -7,7 +7,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { PullToRefresh } from '../components/ui/PullToRefresh';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
-import { useAccounts } from '../hooks/useQueries';
+import { useAccounts, useMyOrders } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
@@ -54,26 +54,50 @@ const AnimatedCounter: React.FC<{ end: number; suffix?: string; prefix?: string;
 // Floating transaction notification
 const TransactionToast: React.FC = () => {
   const [visible, setVisible] = useState(false);
-  const messages = [
-    { user: '小李', action: '购买', title: '满皮肤钻石账号', price: '¥1,299' },
-    { user: '阿杰', action: '租赁', title: '星耀段位账号', price: '¥8/时' },
-    { user: '星星', action: '购买', title: '传说皮肤账号', price: '¥2,599' },
-    { user: '老王', action: '购买', title: '王者低星账号', price: '¥888' },
-  ];
-  const [current, setCurrent] = useState(messages[0]);
+  const [current, setCurrent] = useState<{ user: string; action: string; title: string; price: string } | null>(null);
+
+  const { data: ordersData } = useMyOrders();
+  const realOrders: any[] = ordersData?.data?.data || [];
+
+  const recentReal = useMemo(() => {
+    const hourAgo = Date.now() - 3600000;
+    return realOrders
+      .filter((o) => o.status === 'COMPLETED' && new Date(o.createdAt).getTime() > hourAgo)
+      .slice(0, 5);
+  }, [realOrders]);
 
   useEffect(() => {
-    // Show first toast after 3s
+    const pool = recentReal.length > 0 ? recentReal : null;
+    const demoMessages = [
+      { user: '小李', action: '购买', title: '满皮肤钻石账号', price: '¥1,299' },
+      { user: '阿杰', action: '租赁', title: '星耀段位账号', price: '¥8/时' },
+      { user: '星星', action: '购买', title: '传说皮肤账号', price: '¥2,599' },
+      { user: '老王', action: '购买', title: '王者低星账号', price: '¥888' },
+    ];
+
+    const pick = () => {
+      if (pool) {
+        const o = pool[Math.floor(Math.random() * pool.length)];
+        return {
+          user: ['买家', '用户', '玩家'][Math.floor(Math.random() * 3)],
+          action: o.type === 'BUY' ? '购买' : '租赁',
+          title: o.account?.title || o.accountTitle || '某账号',
+          price: o.type === 'BUY' ? `¥${o.amount}` : `¥${o.amount}/时`,
+        };
+      }
+      return demoMessages[Math.floor(Math.random() * demoMessages.length)];
+    };
+
+    setCurrent(pick());
     const init = setTimeout(() => setVisible(true), 3000);
     const cycle = setInterval(() => {
       setVisible(false);
-      setTimeout(() => {
-        setCurrent(messages[Math.floor(Math.random() * messages.length)]);
-        setVisible(true);
-      }, 500);
+      setTimeout(() => { setCurrent(pick()); setVisible(true); }, 500);
     }, 6000);
     return () => { clearTimeout(init); clearInterval(cycle); };
-  }, []);
+  }, [recentReal]);
+
+  if (!current) return null;
 
   return (
     <div

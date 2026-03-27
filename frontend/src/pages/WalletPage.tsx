@@ -9,7 +9,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
   RefreshCw, CheckCircle, XCircle, Clock, ArrowRightLeft, ExternalLink, X,
-  ShoppingBag, ArrowUpRight, AlertCircle
+  ShoppingBag, ArrowUpRight, AlertCircle, Download
 } from 'lucide-react';
 
 interface Transaction {
@@ -649,6 +649,35 @@ const WalletPage: React.FC = () => {
               </div>
             ))}
           </div>
+          {filteredTransactions.length > 0 && (
+            <div className="px-4 pb-3">
+              <button
+                onClick={() => {
+                  const headers = ['时间', '类型', '金额', '状态', '备注'];
+                  const rows = filteredTransactions.map((tx) => [
+                    new Date(tx.createdAt).toLocaleString('zh-CN'),
+                    typeConfig[tx.type]?.label || tx.type,
+                    `${typeConfig[tx.type]?.positive ? '+' : '-'}¥${tx.amount.toFixed(2)}`,
+                    txStatusConfig[tx.status]?.label || tx.status,
+                    tx.description || '-',
+                  ]);
+                  const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+                  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `delta-wallet-${new Date().toISOString().slice(0, 10)}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  showToast('交易记录已导出', 'success');
+                }}
+                className="text-xs text-slate-600 hover:text-primary transition-colors flex items-center gap-1.5 mt-2"
+              >
+                <Download className="w-3.5 h-3.5" />
+                导出 CSV
+              </button>
+            </div>
+          )}
         )}
       </div>
 
