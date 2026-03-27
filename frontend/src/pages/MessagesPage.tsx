@@ -10,7 +10,7 @@ import { messageApi } from '../api';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy
 } from 'lucide-react';
 
 interface Session {
@@ -412,13 +412,22 @@ const MessagesPage: React.FC = () => {
                           <div className={`max-w-[72%] ${isMe ? 'ml-auto' : ''}`}>
                             {/* Bubble */}
                             <div
-                              className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                              className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm group/bubble ${
                                 isMe
                                   ? 'bg-gradient-to-br from-primary to-purple-600 text-white rounded-br-sm'
                                   : 'bg-dark-lighter text-white rounded-bl-sm'
                               }`}
                             >
                               <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                              {/* Copy button - visible on hover */}
+                              <button
+                                type="button"
+                                onClick={() => { navigator.clipboard.writeText(msg.content); showToast('已复制', 'success'); }}
+                                className="absolute top-1 right-1 w-6 h-6 rounded bg-black/30 text-white/60 flex items-center justify-center opacity-0 group-hover/bubble:opacity-100 transition-opacity hover:bg-black/50 hover:text-white"
+                                title="复制"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
                             </div>
                             {/* Time + status */}
                             <div className={`flex items-center gap-1 mt-1 text-[10px] text-slate-600 ${isMe ? 'justify-end' : ''}`}>

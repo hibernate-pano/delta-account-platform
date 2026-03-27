@@ -77,6 +77,21 @@ const SellPage: React.FC = () => {
   const [dragOver, setDragOver] = useState(false);
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Mark form as dirty when user edits anything
+  useEffect(() => {
+    const hasContent = formData.title || images.length > 0 || formData.price || formData.description;
+    setIsDirty(!!hasContent);
+  }, [formData, images]);
+
+  // beforeunload: warn on tab close / browser back with unsaved data
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -134,6 +149,7 @@ const SellPage: React.FC = () => {
         images,
       });
       showToast('发布成功！账号正在审核中', 'success');
+      setIsDirty(false);
       setTimeout(() => navigate('/accounts'), 2000);
     } catch (err: any) {
       showToast(err.response?.data?.message || '发布失败', 'error');

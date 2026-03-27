@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Account } from '../types';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
+import { PullToRefresh } from '../components/ui/PullToRefresh';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { useAccounts } from '../hooks/useQueries';
@@ -120,6 +122,7 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 const HomePage: React.FC = () => {
   usePageTitle();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
 
   const { data, isLoading, isError } = useAccounts({ size: 8 });
@@ -188,6 +191,7 @@ const HomePage: React.FC = () => {
   ];
 
   return (
+    <PullToRefresh onRefresh={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}>
     <div>
       <TransactionToast />
 
@@ -757,6 +761,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
     </div>
+    </PullToRefresh>
   );
 };
 
