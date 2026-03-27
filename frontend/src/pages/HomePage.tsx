@@ -95,11 +95,19 @@ const HomePage: React.FC = () => {
   const onSaleCount = accounts.filter(a => a.status === 'ON_SALE').length;
   const maxSkins = accounts.length > 0 ? Math.max(...accounts.map(a => a.skinCount || 0)) : 0;
 
-  // Dynamic price thresholds from actual price distribution (quartile-based)
+  // Dynamic price thresholds from actual price distribution (quartile-based, linear interpolation)
   const prices = accounts.map(a => a.price).filter(p => p > 0).sort((a, b) => a - b);
-  const q1 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.25)] : null;
-  const q2 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.5)] : null;
-  const q3 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.75)] : null;
+  const quantile = (arr: number[], q: number): number => {
+    const pos = (arr.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    return arr[base + 1] !== undefined
+      ? arr[base] + rest * (arr[base + 1] - arr[base])
+      : arr[base];
+  };
+  const q1 = prices.length >= 4 ? Math.round(quantile(prices, 0.25)) : null;
+  const q2 = prices.length >= 4 ? Math.round(quantile(prices, 0.5)) : null;
+  const q3 = prices.length >= 4 ? Math.round(quantile(prices, 0.75)) : null;
 
   const categories = useMemo(() => (() => {
     if (prices.length < 4 || q1 == null || q2 == null || q3 == null) {

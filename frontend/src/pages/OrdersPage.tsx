@@ -474,7 +474,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
     >
       {/* Main row — always visible */}
       <div
-        className="flex items-center gap-3 p-4 cursor-pointer"
+        className="flex items-center gap-3 p-4 cursor-pointer group"
         onClick={handleToggleExpand}
       >
         {/* Account thumbnail */}
