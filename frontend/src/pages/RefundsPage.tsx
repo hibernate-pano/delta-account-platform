@@ -248,7 +248,7 @@ const RefundsPage: React.FC = () => {
   const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState('');
 
-  const { data: refundsData, isLoading, isError, refetch } = useMyRefunds();
+  const { data: refundsData, isLoading, isError, refetch, isFetching } = useMyRefunds();
   const { data: ordersData, isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useMyOrders();
   const applyMutation = useApplyRefund();
   const cancelMutation = useCancelRefund();
@@ -454,7 +454,15 @@ const RefundsPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-dark-border">
+            <div className="divide-y divide-dark-border relative">
+              {/* Refetch shimmer overlay */}
+              {isFetching && !isLoading && (
+                <div className="absolute inset-x-0 top-0 z-10 pointer-events-none">
+                  <div className="h-1 bg-dark-lighter overflow-hidden">
+                    <div className="h-full bg-primary/30 animate-pulse" style={{ width: '60%' }} />
+                  </div>
+                </div>
+              )}
               {refunds.map((refund) => {
                 const config = statusConfig[refund.status] || statusConfig.PENDING;
                 const StatusIcon = config.icon;

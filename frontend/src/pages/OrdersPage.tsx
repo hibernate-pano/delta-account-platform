@@ -995,16 +995,17 @@ const OrdersPage: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         {[
           { label: '总订单', value: stats.total, icon: Package, color: 'text-white' },
           { label: '待支付', value: stats.pending, icon: CreditCard, color: 'text-yellow-400' },
           { label: '进行中', value: stats.processing, icon: Clock, color: 'text-blue-400' },
           { label: '已完成', value: stats.completed, icon: CheckCircle, color: 'text-green-400' },
+          { label: '总消费', value: stats.totalSpent > 0 ? `¥${stats.totalSpent.toFixed(0)}` : '—', icon: TrendingUp, color: 'text-purple-400', small: stats.totalSpent > 0 },
         ].map((stat, idx) => (
           <div key={idx} className="card p-4 text-center">
             <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
-            <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
+            <div className={`font-bold ${stat.color} ${stat.small ? 'text-lg' : 'text-xl'}`}>{stat.value}</div>
             <div className="text-xs text-slate-500">{stat.label}</div>
           </div>
         ))}
