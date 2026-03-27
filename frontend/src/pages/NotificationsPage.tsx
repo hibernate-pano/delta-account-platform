@@ -105,9 +105,10 @@ const NotificationItem: React.FC<{
   onDelete: (id: number) => void;
   onView: (n: Notification) => void;
   markReadPending: boolean;
+  markDeletePending: boolean;
   selectedIds: Set<number>;
   onToggleSelect: (id: number) => void;
-}> = ({ notification, onMarkRead, onDelete, onView, markReadPending, selectedIds, onToggleSelect }) => {
+}> = ({ notification, onMarkRead, onDelete, onView, markReadPending, markDeletePending, selectedIds, onToggleSelect }) => {
   const [swipeX, setSwipeX] = useState(0);
   const [swiping, setSwiping] = useState(false);
   const touchStartX = useRef(0);
@@ -254,10 +255,15 @@ const NotificationItem: React.FC<{
             )}
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(notification.id); setSwipeX(0); }}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
+              disabled={markDeletePending}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:cursor-wait"
               title="删除"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              {markDeletePending ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="w-3.5 h-3.5" />
+              )}
             </button>
           </div>
         </div>
@@ -276,6 +282,7 @@ const NotificationsPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
   const modalRef = useRef<HTMLDivElement>(null);
@@ -303,6 +310,7 @@ const NotificationsPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     // Optimistic update
     setDeletedIds((prev) => new Set([...prev, id]));
+    setDeletingIds((prev) => new Set([...prev, id]));
     try {
       await deleteMutation.mutateAsync(id);
       showToast('通知已删除', 'info');
@@ -310,6 +318,8 @@ const NotificationsPage: React.FC = () => {
       // Rollback
       setDeletedIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
       showToast('删除失败', 'error');
+    } finally {
+      setDeletingIds((prev) => { const s = new Set(prev); s.delete(id); return s; });
     }
   };
 
@@ -578,6 +588,7 @@ const NotificationsPage: React.FC = () => {
                       onDelete={handleDelete}
                       onView={setSelectedNotification}
                       markReadPending={pendingIds.has(notification.id)}
+                      markDeletePending={deletingIds.has(notification.id)}
                       selectedIds={selectedIds}
                       onToggleSelect={(id) => {
                         setSelectedIds((prev) => {
