@@ -82,6 +82,8 @@ const HomePage: React.FC = () => {
   const { data, isLoading, isError } = useAccounts({ size: 8 });
   const accounts: Account[] = data?.data?.data?.records || [];
   const { items: recentItems } = useRecentStore();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
 
   // Featured = verified accounts
   const featuredAccounts = accounts.filter((a) => a.verificationStatus === 'VERIFIED').slice(0, 4);
@@ -279,6 +281,24 @@ const HomePage: React.FC = () => {
       {/* Recently Viewed */}
       {(() => {
         const recentAccounts = recentItems.slice(0, 8).map((item: any) => item.account);
+        if (!hydrated) {
+          return (
+            <section className="py-10 bg-dark-darker border-y border-dark-border">
+              <div className="max-w-6xl mx-auto px-6">
+                <div className="h-5 w-24 skeleton rounded mb-5" />
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex-shrink-0 w-44 card p-3">
+                      <div className="aspect-video bg-dark rounded-lg mb-2.5 skeleton" />
+                      <div className="h-3 w-3/4 skeleton rounded mb-1.5" />
+                      <div className="h-4 w-1/3 skeleton rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        }
         if (recentAccounts.length === 0) return null;
         return (
           <section className="py-10 bg-dark-darker border-y border-dark-border">

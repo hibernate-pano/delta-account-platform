@@ -9,7 +9,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
-  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload
+  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload, Eye, ShoppingCart
 } from 'lucide-react';
 
 import { Review } from '../types';
@@ -464,6 +464,22 @@ const ProfilePage: React.FC = () => {
                             : account.status}
                         </span>
                       </div>
+                      {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0)) && (
+                        <div className="flex items-center gap-3 mt-1.5">
+                          {account.viewCount != null && (
+                            <span className="flex items-center gap-0.5 text-[11px] text-slate-500">
+                              <Eye className="w-3 h-3" />
+                              {account.viewCount} 次浏览
+                            </span>
+                          )}
+                          {account.orderCount != null && account.orderCount > 0 && (
+                            <span className="flex items-center gap-0.5 text-[11px] text-green-400/70">
+                              <ShoppingCart className="w-3 h-3" />
+                              {account.orderCount} 笔售出
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
