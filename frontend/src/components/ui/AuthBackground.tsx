@@ -1,4 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+
+const PARTICLE_COUNT = 20;
+// Pre-generate particle configs with stable pseudo-random values (no SSR/client mismatch)
+const PARTICLES = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+  const seed = (i + 1) * 9301 + 49297;
+  const rand = (n: number) => ((seed * 9301 + 49297) % 233280) / 233280 * n;
+  return {
+    size: rand(4) + 2,
+    x: rand(100),
+    y: rand(100),
+    delay: rand(8),
+    duration: rand(6) + 6,
+    opacity: rand(0.3) + 0.1,
+    color: ['#8b5cf6', '#3b82f6', '#ec4899', '#10b981'][i % 4],
+  };
+});
 
 const AuthBackground: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -41,30 +57,22 @@ const AuthBackground: React.FC = () => (
       }}
     />
 
-    {/* Floating particles */}
-    {Array.from({ length: 20 }).map((_, i) => {
-      const size = Math.random() * 4 + 2;
-      const x = Math.random() * 100;
-      const y = Math.random() * 100;
-      const delay = Math.random() * 8;
-      const duration = Math.random() * 6 + 6;
-      const opacity = Math.random() * 0.3 + 0.1;
-      return (
-        <div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            left: `${x}%`,
-            top: `${y}%`,
-            background: ['#8b5cf6', '#3b82f6', '#ec4899', '#10b981'][i % 4],
-            opacity,
-            animation: `particle-float ${duration}s ease-in-out ${delay}s infinite`,
-          }}
-        />
-      );
-    })}
+    {/* Floating particles — deterministic, no hydration mismatch */}
+    {PARTICLES.map((p, i) => (
+      <div
+        key={i}
+        className="absolute rounded-full"
+        style={{
+          width: `${p.size}px`,
+          height: `${p.size}px`,
+          left: `${p.x}%`,
+          top: `${p.y}%`,
+          background: p.color,
+          opacity: p.opacity,
+          animation: `particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+        }}
+      />
+    ))}
 
     {/* Grid overlay */}
     <div

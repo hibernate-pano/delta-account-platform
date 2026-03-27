@@ -10,6 +10,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews, useWalletBalance } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { formatDateTime } from '../utils/format';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
@@ -111,10 +112,7 @@ const AccountDetailPage: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
-};
+  const formatDate = formatDateTime;
 
 const isOwner = user?.id === account?.sellerId;
   const isOnSale = account?.status === 'ON_SALE';
