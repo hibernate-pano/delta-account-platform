@@ -159,7 +159,7 @@ const KeyboardShortcutsHelp: React.FC<{ onClose: () => void }> = ({ onClose }) =
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">键盘快捷键</h2>
             <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-dark-lighter flex items-center justify-center text-slate-500 hover:text-white transition-colors text-sm">
-              ✕
+              <X className="w-4 h-4" />
             </button>
           </div>
           <p className="text-xs text-slate-500 mt-1">按 <kbd className="px-1 py-0.5 bg-dark rounded text-slate-400 font-mono">?</kbd> 打开此面板</p>

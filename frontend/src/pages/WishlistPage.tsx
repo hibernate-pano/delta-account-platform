@@ -11,7 +11,7 @@ import { formatRelativeTime } from '../utils/format';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
   ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye,
-  Bell, X, RefreshCw, Sparkles
+  Bell, X, RefreshCw, Sparkles, CheckCircle
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
@@ -247,7 +247,7 @@ const WishlistPage: React.FC = () => {
                       {account.verificationStatus === 'VERIFIED' && (
                         <div className="absolute bottom-2 left-2">
                           <span className="px-2 py-0.5 bg-green-500/90 text-white text-xs rounded-full flex items-center gap-1">
-                            ✓ 已认证
+                            <CheckCircle className="w-3 h-3" /> 已认证
                           </span>
                         </div>
                       )}

@@ -121,7 +121,7 @@ const CompareRow: React.FC<{ label: string; values: string[]; isWinner?: boolean
           {val}
         </span>
         {isWinner?.[i] && (
-          <span className="ml-1 text-green-400 text-xs">✓ 最优</span>
+          <span className="ml-1 text-green-400 text-xs flex items-center gap-0.5"><Check className="w-3 h-3" /> 最优</span>
         )}
       </td>
     ))}

@@ -15,7 +15,7 @@ import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, Check, Clock
+  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -348,8 +348,8 @@ const isOwner = user?.id === account?.sellerId;
                       {account.sellerNickname || account.sellerUsername}
                     </p>
                     {account.verificationStatus === 'VERIFIED' && (
-                      <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex-shrink-0 items-center gap-0.5">
-                        ✓ 已认证
+                      <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex-shrink-0 flex items-center gap-0.5">
+                        <CheckCircle className="w-3 h-3" /> 已认证
                       </span>
                     )}
                   </div>
