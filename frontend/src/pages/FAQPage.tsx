@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   ChevronDown, Shield, CreditCard, Clock, Lock, CheckCircle,
-  MessageCircle, ArrowLeft, Gamepad2, AlertTriangle, HelpCircle, RefreshCw
+  MessageCircle, ArrowLeft, Gamepad2, AlertTriangle, HelpCircle, RefreshCw, Search, X
 } from 'lucide-react';
 
 interface FAQItem {
@@ -93,10 +93,14 @@ const FAQPage: React.FC = () => {
   usePageTitle('帮助中心');
   const [openQuestion, setOpenQuestion] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('全部');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredFAQ = activeCategory === '全部'
-    ? faqData
-    : faqData.filter((f) => f.category === activeCategory);
+  const filteredFAQ = faqData.filter((f) => {
+    const matchesCategory = activeCategory === '全部' || f.category === activeCategory;
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q || f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q);
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -117,6 +121,26 @@ const FAQPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="搜索问题..."
+          className="w-full pl-11 pr-10 py-3 bg-dark-lighter border border-dark-border rounded-xl text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       {/* Category Filter */}
       <div className="flex gap-2 mb-6 flex-wrap">
         <button
@@ -127,7 +151,7 @@ const FAQPage: React.FC = () => {
               : 'bg-dark-lighter text-slate-400 hover:text-white border border-dark-border'
           }`}
         >
-          全部 ({faqData.length})
+          全部 ({searchQuery ? filteredFAQ.length : faqData.length})
         </button>
         {categories.map((cat) => (
           <button
@@ -146,6 +170,15 @@ const FAQPage: React.FC = () => {
 
       {/* FAQ List */}
       <div className="space-y-3">
+        {filteredFAQ.length === 0 && searchQuery && (
+          <div className="text-center py-12">
+            <Search className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+            <p className="text-slate-500 mb-2">未找到「{searchQuery}」相关问题</p>
+            <button onClick={() => setSearchQuery('')} className="text-xs text-primary hover:underline">
+              清除搜索
+            </button>
+          </div>
+        )}
         {filteredFAQ.map((faq, idx) => {
           const Icon = faq.icon;
           const isOpen = openQuestion === idx;

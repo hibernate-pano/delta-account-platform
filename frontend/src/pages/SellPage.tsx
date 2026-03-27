@@ -723,9 +723,20 @@ const SellPage: React.FC = () => {
                 {dragOver ? (
                   <p className="text-primary text-sm font-medium">松开以添加图片</p>
                 ) : compressingCount > 0 ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <RefreshCw className="w-7 h-7 mx-auto text-primary animate-spin" />
-                    <p className="text-sm text-primary font-medium animate-pulse">正在压缩处理 {compressingCount} 张图片...</p>
+                  <div className="flex flex-col items-center gap-3 py-4">
+                    <div className="w-full max-w-xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-primary">正在压缩 {compressingCount} 张图片...</span>
+                        <span className="text-xs text-primary/60">优化中</span>
+                      </div>
+                      <div className="h-1.5 bg-dark rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full transition-all"
+                          style={{ width: '70%', animation: 'compress-pulse 1.5s ease-in-out infinite' }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-600">压缩后图片更小，上传更快</p>
+                    </div>
                   </div>
                 ) : (
                   <>
@@ -998,7 +1009,25 @@ const SellPage: React.FC = () => {
         )}
       </form>
     </div>
+    <style>{`
+      @keyframes compress-pulse {
+        0%, 100% { opacity: 1; transform: scaleX(1); }
+        50% { opacity: 0.7; transform: scaleX(0.85); }
+      }
+    `}</style>
   );
 };
 
-export default SellPage;
+const SellPageWithStyles: React.FC = () => (
+  <>
+    <SellPage />
+    <style>{`
+      @keyframes compress-pulse {
+        0%, 100% { opacity: 1; transform: scaleX(1); }
+        50% { opacity: 0.7; transform: scaleX(0.85); }
+      }
+    `}</style>
+  </>
+);
+
+export default SellPageWithStyles;
