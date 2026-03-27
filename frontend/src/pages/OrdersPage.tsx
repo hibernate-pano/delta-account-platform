@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { TransactionSkeleton } from '../components/ui/Skeleton';
+import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyOrders, usePayOrder, useCancelOrder, useCompleteOrder, useReviewOrder } from '../hooks/useQueries';
 import {
@@ -1031,6 +1032,7 @@ const OrdersPage: React.FC = () => {
       {reviewingOrder && (
         <ReviewModal order={reviewingOrder} onClose={() => setReviewingOrder(null)} />
       )}
+    <ScrollToTop />
     </div>
   );
 };

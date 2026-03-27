@@ -259,6 +259,15 @@ const isOwner = user?.id === account?.sellerId;
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
                   { label: '装备描述', value: account.weapons || '未填写' },
                   { label: '发布时间', value: account.createdAt ? formatDate(account.createdAt) : '未知' },
+                  ...(account.viewCount != null || account.orderCount != null
+                    ? [{
+                        label: '热度数据',
+                        value: [
+                          account.viewCount != null ? `浏览 ${account.viewCount}` : null,
+                          account.orderCount != null ? `售出 ${account.orderCount}` : null,
+                        ].filter(Boolean).join(' · ') || '—',
+                      }]
+                    : []),
                 ].map((item, i) => (
                   <div
                     key={i}

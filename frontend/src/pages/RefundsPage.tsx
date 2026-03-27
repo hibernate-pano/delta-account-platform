@@ -624,9 +624,15 @@ const RefundsPage: React.FC = () => {
                   placeholder="请详细描述退款原因..."
                   required
                 />
-                {reasonError && (
+                {reasonError ? (
                   <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />{reasonError}
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500 mt-1 flex items-center justify-end gap-1">
+                    <span className={refundReason.length > 450 ? 'text-yellow-400' : refundReason.length >= 500 ? 'text-red-400' : 'text-slate-600'}>
+                      {refundReason.length}
+                    </span><span className="text-slate-700">/500</span>
                   </p>
                 )}
                 {/* Quick reason templates */}

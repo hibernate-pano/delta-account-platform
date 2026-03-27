@@ -5,6 +5,7 @@ import { useToast } from '../components/ui/Toast';
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { ScrollToTop } from '../components/ui/ScrollToTop';
 import {
   Bell, CheckCheck, RefreshCw, ShoppingCart, Wallet, MessageCircle,
   BellOff, Clock, ChevronRight, Package, User, Star, Trash2, Zap, X, AlertCircle, ArrowLeft,
@@ -601,6 +602,7 @@ const NotificationsPage: React.FC = () => {
           </div>
         );
       })()}
+    <ScrollToTop />
     </div>
   );
 };

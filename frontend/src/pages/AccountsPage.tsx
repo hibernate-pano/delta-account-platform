@@ -5,6 +5,7 @@ import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale,
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
+import { ScrollToTop } from '../components/ui/ScrollToTop';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useAccounts, useBuyAccount } from '../hooks/useQueries';
@@ -855,6 +856,7 @@ const AccountsPage: React.FC = () => {
           </div>
         </div>
       )}
+    <ScrollToTop />
     </div>
   );
 };
