@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
+import { favoriteApi } from '../api';
 import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile, useSellerReviews, useReplyReview } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
@@ -135,7 +136,7 @@ const ProfilePage: React.FC = () => {
   const orders = ordersData?.data?.data?.records || [];
   const reviews = reviewsData?.data?.data || [];
 
-  const { items: wishlistItems, removeItem } = useWishlistStore();
+  const { items: wishlistItems, removeItem, addItem } = useWishlistStore();
   const wishlistCount = wishlistItems.length;
 
   const anyError = profileError || ordersError || accountsError;
@@ -786,9 +787,15 @@ const ProfilePage: React.FC = () => {
                     <div key={account.id} className="card hover:border-primary/50 transition-all group relative">
                       {/* Remove button */}
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           removeItem(account.id);
                           showToast('已取消收藏', 'info');
+                          try {
+                            await favoriteApi.toggle(account.id);
+                          } catch {
+                            addItem(account);
+                            showToast('操作失败，请重试', 'error');
+                          }
                         }}
                         className="absolute top-2 right-2 z-10 w-7 h-7 bg-black/50 hover:bg-red-500/80 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
                         title="取消收藏"

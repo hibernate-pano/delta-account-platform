@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { accountApi } from '../api';
 import { Account } from '../types';
-import { Plus, X, DollarSign, Info, Gamepad2, BarChart3 } from 'lucide-react';
+import { Plus, X, DollarSign, Info, Gamepad2, BarChart3, RefreshCw } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
 import SkeletonBase from '../components/ui/Skeleton';
@@ -396,8 +396,9 @@ const AccountEditPage: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="btn-primary flex-1 py-3 disabled:opacity-50"
+            className="btn-primary flex-1 py-3 disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {saving && <RefreshCw className="w-4 h-4 animate-spin" />}
             {saving ? '保存中...' : '保存修改'}
           </button>
         </div>
