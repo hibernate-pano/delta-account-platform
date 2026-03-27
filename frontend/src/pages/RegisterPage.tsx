@@ -265,7 +265,9 @@ const RegisterPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   className={`input pr-10 ${
                     formData.confirmPassword && formData.password !== formData.confirmPassword
-                      ? 'border-red-500 focus:border-red-500'
+                      ? formData.confirmPassword.startsWith(formData.password) && formData.confirmPassword.length >= 3
+                        ? 'border-yellow-500 focus:border-yellow-500'
+                        : 'border-red-500 focus:border-red-500'
                       : formData.confirmPassword && formData.password === formData.confirmPassword
                       ? 'border-green-500 focus:border-green-500'
                       : ''
@@ -284,6 +286,11 @@ const RegisterPage: React.FC = () => {
               {formData.confirmPassword && formData.password === formData.confirmPassword && (
                 <p className="text-xs text-green-400 flex items-center gap-1">
                   <Check className="w-3 h-3" /> 密码一致
+                </p>
+              )}
+              {formData.confirmPassword && formData.password !== formData.confirmPassword && formData.confirmPassword.startsWith(formData.password) && formData.confirmPassword.length >= 3 && (
+                <p className="text-xs text-yellow-400/70 flex items-center gap-1">
+                  再输入 {formData.password.length - formData.confirmPassword.length} 个字符即可匹配
                 </p>
               )}
             </div>

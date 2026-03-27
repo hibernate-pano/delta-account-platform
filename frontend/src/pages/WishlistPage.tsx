@@ -6,6 +6,7 @@ import { useToast } from '../components/ui/Toast';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { formatRelativeTime } from '../utils/format';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
   ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye,
@@ -14,16 +15,6 @@ import {
 
 type ViewMode = 'grid' | 'list';
 type SortMode = 'default' | 'price_asc' | 'price_desc' | 'recent';
-
-const formatRelative = (dateStr: string) => {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return '刚刚';
-  if (m < 60) return `${m}分钟前`;
-  const h = Math.floor(diff / 3600000);
-  if (h < 24) return `${h}小时前`;
-  return `${Math.floor(h / 24)}天前`;
-};
 
 const WishlistPage: React.FC = () => {
   usePageTitle('我的心愿单');
@@ -330,7 +321,7 @@ const WishlistPage: React.FC = () => {
                           {account.orderCount}笔交易
                         </span>
                       )}
-                      <span className="ml-auto opacity-60">{formatRelative(account.createdAt)}</span>
+                      <span className="ml-auto opacity-60">{formatRelativeTime(account.createdAt)}</span>
                     </div>
                   </Link>
 
