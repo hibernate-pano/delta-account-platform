@@ -183,40 +183,34 @@ const AdminPage: React.FC = () => {
     [allUsers, userSearch]
   );
 
-  const handleVerify = (id: number, approved: boolean, label: string) => {
-    verifyMutation.mutate({ id, approved }, {
-      onSuccess: () => {
-        showToast(label, approved ? 'success' : 'warning');
-        refetchAccounts();
-        refetchStats();
-      },
-      onError: () => showToast('操作失败', 'error'),
-    });
+  const handleVerify = async (id: number, approved: boolean, label: string) => {
+    try {
+      await verifyMutation.mutateAsync({ id, approved });
+      showToast(label, approved ? 'success' : 'warning');
+      refetchAccounts();
+      refetchStats();
+    } catch {
+      showToast('操作失败', 'error');
+    }
   };
 
   const handleBan = (id: number) => {
     setPendingBanId(id);
   };
 
-  const handleBulkVerify = (approved: boolean) => {
-    const ids = Array.from(selectedAccounts);
-    let completed = 0;
-    ids.forEach((id) => {
-      verifyMutation.mutate({ id, approved }, {
-        onSuccess: () => {
-          completed++;
-          if (completed === ids.length) {
-            showToast(approved ? `已通过 ${ids.length} 个账号` : `已拒绝 ${ids.length} 个账号`, approved ? 'success' : 'warning');
-            setSelectedAccounts(new Set());
-            refetchAccounts();
-            refetchStats();
-          }
-        },
-        onError: () => {
-          completed++;
-        },
-      });
-    });
+  const handleBulkVerify = async (approved: boolean) => {
+    const ids = [...selectedAccounts];
+    const results = await Promise.allSettled(ids.map((id) => verifyMutation.mutateAsync({ id, approved })));
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    const passed = ids.length - failed;
+    if (failed === 0) {
+      showToast(approved ? `已通过 ${passed} 个账号` : `已拒绝 ${passed} 个账号`, 'success');
+    } else {
+      showToast(`操作完成：${passed} 个成功，${failed} 个失败`, failed > passed ? 'error' : 'warning');
+    }
+    setSelectedAccounts(new Set());
+    refetchAccounts();
+    refetchStats();
   };
 
   if (!token || user?.role !== 'ADMIN') {
@@ -255,12 +249,17 @@ const AdminPage: React.FC = () => {
           <ConfirmInline
             message="确定要封禁此账号吗？"
             confirmLabel="封禁"
-            onConfirm={() => {
-              banMutation.mutate({ id: pendingBanId, banned: true }, {
-                onSuccess: () => { showToast('账号已被封禁', 'warning'); refetchUsers(); refetchStats(); },
-                onError: () => showToast('操作失败', 'error'),
-              });
-              setPendingBanId(null);
+            onConfirm={async () => {
+              try {
+                await banMutation.mutateAsync({ id: pendingBanId, banned: true });
+                showToast('账号已被封禁', 'warning');
+                refetchUsers();
+                refetchStats();
+              } catch {
+                showToast('操作失败', 'error');
+              } finally {
+                setPendingBanId(null);
+              }
             }}
             onCancel={() => setPendingBanId(null)}
           />
@@ -272,12 +271,16 @@ const AdminPage: React.FC = () => {
           <ConfirmInline
             message={pendingUserBan.banned ? `确定要封禁用户 ${pendingUserBan.username} 吗？` : `确定要解封用户 ${pendingUserBan.username} 吗？`}
             confirmLabel={pendingUserBan.banned ? '封禁' : '解封'}
-            onConfirm={() => {
-              banMutation.mutate({ id: pendingUserBan.id, banned: pendingUserBan.banned }, {
-                onSuccess: () => { showToast(pendingUserBan.banned ? '用户已封禁' : '用户已解封', pendingUserBan.banned ? 'warning' : 'success'); refetchUsers(); },
-                onError: () => showToast('操作失败', 'error'),
-              });
-              setPendingUserBan(null);
+            onConfirm={async () => {
+              try {
+                await banMutation.mutateAsync({ id: pendingUserBan.id, banned: pendingUserBan.banned });
+                showToast(pendingUserBan.banned ? '用户已封禁' : '用户已解封', pendingUserBan.banned ? 'warning' : 'success');
+                refetchUsers();
+              } catch {
+                showToast('操作失败', 'error');
+              } finally {
+                setPendingUserBan(null);
+              }
             }}
             onCancel={() => setPendingUserBan(null)}
           />

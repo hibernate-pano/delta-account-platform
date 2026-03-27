@@ -692,11 +692,15 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 <ConfirmInline
                   message="确定要取消该订单吗？"
                   confirmLabel="确认"
-                  onConfirm={() => {
-                    cancelMutation.mutate(order.id, {
-                      onSuccess: () => { showToast('订单已取消', 'success'); setPendingCancel(false); },
-                      onError: (err: any) => { showToast(err.response?.data?.message || '取消失败', 'error'); setPendingCancel(false); },
-                    });
+                  onConfirm={async () => {
+                    try {
+                      await cancelMutation.mutateAsync(order.id);
+                      showToast('订单已取消', 'success');
+                    } catch (err: any) {
+                      showToast(err.response?.data?.message || '取消失败', 'error');
+                    } finally {
+                      setPendingCancel(false);
+                    }
                   }}
                   onCancel={() => setPendingCancel(false)}
                   isPending={cancelMutation.isPending}
