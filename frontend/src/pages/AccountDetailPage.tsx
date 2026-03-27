@@ -12,7 +12,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle
+  Shield, CheckCircle, ThumbsUp
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -32,6 +32,7 @@ const AccountDetailPage: React.FC = () => {
   const reviewStats = reviewStatsData?.data?.data;
   const { data: sellerReviewsData, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
   const sellerReviews = sellerReviewsData?.data?.data || [];
+  const [votedReviews, setVotedReviews] = useState<Set<number>>(new Set());
   const { data: sellerAccountsData } = useSellerAccounts(account?.sellerId);
   const sellerAccounts = useMemo(() =>
     (sellerAccountsData?.data?.data || []).filter(
@@ -521,6 +522,25 @@ const isOwner = user?.id === account?.sellerId;
                           {review.content && (
                             <p className="text-sm text-slate-400 leading-relaxed">{review.content}</p>
                           )}
+                          <div className="flex items-center mt-2">
+                            <button
+                              onClick={() => {
+                                if (!votedReviews.has(review.id)) {
+                                  setVotedReviews(prev => new Set([...prev, review.id]));
+                                  showToast('感谢你的认可！', 'success');
+                                }
+                              }}
+                              disabled={votedReviews.has(review.id)}
+                              className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg border transition-all ${
+                                votedReviews.has(review.id)
+                                  ? 'border-green-500/30 text-green-400 bg-green-500/10'
+                                  : 'border-dark-lighter text-slate-500 hover:border-green-500/30 hover:text-green-400 hover:bg-green-500/5'
+                              }`}
+                            >
+                              <ThumbsUp className={`w-3 h-3 ${votedReviews.has(review.id) ? 'fill-green-400' : ''}`} />
+                              {votedReviews.has(review.id) ? '已赞' : '赞'}
+                            </button>
+                          </div>
                           {review.reply && (
                             <div className="mt-2 pl-3 border-l-2 border-primary/30">
                               <p className="text-xs text-slate-500 mb-0.5">商家回复</p>
