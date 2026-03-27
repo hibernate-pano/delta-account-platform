@@ -8,7 +8,7 @@ import {
   Users, Package, FileText, Shield, RefreshCw, Star,
   CheckCircle, XCircle, Clock, BarChart3, ArrowRight, Eye,
   TrendingDown, AlertTriangle, Ban, ChevronDown,
-  Activity, Zap, ArrowUpRight
+  Activity, Zap, ArrowUpRight, Search
 } from 'lucide-react';
 
 interface PendingAccount {
@@ -134,6 +134,7 @@ const AdminPage: React.FC = () => {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'orders' | 'users'>('overview');
   const [accountFilter, setAccountFilter] = useState<'PENDING' | 'VERIFIED' | 'BANNED' | 'ALL'>('PENDING');
+  const [accountSearch, setAccountSearch] = useState('');
   const [orderPage, setOrderPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
 
@@ -145,7 +146,11 @@ const AdminPage: React.FC = () => {
   const banMutation = useBanUser();
 
   const stats = statsData?.data?.data;
-  const pendingAccounts: PendingAccount[] = accountsData?.data?.data?.records || [];
+  const allAccounts: PendingAccount[] = accountsData?.data?.data?.records || [];
+  const filteredAccounts = useMemo(() =>
+    allAccounts.filter((a) => !accountSearch || a.title.toLowerCase().includes(accountSearch.toLowerCase())),
+    [allAccounts, accountSearch]
+  );
 
   const handleVerify = (id: number, approved: boolean, label: string) => {
     verifyMutation.mutate({ id, approved }, {
@@ -356,7 +361,17 @@ const AdminPage: React.FC = () => {
                 </button>
               ))}
             </div>
-            <span className="text-xs text-slate-500">{pendingAccounts.length} 条结果</span>
+            <div className="flex items-center gap-2 ml-auto">
+              <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+              <input
+                type="text"
+                value={accountSearch}
+                onChange={(e) => setAccountSearch(e.target.value)}
+                placeholder="搜索账号标题..."
+                className="bg-dark border border-dark-border text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary w-40 placeholder:text-slate-600"
+              />
+            </div>
+            <span className="text-xs text-slate-500">{filteredAccounts.length} 条结果</span>
           </div>
 
           {accountsLoading ? (
@@ -369,7 +384,7 @@ const AdminPage: React.FC = () => {
                 <RefreshCw className="w-4 h-4" /> 重试
               </button>
             </div>
-          ) : pendingAccounts.length === 0 ? (
+          ) : filteredAccounts.length === 0 ? (
             <div className="card text-center py-16">
               <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500/50" />
               <h3 className="text-lg font-medium mb-2 text-slate-400">太棒了！</h3>
@@ -377,7 +392,7 @@ const AdminPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-2">
-              {pendingAccounts.map((account) => (
+              {filteredAccounts.map((account) => (
                 <div key={account.id}
                   className="card flex items-center gap-4 p-4 hover:border-slate-700 transition-all group">
                   <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">

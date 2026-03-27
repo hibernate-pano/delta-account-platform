@@ -399,6 +399,12 @@ const WalletPage: React.FC = () => {
             <div>
               <p className="text-slate-400 text-sm">账户余额</p>
               <p className="text-3xl font-bold text-white">¥{balance.toFixed(2)}</p>
+              {(() => {
+                const pending = transactions.filter((t) => t.type === 'WITHDRAW' && t.status === 'PENDING').reduce((s, t) => s + t.amount, 0);
+                return pending > 0 ? (
+                  <p className="text-xs text-yellow-400/80 mt-0.5">待提现 ¥{pending.toFixed(2)} · 可用 ¥{(balance - pending).toFixed(2)}</p>
+                ) : null;
+              })()}
             </div>
           </div>
         </div>

@@ -42,6 +42,7 @@ const WishlistPage: React.FC = () => {
       .sort((a, b) => {
         if (sortMode === 'price_asc') return a.price - b.price;
         if (sortMode === 'price_desc') return b.price - a.price;
+        if (sortMode === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         return 0;
       });
   }, [wishlistItems, filterVerified, sortMode]);
@@ -169,6 +170,7 @@ const WishlistPage: React.FC = () => {
               <option value="default">默认排序</option>
               <option value="price_asc">价格从低到高</option>
               <option value="price_desc">价格从高到低</option>
+              <option value="recent">最近添加</option>
             </select>
 
             {/* Sort icon hints */}
