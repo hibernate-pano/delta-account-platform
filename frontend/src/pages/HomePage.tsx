@@ -778,7 +778,7 @@ const HomePage: React.FC = () => {
                         {account.gameRank && (
                           <span className="badge badge-primary">{account.gameRank}</span>
                         )}
-                        <span className="text-sm text-slate-300">🎨 {account.skinCount} 皮肤</span>
+                        <span className="text-sm text-slate-300 flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-amber-400/80" /> {account.skinCount} 皮肤</span>
                       </div>
                     </div>
                     <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-1 text-lg">
@@ -795,7 +795,7 @@ const HomePage: React.FC = () => {
                           {account.gameRank}
                         </span>
                       )}
-                      <span className="text-xs text-slate-600">🎨 {account.skinCount}</span>
+                      <span className="text-xs text-slate-600 flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400/60" /> {account.skinCount}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>

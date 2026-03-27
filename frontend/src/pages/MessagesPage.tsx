@@ -11,7 +11,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { MessageSkeleton } from '../components/ui/Skeleton';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles
 } from 'lucide-react';
 
 interface Session {
@@ -434,7 +434,7 @@ const MessagesPage: React.FC = () => {
                 </span>
                 <span className="text-xs text-slate-500">{account.gameRank || '暂无段位'}</span>
                 <span className="text-xs text-slate-600">·</span>
-                <span className="text-xs text-slate-500">🎨 {account.skinCount}皮肤</span>
+                <span className="text-xs text-slate-500 flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400/70" /> {account.skinCount}皮肤</span>
               </div>
             </div>
             <div className="flex-shrink-0 flex flex-col items-end gap-1">

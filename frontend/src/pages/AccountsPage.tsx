@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -707,7 +707,7 @@ const AccountsPage: React.FC = () => {
                 <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-2">
                   <span className="px-2 py-0.5 bg-dark rounded">{account.gameType}</span>
                   <span className="px-2 py-0.5 bg-dark rounded">{account.gameRank || '暂无'}</span>
-                  <span>👑 {account.skinCount} 皮肤</span>
+                  <span className="flex items-center gap-1"><Crown className="w-3.5 h-3.5 text-amber-400/80" /> {account.skinCount} 皮肤</span>
                   {account.description && (
                     <span className="line-clamp-1">{account.description}</span>
                   )}
@@ -832,7 +832,7 @@ const AccountsPage: React.FC = () => {
                     <span className="px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium">{quickViewAccount.gameType}</span>
                   )}
                   <span className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">{quickViewAccount.gameRank || '暂无段位'}</span>
-                  <span className="px-2.5 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm">🎨 {quickViewAccount.skinCount} 皮肤</span>
+                  <span className="px-2.5 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-amber-400/70" /> {quickViewAccount.skinCount} 皮肤</span>
                   {quickViewAccount.verificationStatus === 'VERIFIED' && (
                     <span className="px-2.5 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">✓ 已认证</span>
                   )}

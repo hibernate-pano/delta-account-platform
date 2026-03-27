@@ -13,7 +13,7 @@ import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
   MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload, Eye, ShoppingCart,
-  Image, Pencil, Smartphone, Mail
+  Image, Pencil, Smartphone, Mail, Crown, Sparkles
 } from 'lucide-react';
 
 import { Review } from '../types';
@@ -900,7 +900,7 @@ const ProfilePage: React.FC = () => {
                         </h4>
                         <div className="flex justify-between items-center">
                           <span className="text-lg font-bold text-primary">¥{account.price}</span>
-                          <span className="text-xs text-slate-500">👑 {account.skinCount} 皮肤</span>
+                          <span className="text-xs text-slate-500 flex items-center gap-1"><Crown className="w-3 h-3 text-amber-400/80" /> {account.skinCount} 皮肤</span>
                         </div>
                       </div>
                     </div>

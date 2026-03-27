@@ -15,7 +15,7 @@ import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp, Eye
+  Shield, CheckCircle, ThumbsUp, Eye, Sparkles
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -232,8 +232,8 @@ const isOwner = user?.id === account?.sellerId;
             <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">
               {account.gameRank || '暂无段位'}
             </span>
-            <span className="px-3 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm">
-              🎨 {account.skinCount} 皮肤
+            <span className="px-3 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-400/80" /> {account.skinCount} 皮肤
             </span>
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${

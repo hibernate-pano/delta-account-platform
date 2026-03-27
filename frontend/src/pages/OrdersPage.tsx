@@ -12,7 +12,7 @@ import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
-  Shield, User, Star, Search, TrendingUp, TrendingDown
+  Shield, User, Star, Search, TrendingUp, TrendingDown, Sparkles
 } from 'lucide-react';
 
 interface Order {
@@ -196,7 +196,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
               <h3 className="font-semibold truncate">{order.account?.title || `账号 #${order.accountId}`}</h3>
               <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
                 {order.account?.gameRank && <span className="badge badge-primary">{order.account.gameRank}</span>}
-                {order.account?.skinCount && <span>🎨 {order.account.skinCount} 皮肤</span>}
+                {order.account?.skinCount && <span className="flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400/70" /> {order.account.skinCount} 皮肤</span>}
               </div>
             </div>
             <div className="text-right">

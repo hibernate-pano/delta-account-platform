@@ -11,7 +11,7 @@ import { formatRelativeTime } from '../utils/format';
 import {
   Heart, Trash2, ArrowRight, Gamepad2, Filter,
   ShoppingCart, ShoppingBag, Grid3x3, List, SortAsc, SortDesc, User, ShieldCheck, Star, Eye,
-  Bell, X, RefreshCw
+  Bell, X, RefreshCw, Sparkles
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
@@ -281,7 +281,7 @@ const WishlistPage: React.FC = () => {
                       {account.gameRank && (
                         <span className="badge badge-primary">{account.gameRank}</span>
                       )}
-                      <span>🎨 {account.skinCount} 皮肤</span>
+                      <span className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-amber-400/80" /> {account.skinCount} 皮肤</span>
                       {account.weapons && (
                         <span className="truncate max-w-[80px]">{account.weapons}</span>
                       )}
@@ -397,7 +397,7 @@ const WishlistPage: React.FC = () => {
                       </h3>
                     </Link>
                     <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                      <span>🎨 {account.skinCount} 皮肤</span>
+                      <span className="flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-amber-400/80" /> {account.skinCount} 皮肤</span>
                       {account.weapons && <span className="truncate">{account.weapons}</span>}
                     </div>
                     {account.description && (
