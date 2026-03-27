@@ -417,7 +417,9 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
 const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; onReview: (order: Order) => void }> = React.memo(({ order, onViewDetail, onReview }) => {
   const [expanded, setExpanded] = useState(false);
   const [countdown, setCountdown] = useState('');
+  const [countdownUrgent, setCountdownUrgent] = useState(false);
   const [paymentCountdown, setPaymentCountdown] = useState('');
+  const [paymentRemainingMins, setPaymentRemainingMins] = useState<number | null>(null);
   const [pendingCancel, setPendingCancel] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -447,10 +449,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
     if (order.type !== 'RENT' || order.status !== 'PROCESSING' || !order.rentEnd) return;
     const update = () => {
       const remaining = new Date(order.rentEnd!).getTime() - Date.now();
-      if (remaining <= 0) { setCountdown('已到期'); return; }
+      if (remaining <= 0) { setCountdown('已到期'); setCountdownUrgent(false); return; }
       const h = Math.floor(remaining / 3600000);
       const m = Math.floor((remaining % 3600000) / 60000);
       setCountdown(h > 0 ? `剩余 ${h}小时${m}分` : `剩余 ${m}分钟`);
+      setCountdownUrgent(h === 0); // urgent when < 1 hour
     };
     update();
     const interval = setInterval(update, 60000);
@@ -464,10 +467,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
     const update = () => {
       const elapsed = Date.now() - new Date(order.createdAt).getTime();
       const remaining = PAYMENT_WINDOW - elapsed;
-      if (remaining <= 0) { setPaymentCountdown('已超时'); return; }
+      if (remaining <= 0) { setPaymentCountdown('已超时'); setPaymentRemainingMins(0); return; }
       const m = Math.floor(remaining / 60000);
       const s = Math.floor((remaining % 60000) / 1000);
       setPaymentCountdown(`${m}:${s.toString().padStart(2, '0')}`);
+      setPaymentRemainingMins(m);
     };
     update();
     const interval = setInterval(update, 1000);
@@ -525,15 +529,19 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             {statusConfig[order.status]?.label || order.status}
           </div>
           {isPending && paymentCountdown && (
-            <div className={`mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
-              paymentCountdown === '已超时' ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'
+            <div className={`mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              paymentCountdown === '已超时' || (paymentRemainingMins !== null && paymentRemainingMins < 5)
+                ? 'bg-red-500/20 text-red-400 animate-pulse'
+                : 'bg-orange-500/20 text-orange-400'
             }`}>
               <Clock className="w-2.5 h-2.5" />
               {paymentCountdown === '已超时' ? '支付超时' : paymentCountdown}
             </div>
           )}
           {countdown && !isPending && (
-            <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-orange-500/20 text-orange-400 font-medium">
+            <div className={`mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
+              countdownUrgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-orange-500/20 text-orange-400'
+            }`}>
               <Clock className="w-2.5 h-2.5" />
               {countdown}
             </div>
