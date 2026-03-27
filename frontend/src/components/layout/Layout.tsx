@@ -9,6 +9,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { useUnreadCount } from '../../hooks/useQueries';
 import { useToast } from '../ui/Toast';
+import ErrorBoundary from '../ui/ErrorBoundary';
 import MobileTabBar from './MobileTabBar';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -417,7 +418,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
-        {children}
+        <ErrorBoundary>{children}</ErrorBoundary>
       </main>
 
       {/* Mobile Bottom Tab Bar */}

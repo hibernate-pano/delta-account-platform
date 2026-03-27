@@ -161,6 +161,9 @@ const ProfilePage: React.FC = () => {
     totalSpent: orders
       .filter((o: any) => o.status === 'COMPLETED' && o.type === 'BUY')
       .reduce((sum: number, o: any) => sum + (o.amount || 0), 0),
+    totalEarned: accounts
+      .filter((a: any) => a.status === 'SOLD')
+      .reduce((sum: number, a: any) => sum + (a.price || 0), 0),
     avgOrderValue: orders.filter((o: any) => o.status === 'COMPLETED').length > 0
       ? orders.filter((o: any) => o.status === 'COMPLETED').reduce((sum: number, o: any) => sum + (o.amount || 0), 0) /
         orders.filter((o: any) => o.status === 'COMPLETED').length
@@ -630,17 +633,31 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Spending / Earnings Card */}
-              {stats.totalSpent > 0 && (
+              {(stats.totalSpent > 0 || stats.totalEarned > 0) && (
                 <div className="card">
                   <h3 className="font-medium mb-4 flex items-center gap-2">
                     <Wallet className="w-5 h-5 text-primary" />
                     交易统计
                   </h3>
                   <div className="space-y-3">
+                    {stats.totalEarned > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">累计收入</span>
+                        <span className="font-medium text-green-400">+¥{stats.totalEarned.toFixed(2)}</span>
+                      </div>
+                    )}
                     {stats.totalSpent > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-slate-500">累计消费</span>
                         <span className="font-medium text-red-400">-¥{stats.totalSpent.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {(stats.totalEarned > 0 || stats.totalSpent > 0) && (
+                      <div className="flex justify-between items-center border-t border-dark-border pt-3">
+                        <span className="text-slate-400">净收益</span>
+                        <span className={`font-semibold ${stats.totalEarned - stats.totalSpent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {stats.totalEarned - stats.totalSpent >= 0 ? '+' : ''}¥{(stats.totalEarned - stats.totalSpent).toFixed(2)}
+                        </span>
                       </div>
                     )}
                     {stats.avgOrderValue > 0 && (
