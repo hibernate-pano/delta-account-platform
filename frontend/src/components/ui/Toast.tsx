@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -7,6 +7,7 @@ interface Toast {
   id: string;
   message: string;
   type: ToastType;
+  pausedAt?: number;
 }
 
 interface ToastContextType {
@@ -14,6 +15,8 @@ interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
   toast: (type: ToastType, message: string) => void;
   removeToast: (id: string) => void;
+  pauseToast: (id: string) => void;
+  resumeToast: (id: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -37,25 +40,60 @@ const getAriaLive = (type: ToastType) =>
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [dismissing, setDismissing] = useState<Set<string>>(new Set());
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const showToast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
-
-    setTimeout(() => {
+  const scheduleDismiss = useCallback((id: string, delay: number) => {
+    const existing = timersRef.current.get(id);
+    if (existing) clearTimeout(existing);
+    const timer = setTimeout(() => {
       setDismissing((prev) => new Set([...prev, id]));
+      timersRef.current.delete(id);
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
         setDismissing((prev) => { const s = new Set(prev); s.delete(id); return s; });
       }, 200);
-    }, TOAST_DURATION);
+    }, delay);
+    timersRef.current.set(id, timer);
   }, []);
+
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    scheduleDismiss(id, TOAST_DURATION);
+  }, [scheduleDismiss]);
+
+  const pauseToast = useCallback((id: string) => {
+    const timer = timersRef.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timersRef.current.delete(id);
+    }
+    setToasts((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, pausedAt: Date.now() } : t
+      )
+    );
+  }, []);
+
+  const resumeToast = useCallback((id: string) => {
+    let remaining = TOAST_DURATION;
+    setToasts((prev) => {
+      const toast = prev.find((t) => t.id === id);
+      if (toast?.pausedAt) {
+        remaining = Math.max(TOAST_DURATION - (Date.now() - toast.pausedAt), 500);
+      }
+      return prev.map((t) => t.id === id ? { ...t, pausedAt: undefined } : t);
+    });
+    scheduleDismiss(id, remaining);
+  }, [scheduleDismiss]);
 
   const toast = useCallback((type: ToastType, message: string) => {
     showToast(message, type);
   }, [showToast]);
 
   const removeToast = useCallback((id: string) => {
+    const timer = timersRef.current.get(id);
+    if (timer) { clearTimeout(timer); timersRef.current.delete(id); }
     setDismissing((prev) => new Set([...prev, id]));
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -64,18 +102,20 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toasts, showToast, toast, removeToast }}>
+    <ToastContext.Provider value={{ toasts, showToast, toast, removeToast, pauseToast, resumeToast }}>
       {children}
-      <ToastContainer toasts={toasts} removeToast={removeToast} dismissing={dismissing} />
+      <ToastContainer toasts={toasts} removeToast={removeToast} dismissing={dismissing} pauseToast={pauseToast} resumeToast={resumeToast} />
     </ToastContext.Provider>
   );
 };
 
 
-const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void; dismissing: Set<string> }> = ({
+const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void; dismissing: Set<string>; pauseToast: (id: string) => void; resumeToast: (id: string) => void }> = ({
   toasts,
   removeToast,
   dismissing,
+  pauseToast,
+  resumeToast,
 }) => {
   if (toasts.length === 0) return null;
 
@@ -109,6 +149,8 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
           key={toast.id}
           role={getAriaRole(toast.type)}
           aria-live={getAriaLive(toast.type)}
+          onMouseEnter={() => pauseToast(toast.id)}
+          onMouseLeave={() => resumeToast(toast.id)}
           className={`${dismissing.has(toast.id) ? 'toast-exit' : 'toast-enter'} flex flex-col ${
             toast.type === 'success' ? 'border-l-green-400' :
             toast.type === 'error'   ? 'border-l-red-400'   :
@@ -118,9 +160,10 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
         >
           {/* Progress bar */}
           <div
-            className={`h-0.5 ${getBarColor(toast.type)} opacity-60`}
+            className={`h-0.5 ${getBarColor(toast.type)} opacity-60 transition-none`}
             style={{
-              animation: `toast-progress ${TOAST_DURATION}ms linear forwards`,
+              width: toast.pausedAt ? undefined : '100%',
+              animation: toast.pausedAt ? 'none' : `toast-progress ${TOAST_DURATION}ms linear forwards`,
             }}
           />
           <div className="flex items-start gap-3 p-4">

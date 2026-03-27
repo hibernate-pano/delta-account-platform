@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Account } from '../../types';
 import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus, Star, Zap } from 'lucide-react';
+import { ConfirmInline } from './ConfirmInline';
 
 interface CompareItem {
   account: Account;
@@ -23,6 +24,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
   maxItems = 4,
 }) => {
   const [visible, setVisible] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   if (items.length === 0 || !visible) return null;
 
@@ -78,12 +80,20 @@ export const CompareBar: React.FC<CompareBarProps> = ({
         </button>
 
         <button
-          onClick={onClear}
+          onClick={() => setShowClearConfirm(true)}
           className="text-slate-500 hover:text-white transition-colors p-1"
           title="清除"
         >
           <X className="w-4 h-4" />
         </button>
+        {showClearConfirm && (
+          <ConfirmInline
+            message={`确定要清除全部 ${items.length} 个已选账号吗？`}
+            confirmLabel="清除"
+            onConfirm={() => { onClear(); setShowClearConfirm(false); }}
+            onCancel={() => setShowClearConfirm(false)}
+          />
+        )}
       </div>
     </div>
   );
