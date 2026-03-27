@@ -5,6 +5,7 @@ import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useMyRefunds, useApplyRefund, useCancelRefund, useMyOrders } from '../hooks/useQueries';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
+import { RefundCardSkeleton, RefundableOrderSkeleton } from '../components/ui/Skeleton';
 import {
   ArrowLeft, Package, RefreshCw, CheckCircle, XCircle, Clock,
   AlertTriangle, DollarSign, ChevronRight, Plus, X, Upload, FileText,
@@ -427,7 +428,7 @@ const RefundsPage: React.FC = () => {
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 skeleton rounded-xl" />
+                <RefundCardSkeleton key={i} />
               ))}
             </div>
           ) : isError ? (
@@ -562,14 +563,7 @@ const RefundsPage: React.FC = () => {
           {ordersLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-4 py-4 border-b border-dark-border last:border-0">
-                  <div className="w-12 h-12 rounded-lg skeleton flex-shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-48 skeleton rounded" />
-                    <div className="h-3 w-32 skeleton rounded" />
-                  </div>
-                  <div className="h-6 w-20 skeleton rounded flex-shrink-0" />
-                </div>
+                <RefundableOrderSkeleton key={i} />
               ))}
             </div>
           ) : ordersError ? (

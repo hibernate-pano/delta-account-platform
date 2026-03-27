@@ -169,4 +169,19 @@ export const ReviewSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => (
   </div>
 );
 
+export const RefundCardSkeleton: React.FC = () => (
+  <div className="h-24 skeleton rounded-xl" />
+);
+
+export const RefundableOrderSkeleton: React.FC = () => (
+  <div className="flex items-center gap-4 py-4 border-b border-dark-border last:border-0">
+    <div className="w-12 h-12 rounded-lg skeleton flex-shrink-0" />
+    <div className="flex-1 space-y-2">
+      <div className="h-4 w-48 skeleton rounded" />
+      <div className="h-3 w-32 skeleton rounded" />
+    </div>
+    <div className="h-6 w-20 skeleton rounded flex-shrink-0" />
+  </div>
+);
+
 export default Skeleton;

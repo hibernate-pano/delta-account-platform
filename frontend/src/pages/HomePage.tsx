@@ -5,10 +5,9 @@ import { Account } from '../types';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { PullToRefresh } from '../components/ui/PullToRefresh';
-import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
-import { useAccounts } from '../hooks/useQueries';
-import { useMyOrders } from '../hooks/useQueries';
+import { useRecentStore } from '../store/recent';
+import { useAccounts, useMyOrders } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
@@ -78,6 +77,7 @@ const HomePage: React.FC = () => {
   usePageTitle();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { token } = useAuthStore();
   const [keyword, setKeyword] = useState('');
 
   const { data, isLoading, isError } = useAccounts({ size: 8 });
@@ -148,7 +148,7 @@ const HomePage: React.FC = () => {
   return (
     <PullToRefresh onRefresh={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}>
     <div>
-      <TransactionToast />
+      {token && <TransactionToast />}
 
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">

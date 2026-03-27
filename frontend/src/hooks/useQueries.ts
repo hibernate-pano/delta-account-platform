@@ -219,10 +219,11 @@ export const useAdminUsers = (params?: { page?: number; size?: number }) => {
 
 // ==================== Order Hooks ====================
 
-export const useMyOrders = () => {
+export const useMyOrders = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: queryKeys.orders.my,
     queryFn: () => orderApi.getMyOrders(),
+    enabled: options?.enabled ?? true,
     ...defaultQueryOptions,
   });
 };
