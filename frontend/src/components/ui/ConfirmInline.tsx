@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmInlineProps {
@@ -16,21 +16,35 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
   confirmLabel = '确认',
   confirmVariant = 'danger',
 }) => {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    cancelRef.current?.focus();
+  }, []);
+
   return (
-    <div className="flex items-center gap-3 p-3 bg-dark rounded-xl border border-red-500/20 animate-fade-in">
+    <div
+      role="alertdialog"
+      aria-live="polite"
+      aria-label="请确认此操作"
+      className="flex items-center gap-3 p-3 bg-dark rounded-xl border border-red-500/20 animate-fade-in"
+    >
       <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
         <AlertTriangle className="w-4 h-4 text-red-400" />
       </div>
       <p className="text-sm text-slate-300 flex-1">{message}</p>
       <div className="flex gap-2 flex-shrink-0">
         <button
+          ref={cancelRef}
           onClick={onCancel}
+          onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
           className="px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-dark-lighter rounded-lg hover:bg-dark-border transition-colors"
         >
           取消
         </button>
         <button
           onClick={onConfirm}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onConfirm(); }}
           className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${
             confirmVariant === 'danger'
               ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'

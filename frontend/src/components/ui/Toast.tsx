@@ -128,6 +128,7 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
             <p className="flex-1 text-sm text-slate-200">{toast.message}</p>
             <button
               onClick={() => removeToast(toast.id)}
+              aria-label="关闭通知"
               className="flex-shrink-0 text-slate-500 hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />

@@ -566,6 +566,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           >
             <button
               onClick={() => { navigate('/sell'); setQuickActionsOpen(false); }}
+              aria-label="发布账号"
               className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
             >
               <Plus className="w-4 h-4 text-green-400" />
@@ -573,6 +574,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
             <button
               onClick={() => { navigate('/wallet'); setQuickActionsOpen(false); }}
+              aria-label="钱包充值"
               className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
             >
               <Wallet className="w-4 h-4 text-primary" />
@@ -580,6 +582,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
             <button
               onClick={() => { navigate('/messages'); setQuickActionsOpen(false); }}
+              aria-label="消息中心"
               className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
             >
               <MessageCircle className="w-4 h-4 text-blue-400" />
@@ -592,6 +595,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
             <button
               onClick={() => { navigate('/notifications'); setQuickActionsOpen(false); }}
+              aria-label="通知中心"
               className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
             >
               <Bell className="w-4 h-4 text-yellow-400" />
@@ -605,6 +609,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
           <button
             onClick={() => setQuickActionsOpen(!quickActionsOpen)}
+            aria-label={quickActionsOpen ? '关闭快捷操作' : '打开快捷操作'}
+            aria-expanded={quickActionsOpen}
             className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all ${
               quickActionsOpen
                 ? 'bg-red-500 hover:bg-red-600 rotate-45'
