@@ -25,6 +25,7 @@ const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [shake, setShake] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const usernameRef = useRef<HTMLInputElement>(null);
   const [loginTab, setLoginTab] = useState<'manual' | 'demo'>('manual');
 
   // Load remembered username
@@ -72,6 +73,7 @@ const LoginPage: React.FC = () => {
     } catch (err: any) {
       setError(err.response?.data?.message || '登录失败，请检查用户名和密码');
       triggerShake();
+      usernameRef.current?.focus();
     } finally {
       setLoading(false);
     }
@@ -88,6 +90,7 @@ const LoginPage: React.FC = () => {
     } catch (err: any) {
       setError(err.response?.data?.message || '登录失败');
       triggerShake();
+      usernameRef.current?.focus();
     } finally {
       setLoading(false);
     }
@@ -153,6 +156,7 @@ const LoginPage: React.FC = () => {
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
                   <input
                     type="text"
+                    ref={usernameRef}
                     value={formData.username}
                     onChange={(e) => { setFormData({ ...formData, username: e.target.value }); setFieldErrors((f) => ({ ...f, username: undefined })); setError(''); }}
                     onFocus={() => setFocusedField('username')}

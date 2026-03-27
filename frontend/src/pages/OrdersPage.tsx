@@ -126,6 +126,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
   const { user } = useAuthStore();
   const { showToast } = useToast();
   const payMutation = usePayOrder();
+  const cancelMutation = useCancelOrder();
   const isBuyer = user?.id === order.buyerId;
   const isSeller = user?.id === order.sellerId;
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
@@ -367,6 +368,25 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
                 {payMutation.isPending ? '支付中...' : '立即支付'}
               </button>
             )}
+            {order.status === 'PENDING' && (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!window.confirm('确定要取消该订单吗？')) return;
+                  try {
+                    await cancelMutation.mutateAsync(order.id);
+                    showToast('订单已取消', 'success');
+                    onClose();
+                  } catch (err: any) {
+                    showToast(err.response?.data?.message || '取消失败', 'error');
+                  }
+                }}
+                disabled={cancelMutation.isPending}
+                className="btn-secondary !py-2.5 !px-3 text-sm text-slate-400 hover:text-red-400 disabled:opacity-50"
+              >
+                {cancelMutation.isPending ? '取消中...' : '取消订单'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -382,6 +402,7 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
   const navigate = useNavigate();
   const { showToast } = useToast();
   const payMutation = usePayOrder();
+  const cancelMutation = useCancelOrder();
   const StatusIcon = statusConfig[order.status]?.icon || Clock;
   const isTerminal = ['CANCELLED', 'REFUNDED'].includes(order.status);
   const isPending = order.status === 'PENDING';
@@ -634,6 +655,22 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               >
                 <CreditCard className="w-3.5 h-3.5" />
                 立即支付
+              </button>
+            )}
+            {isPending && (
+              <button
+                onClick={() => {
+                  if (!window.confirm('确定要取消该订单吗？')) return;
+                  cancelMutation.mutate(order.id, {
+                    onSuccess: () => showToast('订单已取消', 'success'),
+                    onError: (err: any) => showToast(err.response?.data?.message || '取消失败', 'error'),
+                  });
+                }}
+                disabled={cancelMutation.isPending}
+                className="btn-secondary !py-2 !px-2.5 text-xs text-slate-400 hover:text-red-400 disabled:opacity-50"
+                title="取消订单"
+              >
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
             {order.status === 'COMPLETED' && (
