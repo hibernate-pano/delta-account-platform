@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, CheckCircle, AlertCircle, MessageSquare, Clock, ChevronRight } from 'lucide-react';
+import { Bell, CheckCircle, AlertCircle, MessageSquare, Clock, ChevronRight, MessageCircle } from 'lucide-react';
 import { useNotifications, useUnreadCount, useMarkNotificationRead, useMarkAllNotificationsRead } from '../../hooks/useQueries';
 import { useToast } from './Toast';
 
@@ -22,6 +22,8 @@ export const NotificationBell: React.FC = () => {
 
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData?.notificationCount ?? 0;
+  const messageCount = unreadData?.messageCount ?? 0;
+  const totalUnread = unreadCount + messageCount;
 
   const { data: notificationsData } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
@@ -98,22 +100,33 @@ export const NotificationBell: React.FC = () => {
       <button
         onClick={() => setShowDropdown(!showDropdown)}
         className="relative p-2 text-slate-400 hover:text-white transition-colors"
-        aria-label={`通知${unreadCount > 0 ? `，${unreadCount}条未读` : ''}`}
+        aria-label={`通知${totalUnread > 0 ? `，${totalUnread}条未读` : ''}`}
         aria-expanded={showDropdown}
         aria-haspopup="true"
       >
         <Bell className="w-5 h-5" />
-        {unreadCount > 0 && (
+        {totalUnread > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {totalUnread > 9 ? '9+' : totalUnread}
           </span>
+        )}
+        {messageCount > 0 && unreadCount === 0 && (
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full border border-dark" />
         )}
       </button>
 
       {showDropdown && (
         <div className="absolute right-0 top-full mt-2 w-80 bg-dark-lighter border border-dark-border rounded-xl shadow-xl z-50">
           <div className="p-3 border-b border-dark-border flex items-center justify-between">
-            <h3 className="font-semibold">通知</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold">通知</h3>
+              {messageCount > 0 && (
+                <span className="flex items-center gap-1 text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  <MessageCircle className="w-3 h-3" />
+                  {messageCount}条私信
+                </span>
+              )}
+            </div>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}

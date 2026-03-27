@@ -9,19 +9,22 @@ import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { useToast } from '../components/ui/Toast';
 import { EmptyState } from '../components/ui/EmptyState';
 import {
-  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star, ShoppingCart, RefreshCw, Heart
+  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star, ShoppingCart, RefreshCw, Heart, TrendingUp, Users, BadgeCheck
 } from 'lucide-react';
 
 const RecentlyViewedPage: React.FC = () => {
   usePageTitle('最近浏览');
   const navigate = useNavigate();
-  const { items: recentItems, removeItem, clearAll } = useRecentStore();
+  const { items: recentItems, removeItem, clearAll, getVerifiedCount, getPriceRange } = useRecentStore();
   const { token } = useAuthStore();
   const { showToast } = useToast();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [sortMode, setSortMode] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [removingId, setRemovingId] = useState<number | null>(null);
+
+  const verifiedCount = getVerifiedCount();
+  const { min: priceMin, max: priceMax } = getPriceRange();
 
   const filteredItems = useMemo(() => {
     return recentItems
@@ -79,6 +82,32 @@ const RecentlyViewedPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Stats banner */}
+      {recentItems.length > 0 && (
+        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border rounded-xl">
+          <div className="flex items-center gap-1.5 text-sm">
+            <Users className="w-4 h-4 text-primary" />
+            <span className="text-slate-400">共</span>
+            <span className="font-semibold text-white">{recentItems.length}</span>
+            <span className="text-slate-400">个账号</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <BadgeCheck className="w-4 h-4 text-green-500" />
+            <span className="text-slate-400">已认证</span>
+            <span className="font-semibold text-green-400">{verifiedCount}</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <TrendingUp className="w-4 h-4 text-purple-400" />
+            <span className="text-slate-400">价格区间</span>
+            <span className="font-semibold text-white">
+              {priceMin > 0 ? `¥${priceMin} ~ ¥${priceMax}` : '—'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {showClearConfirm && (
         <div className="mb-4">
@@ -200,6 +229,18 @@ const RecentlyViewedPage: React.FC = () => {
                       <span className="flex items-center gap-0.5 text-xs text-yellow-400">
                         <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                         {item.account.sellerCreditScore}分
+                      </span>
+                    )}
+                    {item.account.orderCount != null && (
+                      <span className="flex items-center gap-0.5 text-xs text-slate-600">
+                        <ShoppingCart className="w-3 h-3" />
+                        已售{item.account.orderCount}单
+                      </span>
+                    )}
+                    {item.account.viewCount != null && (
+                      <span className="flex items-center gap-0.5 text-xs text-slate-600">
+                        <Eye className="w-3 h-3" />
+                        {item.account.viewCount}次浏览
                       </span>
                     )}
                     {item.account.verificationStatus === 'VERIFIED' && (
