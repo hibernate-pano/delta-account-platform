@@ -269,10 +269,10 @@ const RefundsPage: React.FC = () => {
     return { totalRefunded, pendingAmount, successCount, successRate, totalCount: refunds.length };
   }, [refunds]);
 
-  // Orders eligible for refund (PAID or COMPLETED, no existing pending refund)
+  // Orders eligible for refund (PAID, PROCESSING or COMPLETED within window, no existing pending refund)
   const refundableOrders = orders.filter(
     (o: any) =>
-      ['PAID', 'PROCESSING'].includes(o.status) &&
+      ['PAID', 'PROCESSING', 'COMPLETED'].includes(o.status) &&
       !refunds.some((r) => r.orderId === o.id && r.status === 'PENDING')
   );
 

@@ -556,8 +556,25 @@ const isOwner = user?.id === account?.sellerId;
                 </div>
               ) : sellerReviews.length === 0 && !reviewsError ? (
                 <div className="card p-6 text-center">
-                  <Star className="w-8 h-8 mx-auto mb-2 text-slate-700" />
-                  <p className="text-sm text-slate-500">暂无评价</p>
+                  <div className="w-12 h-12 bg-dark-lighter rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Star className="w-6 h-6 text-slate-700" />
+                  </div>
+                  <p className="text-sm text-slate-500 mb-1">暂无评价</p>
+                  <p className="text-xs text-slate-600 mb-4">
+                    {account.sellerNickname || account.sellerUsername} 是新卖家，试试
+                    <button onClick={handleContactSeller} className="text-primary hover:underline mx-1">
+                      聊聊
+                    </button>
+                    了解详情吧
+                  </p>
+                  {sellerAccounts.length > 0 && (
+                    <Link
+                      to={`/accounts?seller=${account?.sellerId}`}
+                      className="text-xs text-slate-500 hover:text-primary transition-colors"
+                    >
+                      查看该卖家其他 {sellerAccounts.length} 个账号 →
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-3">
