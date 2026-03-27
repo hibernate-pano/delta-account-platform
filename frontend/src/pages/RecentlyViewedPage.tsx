@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/auth';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
+import { useToast } from '../components/ui/Toast';
 import {
   Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star, ShoppingCart, RefreshCw
 } from 'lucide-react';
@@ -25,6 +26,7 @@ const RecentlyViewedPage: React.FC = () => {
   usePageTitle('最近浏览');
   const { items: recentItems, removeItem, clearAll } = useRecentStore();
   const { token } = useAuthStore();
+  const { showToast } = useToast();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [sortMode, setSortMode] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -250,6 +252,7 @@ const RecentlyViewedPage: React.FC = () => {
                   setRemovingId(item.account.id);
                   setTimeout(() => {
                     removeItem(item.account.id);
+                    showToast('已移除浏览记录', 'info');
                     setRemovingId(null);
                   }, 150);
                 }}

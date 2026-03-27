@@ -85,14 +85,25 @@ const getNavTarget = (notification: Notification): { to: string; label: string }
   switch (notification.type) {
     case 'ORDER_PAID':
     case 'ORDER_COMPLETED':
-    case 'REFUND':
+    case 'ORDER_CANCELLED':
+    case 'ORDER_REJECTED':
       return { to: '/orders', label: '查看订单' };
+    case 'REFUND':
+      return { to: '/refunds', label: '查看退款' };
     case 'NEW_MESSAGE':
-      return { to: '/messages', label: '查看消息' };
+      return { to: '/messages', label: '回复消息' };
     case 'WALLET':
       return { to: '/wallet', label: '查看钱包' };
+    case 'PAYMENT_FAILED':
+      return { to: '/orders', label: '重新支付' };
+    case 'NEW_REVIEW':
+      return { to: '/orders', label: '查看评价' };
+    case 'LOGIN_ALERT':
+    case 'PASSWORD_CHANGED':
     case 'ACCOUNT_VERIFIED':
-      return { to: '/profile', label: '查看详情' };
+      return { to: '/profile', label: '个人中心' };
+    case 'ACCOUNT_EXPIRING':
+      return { to: '/accounts', label: '浏览账号' };
     default:
       return null;
   }
@@ -634,44 +645,13 @@ const NotificationsPage: React.FC = () => {
               <div className="p-6">
                 <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{n.content}</p>
                 <div className="mt-5 flex gap-2 flex-wrap">
-                  {n.type === 'ORDER_PAID' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
-                  )}
-                  {n.type === 'ORDER_COMPLETED' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
-                  )}
-                  {n.type === 'NEW_MESSAGE' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/messages'); }} className="btn-primary flex-1 text-sm">回复消息</button>
-                  )}
-                  {n.type === 'WALLET' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/wallet'); }} className="btn-primary flex-1 text-sm">查看钱包</button>
-                  )}
-                  {n.type === 'REFUND' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/refunds'); }} className="btn-primary flex-1 text-sm">查看退款</button>
-                  )}
-                  {n.type === 'ORDER_CANCELLED' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
-                  )}
-                  {n.type === 'ORDER_REJECTED' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看订单</button>
-                  )}
-                  {n.type === 'PAYMENT_FAILED' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">重新支付</button>
-                  )}
-                  {n.type === 'NEW_REVIEW' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/orders'); }} className="btn-primary flex-1 text-sm">查看评价</button>
-                  )}
-                  {n.type === 'LOGIN_ALERT' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">查看主页</button>
-                  )}
-                  {n.type === 'PASSWORD_CHANGED' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">个人中心</button>
-                  )}
-                  {n.type === 'ACCOUNT_EXPIRING' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/accounts'); }} className="btn-primary flex-1 text-sm">浏览账号</button>
-                  )}
-                  {n.type === 'ACCOUNT_VERIFIED' && (
-                    <button onClick={() => { setSelectedNotification(null); navigate('/profile'); }} className="btn-primary flex-1 text-sm">查看主页</button>
+                  {getNavTarget(n) && (
+                    <button
+                      onClick={() => { setSelectedNotification(null); navigate(getNavTarget(n)!.to); }}
+                      className="btn-primary flex-1 text-sm"
+                    >
+                      {getNavTarget(n)!.label}
+                    </button>
                   )}
                   <button onClick={() => setSelectedNotification(null)} className="btn-secondary flex-1 text-sm">关闭</button>
                 </div>
