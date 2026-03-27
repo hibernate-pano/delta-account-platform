@@ -12,7 +12,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp
+  Shield, CheckCircle, ThumbsUp, Eye
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -53,6 +53,20 @@ const AccountDetailPage: React.FC = () => {
   const [rentHours, setRentHours] = useState(1);
   const [activeTab, setActiveTab] = useState<'info' | 'details'>('info');
   const [copied, setCopied] = useState(false);
+  const [viewerCount, setViewerCount] = useState(0);
+
+  // Live viewer count simulation
+  useEffect(() => {
+    if (!account) return;
+    const base = Math.floor((account.viewCount || 0) / 10) + Math.floor(Math.random() * 8) + 3;
+    setViewerCount(base);
+    const interval = setInterval(() => {
+      const delta = Math.floor(Math.random() * 5) - 2;
+      setViewerCount(prev => Math.max(1, prev + delta));
+    }, 8000 + Math.random() * 7000);
+    const hide = setTimeout(() => setViewerCount(0), 25000);
+    return () => { clearInterval(interval); clearTimeout(hide); };
+  }, [account?.id]);
 
   const handleBuy = async () => {
     if (!token) {
@@ -188,7 +202,17 @@ const isOwner = user?.id === account?.sellerId;
 
         {/* Right: Info */}
         <div>
-          <h1 className="text-2xl font-bold mb-4">{account.title}</h1>
+          <h1 className="text-2xl font-bold mb-3">{account.title}</h1>
+          {viewerCount > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full">
+                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
+                <span className="text-xs text-orange-400 font-medium">
+                  <span className="text-orange-300">{viewerCount}</span> 人正在查看此账号
+                </span>
+              </div>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2 mb-6">
             {account.gameType && (
               <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium">
