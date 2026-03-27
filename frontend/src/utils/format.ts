@@ -26,7 +26,7 @@ export const formatDateTime = (dateStr: string | undefined | null): string => {
 };
 
 /**
- * 格式化相对时间 (刚刚 / N分钟前 / N小时前 / Nd天前)
+ * 格式化相对时间 (< 7天: 刚刚/N分钟前/N小时前/N天前; ≥ 7天: 3月27日)
  */
 export const formatRelativeTime = (dateStr: string | number | undefined | null): string => {
   if (!dateStr) return '-';
@@ -36,5 +36,7 @@ export const formatRelativeTime = (dateStr: string | number | undefined | null):
   if (m < 60) return `${m}分钟前`;
   const h = Math.floor(diff / 3600000);
   if (h < 24) return `${h}小时前`;
-  return `${Math.floor(h / 24)}天前`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}天前`;
+  return new Date(dateStr).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
 };

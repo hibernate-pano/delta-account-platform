@@ -5,6 +5,7 @@ import { useToast } from '../components/ui/Toast';
 import { WalletSkeleton } from '../components/ui/Skeleton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useWalletBalance, useWalletTransactions, useRecharge, useWithdraw } from '../hooks/useQueries';
+import { formatRelativeTime } from '../utils/format';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Minus, CreditCard, BarChart3,
@@ -37,18 +38,6 @@ const txStatusConfig: Record<string, { label: string; color: string; bg: string 
   PENDING:   { label: '处理中', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
   FAILED:    { label: '失败', color: 'text-red-400', bg: 'bg-red-500/20' },
   CANCELLED: { label: '已取消', color: 'text-slate-400', bg: 'bg-slate-500/20' },
-};
-
-const formatRelativeTime = (dateStr: string) => {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return '刚刚';
-  if (m < 60) return `${m}分钟前`;
-  const h = Math.floor(diff / 3600000);
-  if (h < 24) return `${h}小时前`;
-  const d = Math.floor(diff / 86400000);
-  if (d < 7) return `${d}天前`;
-  return new Date(dateStr).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
 };
 
 // Group transactions by date
