@@ -665,18 +665,26 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 disabled={payMutation.isPending}
                 className="btn-primary flex-1 !py-2 text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
-                <CreditCard className="w-3.5 h-3.5" />
-                立即支付
+                {payMutation.isPending ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <CreditCard className="w-3.5 h-3.5" />
+                )}
+                {payMutation.isPending ? '支付中...' : '立即支付'}
               </button>
             )}
             {isPending && !pendingCancel && (
               <button
                 onClick={() => setPendingCancel(true)}
                 disabled={cancelMutation.isPending}
-                className="btn-secondary !py-2 !px-2.5 text-xs text-slate-400 hover:text-red-400 disabled:opacity-50"
+                className="btn-secondary !py-2 !px-2.5 text-xs text-slate-400 hover:text-red-400 disabled:opacity-50 flex items-center justify-center"
                 title="取消订单"
               >
-                <X className="w-3.5 h-3.5" />
+                {cancelMutation.isPending ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <X className="w-3.5 h-3.5" />
+                )}
               </button>
             )}
             {isPending && pendingCancel && (
