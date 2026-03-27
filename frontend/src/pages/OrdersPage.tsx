@@ -712,6 +712,15 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 <Star className="w-3.5 h-3.5 text-yellow-400" />
               </button>
             )}
+            {order.status === 'COMPLETED' && order.type === 'BUY' && (
+              <button
+                onClick={(e) => { e.stopPropagation(); navigate(`/accounts/${order.accountId}`); }}
+                className="btn-secondary !py-2 !px-2.5 text-xs flex items-center justify-center gap-1.5"
+                title="再次购买此账号"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
       )}

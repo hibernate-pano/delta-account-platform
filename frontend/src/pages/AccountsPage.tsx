@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -26,6 +26,7 @@ const AccountsPage: React.FC = () => {
   const [rentalOnly, setRentalOnly] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [compareItems, setCompareItems] = useState<Array<{ account: Account; addedAt: number }>>([]);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 12;
   const [showCompareModal, setShowCompareModal] = useState(false);
@@ -317,6 +318,42 @@ const AccountsPage: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* Keyboard shortcuts hint */}
+        <div className="relative">
+          {showShortcuts && (
+            <div className="absolute top-0 right-0 mt-2 bg-dark-card border border-dark-border rounded-xl p-4 shadow-xl animate-fade-in z-20 w-52">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium">键盘快捷键</p>
+                <button onClick={() => setShowShortcuts(false)} className="text-slate-500 hover:text-white transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="space-y-2 text-xs">
+                {[
+                  { key: '⌘ K', desc: '打开账号市场' },
+                  { key: '/', desc: '聚焦搜索框' },
+                  { key: '← →', desc: '翻页' },
+                  { key: 'G', desc: '切换视图' },
+                  { key: 'P', desc: '回到第1页' },
+                  { key: '?', desc: '显示此面板' },
+                ].map(({ key, desc }) => (
+                  <div key={key} className="flex items-center justify-between gap-4">
+                    <span className="text-slate-500">{desc}</span>
+                    <kbd className="px-2 py-0.5 bg-dark rounded border border-dark-border font-mono text-slate-400 flex-shrink-0">{key}</kbd>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => setShowShortcuts(!showShortcuts)}
+            className="absolute top-2 right-2 text-xs text-slate-600 hover:text-primary transition-colors"
+            title="显示键盘快捷键"
+          >
+            <Keyboard className="w-4 h-4" />
+          </button>
+        </div>
 
         {/* Expanded Filters */}
         {showFilters && (
