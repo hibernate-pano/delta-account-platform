@@ -33,8 +33,11 @@ const AccountDetailPage: React.FC = () => {
   const { data: sellerReviewsData, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
   const sellerReviews = sellerReviewsData?.data?.data || [];
   const { data: sellerAccountsData } = useSellerAccounts(account?.sellerId);
-  const sellerAccounts = (sellerAccountsData?.data?.data || []).filter(
-    (a: any) => a.id !== accountId && a.status === 'ON_SALE'
+  const sellerAccounts = useMemo(() =>
+    (sellerAccountsData?.data?.data || []).filter(
+      (a: any) => a.id !== accountId && a.status === 'ON_SALE'
+    ),
+    [sellerAccountsData?.data?.data, accountId]
   );
 
   const account: Account | undefined = data?.data?.data;
@@ -238,7 +241,7 @@ const isOwner = user?.id === account?.sellerId;
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all active:opacity-80 ${
                   activeTab === tab.key
                     ? 'bg-primary text-white'
                     : 'text-slate-400 hover:text-white'

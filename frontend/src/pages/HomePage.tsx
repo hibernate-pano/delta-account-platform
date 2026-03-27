@@ -129,7 +129,7 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
     <div className="card overflow-hidden p-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-dark-lighter/40 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left active:bg-dark-lighter hover:bg-dark-lighter/40 transition-colors"
       >
         <span className="font-medium text-sm pr-4">{q}</span>
         <ChevronDown className={`w-4 h-4 text-slate-500 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
@@ -168,9 +168,8 @@ const HomePage: React.FC = () => {
   const q2 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.5)] : null;
   const q3 = prices.length >= 4 ? prices[Math.floor(prices.length * 0.75)] : null;
 
-  const categories = (() => {
+  const categories = useMemo(() => (() => {
     if (prices.length < 4 || q1 == null || q2 == null || q3 == null) {
-      // Fallback: use percentage-based tiers
       const maxP = prices.length > 0 ? Math.max(...prices) : 1000;
       const tier1 = Math.round(maxP * 0.25);
       const tier2 = Math.round(maxP * 0.5);
@@ -182,14 +181,27 @@ const HomePage: React.FC = () => {
         { label: '顶级账号', Icon: Zap, color: 'text-red-400', bg: 'bg-red-400/20', desc: `¥${tier3}+`, count: accounts.filter(a => a.price >= tier3).length },
       ];
     }
-    // Quartile-based: Q1 budget, Q2 mid-range, Q3 high-end, Q4+ premium
     return [
       { label: '入门价', Icon: Sparkles, color: 'text-green-400', bg: 'bg-green-400/20', desc: `¥${q1}以下`, count: accounts.filter(a => a.price < q1).length },
       { label: '中端价', Icon: Star, color: 'text-blue-400', bg: 'bg-blue-400/20', desc: `¥${q1}-${q2}`, count: accounts.filter(a => a.price >= q1 && a.price < q2).length },
       { label: '高端价', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-400/20', desc: `¥${q2}-${q3}`, count: accounts.filter(a => a.price >= q2 && a.price < q3).length },
       { label: '顶级账号', Icon: Zap, color: 'text-red-400', bg: 'bg-red-400/20', desc: `¥${q3}+`, count: accounts.filter(a => a.price >= q3).length },
     ];
-  })();
+  })(), [prices, q1, q2, q3, accounts]);
+
+  const features = useMemo(() => [
+    { icon: Shield, title: '安全交易', desc: '账号信息全程加密，官方担保交易', color: 'from-emerald-500 to-teal-500' },
+    { icon: Clock, title: '快速交付', desc: '7×24小时在线，分钟级交付', color: 'from-blue-500 to-cyan-500' },
+    { icon: TrendingUpIcon, title: '信誉保障', desc: '完善评价体系，透明交易记录', color: 'from-purple-500 to-pink-500' },
+    { icon: Users, title: '海量账号', desc: '热门英雄角色，应有尽有', color: 'from-orange-500 to-red-500' },
+  ], []);
+
+  const steps = useMemo(() => [
+    { num: '01', title: '浏览账号', desc: '搜索感兴趣的账号，了解详情和价格', icon: Search },
+    { num: '02', title: '联系卖家', desc: '在线沟通，确认账号信息和交易细节', icon: Users },
+    { num: '03', title: '下单支付', desc: '安全支付，资金由平台托管', icon: Shield },
+    { num: '04', title: '完成交易', desc: '获取账号，立即开始游戏', icon: Zap },
+  ], []);
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,20 +211,6 @@ const HomePage: React.FC = () => {
       navigate('/accounts');
     }
   };
-
-  const features = [
-    { icon: Shield, title: '安全交易', desc: '账号信息全程加密，官方担保交易', color: 'from-emerald-500 to-teal-500' },
-    { icon: Clock, title: '快速交付', desc: '7×24小时在线，分钟级交付', color: 'from-blue-500 to-cyan-500' },
-    { icon: TrendingUpIcon, title: '信誉保障', desc: '完善评价体系，透明交易记录', color: 'from-purple-500 to-pink-500' },
-    { icon: Users, title: '海量账号', desc: '热门英雄角色，应有尽有', color: 'from-orange-500 to-red-500' },
-  ];
-
-  const steps = [
-    { num: '01', title: '浏览账号', desc: '搜索感兴趣的账号，了解详情和价格', icon: Search },
-    { num: '02', title: '联系卖家', desc: '在线沟通，确认账号信息和交易细节', icon: Users },
-    { num: '03', title: '下单支付', desc: '安全支付，资金由平台托管', icon: Shield },
-    { num: '04', title: '完成交易', desc: '获取账号，立即开始游戏', icon: Zap },
-  ];
 
   return (
     <PullToRefresh onRefresh={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}>
@@ -411,7 +409,7 @@ const HomePage: React.FC = () => {
                 onClick={() => {
                   navigate(`/accounts?keyword=${encodeURIComponent(cat.label)}`);
                 }}
-                className="card-static p-5 group hover:border-primary/50 transition-all cursor-pointer text-left"
+                className="card-static p-5 group active:border-primary/30 active:bg-primary/5 hover:border-primary/50 transition-all cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className={`w-10 h-10 rounded-xl ${cat.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
