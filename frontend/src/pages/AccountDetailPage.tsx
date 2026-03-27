@@ -34,7 +34,7 @@ const AccountDetailPage: React.FC = () => {
   const { data: sellerReviewsData, isLoading: reviewsLoading, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
   const sellerReviews = sellerReviewsData?.data?.data || [];
   const [votedReviews, setVotedReviews] = useState<Set<number>>(new Set());
-  const { data: sellerAccountsData } = useSellerAccounts(account?.sellerId);
+  const { data: sellerAccountsData, isLoading: sellerAccountsLoading } = useSellerAccounts(account?.sellerId);
   const sellerAccounts = useMemo(() =>
     (sellerAccountsData?.data?.data || []).filter(
       (a: any) => a.id !== accountId && a.status === 'ON_SALE'
@@ -467,7 +467,26 @@ const isOwner = user?.id === account?.sellerId;
           )}
 
           {/* Seller's Other Listings */}
-          {sellerAccounts.length > 0 && (
+          {sellerAccountsLoading ? (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <span className="text-slate-500">卖家其他账号</span>
+                </h3>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-1">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-36 card p-2.5">
+                    <div className="aspect-video bg-dark-lighter rounded-lg mb-2 overflow-hidden">
+                      <div className="w-full h-full skeleton" />
+                    </div>
+                    <div className="h-3 w-3/4 skeleton rounded mb-1" />
+                    <div className="h-3 w-1/2 skeleton rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : sellerAccounts.length > 0 ? (
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
