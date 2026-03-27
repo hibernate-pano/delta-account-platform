@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useWishlistStore } from '../../store/wishlist';
 import { useAuthStore } from '../../store/auth';
 import { useToast } from './Toast';
@@ -20,6 +21,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const { addItem, removeItem, isWishlisted } = useWishlistStore();
   const { token } = useAuthStore();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const wishlisted = isWishlisted(account.id);
   const [bursting, setBursting] = React.useState(false);
   const [pending, setPending] = React.useState(false);
@@ -39,7 +41,11 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!token || pending) return;
+    if (!token || pending) {
+      showToast('请先登录后再收藏', 'info');
+      navigate('/login');
+      return;
+    }
 
     const wasWishlisted = wishlisted;
 

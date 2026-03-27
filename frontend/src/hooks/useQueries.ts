@@ -507,6 +507,7 @@ export const useToggleFavorite = () => {
     mutationFn: (accountId: number) => favoriteApi.toggle(accountId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.favorites.list });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
     },
   });
 };
