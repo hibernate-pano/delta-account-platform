@@ -6,7 +6,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
 import {
-  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star
+  Eye, Trash2, ArrowRight, Gamepad2, History, Clock, CheckCircle, Sparkles, Star, ShoppingCart, RefreshCw
 } from 'lucide-react';
 
 const formatRelativeTime = (ts: number) => {
@@ -28,6 +28,7 @@ const RecentlyViewedPage: React.FC = () => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [sortMode, setSortMode] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
   const filteredItems = useMemo(() => {
     return recentItems
@@ -221,15 +222,45 @@ const RecentlyViewedPage: React.FC = () => {
                   <Clock className="w-3 h-3" />
                   {formatRelativeTime(item.viewedAt)}
                 </p>
+
+                {/* Social proof */}
+                {(item.account.viewCount != null || (item.account.orderCount != null && item.account.orderCount > 0)) && (
+                  <div className="flex items-center gap-3 mt-1.5">
+                    {item.account.viewCount != null && (
+                      <span className="flex items-center gap-0.5 text-[11px] text-slate-500">
+                        <Eye className="w-3 h-3" />
+                        {item.account.viewCount} 次浏览
+                      </span>
+                    )}
+                    {item.account.orderCount != null && item.account.orderCount > 0 && (
+                      <span className="flex items-center gap-0.5 text-[11px] text-green-400/70">
+                        <ShoppingCart className="w-3 h-3" />
+                        {item.account.orderCount} 笔售出
+                      </span>
+                    )}
+                  </div>
+                )}
               </Link>
 
               {/* Remove */}
               <button
-                onClick={(e) => { e.preventDefault(); removeItem(item.account.id); }}
-                className="absolute bottom-4 right-4 p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                disabled={removingId === item.account.id}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setRemovingId(item.account.id);
+                  setTimeout(() => {
+                    removeItem(item.account.id);
+                    setRemovingId(null);
+                  }, 150);
+                }}
+                className="absolute bottom-4 right-4 p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="移除记录"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                {removingId === item.account.id ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="w-3.5 h-3.5" />
+                )}
               </button>
             </div>
           ))}
