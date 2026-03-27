@@ -697,6 +697,48 @@ const ProfilePage: React.FC = () => {
                 </div>
               )}
 
+              {/* Order trend mini-chart */}
+              {!ordersLoading && orders.length > 0 && (() => {
+                const last7 = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() - (6 - i));
+                  const dateStr = d.toISOString().slice(0, 10);
+                  const count = orders.filter((o: any) => o.createdAt?.startsWith(dateStr)).length;
+                  return { date: dateStr, count, label: `${d.getMonth() + 1}/${d.getDate()}` };
+                });
+                const maxCount = Math.max(...last7.map(d => d.count), 1);
+                const total7 = last7.reduce((s, d) => s + d.count, 0);
+                return (
+                  <div className="card">
+                    <h3 className="font-medium mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                      7日订单趋势
+                    </h3>
+                    <div className="flex items-end gap-1 h-16 mb-3">
+                      {last7.map((d, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full bg-dark-lighter rounded-t relative" style={{ height: 56 }}>
+                            <div
+                              className="absolute bottom-0 w-full bg-gradient-to-t from-primary/70 to-primary rounded-t transition-all hover:from-primary"
+                              style={{ height: `${(d.count / maxCount) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between px-1">
+                      {last7.map((d, i) => (
+                        <span key={i} className="text-[9px] text-slate-600 text-center flex-1">{d.label}</span>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center mt-2 px-1 text-xs">
+                      <span className="text-slate-500">7日订单</span>
+                      <span className={total7 > 0 ? 'text-green-400 font-medium' : 'text-slate-500'}>{total7}笔</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Activity Timeline */}
               {!ordersLoading && orders.length > 0 && (
                 <div className="card">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlistStore } from '../store/wishlist';
 import { useAuthStore } from '../store/auth';
@@ -59,9 +59,17 @@ const WishlistPage: React.FC = () => {
   };
 
   const confirmClearAll = () => {
+    const itemsToRestore = [...wishlistItems];
     clearAll();
     setShowClearConfirm(false);
-    showToast('收藏列表已清空', 'info');
+    const count = itemsToRestore.length;
+    showToast(`已清空 ${count} 条收藏`, 'info', {
+      label: '撤销',
+      onClick: () => {
+        itemsToRestore.forEach(item => useWishlistStore.getState().addItem(item.account));
+        showToast(`已恢复 ${count} 条收藏`, 'success');
+      },
+    });
   };
 
   const handleRemove = (id: number) => {

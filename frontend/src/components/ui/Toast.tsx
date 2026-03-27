@@ -8,11 +8,15 @@ interface Toast {
   message: string;
   type: ToastType;
   pausedAt?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 interface ToastContextType {
   toasts: Toast[];
-  showToast: (message: string, type?: ToastType) => void;
+  showToast: (message: string, type?: ToastType, action?: Toast['action']) => void;
   toast: (type: ToastType, message: string) => void;
   removeToast: (id: string) => void;
   pauseToast: (id: string) => void;
@@ -57,10 +61,10 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     timersRef.current.set(id, timer);
   }, []);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+  const showToast = useCallback((message: string, type: ToastType = 'info', action?: Toast['action']) => {
     const id = crypto.randomUUID();
     setToasts((prev) => {
-      const next = [{ id, message, type }, ...prev];
+      const next = [{ id, message, type, action }, ...prev];
       return next.length > MAX_VISIBLE ? next.slice(0, MAX_VISIBLE) : next;
     });
     scheduleDismiss(id, TOAST_DURATION);
@@ -172,7 +176,17 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
           />
           <div className="flex items-start gap-3 p-4">
             <div className="flex-shrink-0 mt-0.5">{getIcon(toast.type)}</div>
-            <p className="flex-1 text-sm text-slate-200">{toast.message}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-slate-200">{toast.message}</p>
+              {toast.action && (
+                <button
+                  onClick={() => { toast.action?.onClick(); removeToast(toast.id); }}
+                  className="mt-1.5 text-xs text-primary hover:text-primary-light font-medium transition-colors"
+                >
+                  {toast.action.label}
+                </button>
+              )}
+            </div>
             <button
               onClick={() => removeToast(toast.id)}
               aria-label="关闭通知"
