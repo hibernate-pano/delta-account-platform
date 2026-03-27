@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { ConfirmInline } from '../components/ui/ConfirmInline';
 import { useAdminStats, useAdminAccounts, useAdminOrders, useAdminUsers, useVerifyAccount, useBanUser } from '../hooks/useQueries';
 import {
   Users, Package, FileText, Shield, RefreshCw, Star,
@@ -139,6 +140,8 @@ const AdminPage: React.FC = () => {
   const [userSearch, setUserSearch] = useState('');
   const [orderPage, setOrderPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
+  const [pendingBanId, setPendingBanId] = useState<number | null>(null);
+  const [pendingUserBan, setPendingUserBan] = useState<{ id: number; banned: boolean; username: string } | null>(null);
 
   const { data: statsData, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminStats();
   const { data: accountsData, isLoading: accountsLoading, isError: accountsError, refetch: refetchAccounts } = useAdminAccounts({ status: accountFilter, size: 50 });
@@ -191,11 +194,7 @@ const AdminPage: React.FC = () => {
   };
 
   const handleBan = (id: number) => {
-    if (!confirm('确定要封禁此用户吗？')) return;
-    banMutation.mutate({ id, banned: true }, {
-      onSuccess: () => { showToast('用户已被封禁', 'warning'); refetchUsers(); refetchStats(); },
-      onError: () => showToast('操作失败', 'error'),
-    });
+    setPendingBanId(id);
   };
 
   if (!token || user?.role !== 'ADMIN') {
@@ -228,6 +227,40 @@ const AdminPage: React.FC = () => {
 
   return (
     <div>
+      {/* Inline confirm: account ban */}
+      {pendingBanId !== null && (
+        <div className="mb-4">
+          <ConfirmInline
+            message="确定要封禁此账号吗？"
+            confirmLabel="封禁"
+            onConfirm={() => {
+              banMutation.mutate({ id: pendingBanId, banned: true }, {
+                onSuccess: () => { showToast('账号已被封禁', 'warning'); refetchUsers(); refetchStats(); },
+                onError: () => showToast('操作失败', 'error'),
+              });
+              setPendingBanId(null);
+            }}
+            onCancel={() => setPendingBanId(null)}
+          />
+        </div>
+      )}
+      {/* Inline confirm: user ban/unban */}
+      {pendingUserBan !== null && (
+        <div className="mb-4">
+          <ConfirmInline
+            message={pendingUserBan.banned ? `确定要封禁用户 ${pendingUserBan.username} 吗？` : `确定要解封用户 ${pendingUserBan.username} 吗？`}
+            confirmLabel={pendingUserBan.banned ? '封禁' : '解封'}
+            onConfirm={() => {
+              banMutation.mutate({ id: pendingUserBan.id, banned: pendingUserBan.banned }, {
+                onSuccess: () => { showToast(pendingUserBan.banned ? '用户已封禁' : '用户已解封', pendingUserBan.banned ? 'warning' : 'success'); refetchUsers(); },
+                onError: () => showToast('操作失败', 'error'),
+              });
+              setPendingUserBan(null);
+            }}
+            onCancel={() => setPendingUserBan(null)}
+          />
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -674,25 +707,13 @@ const AdminPage: React.FC = () => {
                                     <Eye className="w-3.5 h-3.5" />
                                   </button>
                                   {user.status === 'BANNED' ? (
-                                    <button onClick={() => {
-                                      if (!confirm(`确定要解封用户 ${user.username} 吗？`)) return;
-                                      banMutation.mutate({ id: user.id, banned: false }, {
-                                        onSuccess: () => { showToast('用户已解封', 'success'); refetchUsers(); },
-                                        onError: () => showToast('操作失败', 'error'),
-                                      });
-                                    }}
+                                    <button onClick={() => setPendingUserBan({ id: user.id, banned: false, username: user.username })}
                                       disabled={banMutation.isPending}
                                       className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs hover:bg-green-500/30 disabled:opacity-50 transition-colors">
                                       解封
                                     </button>
                                   ) : (
-                                    <button onClick={() => {
-                                      if (!confirm(`确定要封禁用户 ${user.username} 吗？`)) return;
-                                      banMutation.mutate({ id: user.id, banned: true }, {
-                                        onSuccess: () => { showToast('用户已封禁', 'warning'); refetchUsers(); },
-                                        onError: () => showToast('操作失败', 'error'),
-                                      });
-                                    }}
+                                    <button onClick={() => setPendingUserBan({ id: user.id, banned: true, username: user.username })}
                                       disabled={banMutation.isPending}
                                       className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 disabled:opacity-50 transition-colors">
                                       封禁

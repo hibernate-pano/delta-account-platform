@@ -571,7 +571,8 @@ const HomePage: React.FC = () => {
             <h2 className="text-3xl font-bold mb-3">
               用户 <span className="gradient-text">真实评价</span>
             </h2>
-            <p className="text-slate-400">精选已完成的真实交易评价 · <span className="text-slate-600">示例展示</span></p>
+            <p className="text-slate-400">精选已完成的真实交易评价</p>
+            <span className="inline-block mt-2 text-[11px] px-2 py-0.5 rounded bg-dark-lighter text-slate-600 border border-dark-border">示例数据 · 演示展示</span>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
@@ -623,8 +624,8 @@ const HomePage: React.FC = () => {
                     <p className="text-sm font-medium">{t.name}</p>
                     <p className="text-xs text-slate-600">示例用户</p>
                   </div>
-                  <span className="ml-auto flex items-center gap-1 text-xs text-green-400">
-                    <CheckCircle className="w-3 h-3" /> 已完成
+                  <span className="ml-auto flex items-center gap-1 text-xs text-slate-600">
+                    <CheckCircle className="w-3 h-3" /> 示例
                   </span>
                 </div>
               </div>
