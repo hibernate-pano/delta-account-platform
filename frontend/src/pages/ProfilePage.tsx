@@ -4,20 +4,120 @@ import { useAuthStore } from '../store/auth';
 import { useWishlistStore } from '../store/wishlist';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmInline } from '../components/ui/ConfirmInline';
-import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile } from '../hooks/useQueries';
+import { useAuthProfile, useMyOrders, useSellerAccounts, useUnreadCount, useUpdateProfile, useSellerReviews, useReplyReview } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
-  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle
+  MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send
 } from 'lucide-react';
+
+import { Review } from '../types';
+
+// Review card with inline reply capability
+const ReviewCard: React.FC<{
+  review: Review;
+  replyMutation: ReturnType<typeof useReplyReview>;
+  showToast: (msg: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+}> = ({ review, replyMutation, showToast }) => {
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [replyText, setReplyText] = useState('');
+
+  const handleSubmitReply = async () => {
+    if (!replyText.trim()) return;
+    try {
+      await replyMutation.mutateAsync({ id: review.id, reply: replyText.trim() });
+      showToast('回复已发送', 'success');
+      setReplyText('');
+      setShowReplyInput(false);
+    } catch {
+      showToast('回复失败，请重试', 'error');
+    }
+  };
+
+  return (
+    <div className="card p-4">
+      <div className="flex gap-3">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
+          <User className="w-4 h-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-sm font-medium text-slate-300">
+              {review.reviewer?.nickname || review.reviewer?.username || '匿名用户'}
+            </span>
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] text-slate-600">{new Date(review.createdAt).toLocaleDateString('zh-CN')}</span>
+            {review.accountTitle && (
+              <span className="text-[10px] px-1.5 py-0.5 bg-dark rounded text-slate-500">账号: {review.accountTitle}</span>
+            )}
+          </div>
+          {review.content && (
+            <p className="text-sm text-slate-400 leading-relaxed">{review.content}</p>
+          )}
+          {review.reply && (
+            <div className="mt-2 pl-3 border-l-2 border-primary/30">
+              <p className="text-xs text-slate-500 mb-0.5">商家回复:</p>
+              <p className="text-sm text-slate-400">{review.reply}</p>
+            </div>
+          )}
+          {!review.reply && (
+            <div className="mt-2">
+              {showReplyInput ? (
+                <div className="flex gap-2 items-end">
+                  <input
+                    type="text"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitReply(); if (e.key === 'Escape') { setShowReplyInput(false); setReplyText(''); } }}
+                    placeholder="写下你的回复..."
+                    className="input flex-1 !py-2 !text-xs"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleSubmitReply}
+                    disabled={replyMutation.isPending || !replyText.trim()}
+                    className="px-3 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 disabled:opacity-50 transition-colors flex-shrink-0"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => { setShowReplyInput(false); setReplyText(''); }}
+                    className="px-2 py-2 text-slate-500 hover:text-white transition-colors flex-shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowReplyInput(true)}
+                  className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  回复评价
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ProfilePage: React.FC = () => {
   usePageTitle('个人中心');
   const navigate = useNavigate();
   const { token, user, logout, updateUser } = useAuthStore();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist'>('accounts');
+  const [activeTab, setActiveTab] = useState<'accounts' | 'orders' | 'stats' | 'wishlist' | 'reviews'>('accounts');
   const [showEditModal, setShowEditModal] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
 
@@ -28,9 +128,12 @@ const ProfilePage: React.FC = () => {
   const profile = profileData?.data?.data;
   const profileId = profile?.id ?? user?.id;
   const { data: sellerAccounts, isLoading: accountsLoading, isError: accountsError } = useSellerAccounts(profileId);
+  const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchReviews } = useSellerReviews(profileId);
+  const replyMutation = useReplyReview();
 
   const accounts = sellerAccounts || [];
   const orders = ordersData?.data?.data?.records || [];
+  const reviews = reviewsData?.data?.data || [];
 
   const { items: wishlistItems, removeItem } = useWishlistStore();
   const wishlistCount = wishlistItems.length;
@@ -224,6 +327,7 @@ const ProfilePage: React.FC = () => {
           { key: 'orders', label: '订单记录', icon: FileText, count: stats.totalOrders },
           { key: 'stats', label: '数据统计', icon: TrendingUp, count: null },
           { key: 'wishlist', label: '我的收藏', icon: Heart, count: wishlistCount },
+          { key: 'reviews', label: '收到的评价', icon: Star, count: reviews.length || null },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -603,6 +707,40 @@ const ProfilePage: React.FC = () => {
                         </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {/* Reviews Tab */}
+          {activeTab === 'reviews' && (
+            <div>
+              {reviewsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="card p-4 animate-pulse">
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-dark-lighter" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-dark-lighter rounded w-1/4" />
+                          <div className="h-3 bg-dark-lighter rounded w-3/4" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="card text-center py-16">
+                  <div className="w-20 h-20 bg-dark-lighter rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-10 h-10 text-slate-700" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2 text-slate-400">暂无评价</h3>
+                  <p className="text-slate-600 text-sm">完成交易后买家会留下评价</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {reviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} replyMutation={replyMutation} showToast={showToast} />
                   ))}
                 </div>
               )}

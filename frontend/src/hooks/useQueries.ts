@@ -563,6 +563,17 @@ export const useSellerReviews = (sellerId: number | undefined) => {
   });
 };
 
+export const useReplyReview = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reply }: { id: number; reply: string }) =>
+      reviewApi.reply(id, reply),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'user'] });
+    },
+  });
+};
+
 // ==================== Query Client Factory ====================
 
 export const createQueryClient = () => new QueryClient({

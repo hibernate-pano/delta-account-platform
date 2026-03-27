@@ -75,8 +75,11 @@ export interface Review {
   orderId: number;
   reviewerId: number;
   revieweeId: number;
+  accountId?: number;
+  accountTitle?: string;
   rating: number;
   content?: string;
+  reply?: string;
   createdAt: string;
   reviewer?: User;
 }
