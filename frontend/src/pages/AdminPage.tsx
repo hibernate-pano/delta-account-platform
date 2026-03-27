@@ -762,9 +762,21 @@ const AdminPage: React.FC = () => {
                               <span className={`text-xs px-2 py-0.5 rounded ${statusBadge.bg} ${statusBadge.color}`}>{statusBadge.label}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <span className={`font-medium ${(user.creditScore ?? 100) >= 80 ? 'text-green-400' : (user.creditScore ?? 100) >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                {user.creditScore ?? 100}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`font-medium ${(user.creditScore ?? 100) >= 80 ? 'text-green-400' : (user.creditScore ?? 100) >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                  {user.creditScore ?? 100}
+                                </span>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                  (user.creditScore ?? 100) >= 90 ? 'bg-green-500/20 text-green-400' :
+                                  (user.creditScore ?? 100) >= 80 ? 'bg-emerald-500/20 text-emerald-400' :
+                                  (user.creditScore ?? 100) >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                                  'bg-red-500/20 text-red-400'
+                                }`}>
+                                  {(user.creditScore ?? 100) >= 90 ? '优秀' :
+                                   (user.creditScore ?? 100) >= 80 ? '良好' :
+                                   (user.creditScore ?? 100) >= 60 ? '一般' : '欠佳'}
+                                </span>
+                              </div>
                             </td>
                             <td className="px-4 py-3 text-slate-500 text-xs">
                               {user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-CN') : '-'}

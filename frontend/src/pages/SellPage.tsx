@@ -446,6 +446,26 @@ const SellPage: React.FC = () => {
                     <option value="">选择段位</option>
                     {ranks.map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
+                  {formData.gameRank && (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="text-[10px] text-slate-600">段位等级:</span>
+                      <div className="flex gap-0.5">
+                        {ranks.map((r, i) => (
+                          <div
+                            key={r}
+                            className={`w-5 h-2 rounded-full transition-all ${
+                              r === formData.gameRank ? 'bg-primary shadow-sm shadow-primary/50' :
+                              i < ranks.indexOf(formData.gameRank) ? 'bg-green-500/40' :
+                              'bg-dark-lighter'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-primary font-medium">
+                        {ranks.indexOf(formData.gameRank) + 1}/{ranks.length}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">皮肤数量</label>
