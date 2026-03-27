@@ -256,6 +256,9 @@ const WishlistPage: React.FC = () => {
                         <span className="text-slate-600 ml-auto">租 ¥{account.rentalPrice}/时</span>
                       )}
                     </div>
+                    {account.description && (
+                      <p className="text-xs text-slate-500 mb-2 line-clamp-1">{account.description}</p>
+                    )}
                     {(account.sellerNickname || account.sellerUsername) && (
                       <div className="flex items-center gap-1.5 mb-2">
                         {account.sellerAvatar ? (
@@ -359,6 +362,9 @@ const WishlistPage: React.FC = () => {
                       <span>🎨 {account.skinCount} 皮肤</span>
                       {account.weapons && <span className="truncate">{account.weapons}</span>}
                     </div>
+                    {account.description && (
+                      <p className="text-xs text-slate-600 mt-1 line-clamp-1">{account.description}</p>
+                    )}
                   </div>
 
                   {/* Price + Seller */}

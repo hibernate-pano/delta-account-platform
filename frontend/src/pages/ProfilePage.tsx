@@ -507,18 +507,31 @@ const ProfilePage: React.FC = () => {
                       className="card flex items-center gap-4 hover:border-primary/50 transition-all cursor-pointer group"
                       onClick={() => navigate('/orders')}
                     >
-                      <div className="w-12 h-12 bg-dark rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-slate-500" />
+                      {/* Account thumbnail */}
+                      <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-dark">
+                        {order.account?.images?.[0] ? (
+                          <img src={order.account.images[0]} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-5 h-5 text-slate-500" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate group-hover:text-primary transition-colors">
-                          订单 #{order.orderNo.slice(-8)}
+                          {order.account?.title || `订单 #${order.orderNo.slice(-6)}`}
                         </p>
-                        <p className="text-sm text-slate-500">
-                          {order.type === 'BUY' ? '购买' : '租赁'} · {order.createdAt}
-                        </p>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                          <span className={order.type === 'BUY' ? 'text-blue-400' : 'text-purple-400'}>
+                            {order.type === 'BUY' ? '购买' : '租赁'}
+                          </span>
+                          {order.account?.gameRank && (
+                            <span className="text-slate-600">{order.account.gameRank}</span>
+                          )}
+                          <span>{order.createdAt}</span>
+                        </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <p className="font-bold">¥{order.amount.toFixed(2)}</p>
                         <span
                           className={`px-2 py-0.5 rounded text-xs ${
@@ -526,6 +539,8 @@ const ProfilePage: React.FC = () => {
                               ? 'bg-green-500/20 text-green-400'
                               : order.status === 'PENDING'
                               ? 'bg-yellow-500/20 text-yellow-400'
+                              : order.status === 'CANCELLED'
+                              ? 'bg-red-500/20 text-red-400'
                               : 'bg-slate-500/20 text-slate-400'
                           }`}
                         >
@@ -533,10 +548,14 @@ const ProfilePage: React.FC = () => {
                             ? '已完成'
                             : order.status === 'PENDING'
                             ? '待支付'
+                            : order.status === 'CANCELLED'
+                            ? '已取消'
+                            : order.status === 'PROCESSING'
+                            ? '处理中'
                             : order.status}
                         </span>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-primary transition-colors" />
+                      <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-primary transition-colors flex-shrink-0" />
                     </div>
                   ))}
                 </div>
