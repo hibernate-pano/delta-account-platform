@@ -84,6 +84,7 @@ const HomePage: React.FC = () => {
   const accounts: Account[] = data?.data?.data?.records || [];
   const { items: recentItems } = useRecentStore();
   const [hydrated, setHydrated] = useState(false);
+  const [faqExpanded, setFaqExpanded] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
   // Featured = verified accounts
@@ -618,7 +619,7 @@ const HomePage: React.FC = () => {
             <p className="text-slate-400">你可能想了解的问题</p>
           </div>
           <div className="space-y-3">
-            {[
+            {(faqExpanded ? [
               {
                 q: '交易是否安全？',
                 a: '平台全程托管交易资金，买家确认收货后资金才会释放给卖家。同时所有账号信息经过平台审核，虚假描述可申请全额退款。'
@@ -639,10 +640,33 @@ const HomePage: React.FC = () => {
                 q: '租号有什么规则？',
                 a: '租号最长租期30天，到期后自动归还。租号期间禁止修改账号密码及敏感信息，违规将扣除押金并封禁账号。'
               },
-            ].map((faq, i) => (
+            ] : [
+              {
+                q: '交易是否安全？',
+                a: '平台全程托管交易资金，买家确认收货后资金才会释放给卖家。同时所有账号信息经过平台审核，虚假描述可申请全额退款。'
+              },
+              {
+                q: '账号被找回怎么办？',
+                a: '平台提供账号找回全额赔付保障。交易完成后如原主人通过官方渠道找回账号，平台将协助买家维权并提供相应赔偿。'
+              },
+              {
+                q: '支持哪些支付方式？',
+                a: '目前支持微信支付、支付宝，以及平台余额支付。后续将陆续支持银行卡和信用卡支付。'
+              },
+            ]).map((faq, i) => (
               <FaqItem key={i} q={faq.q} a={faq.a} />
             ))}
           </div>
+          <button
+            onClick={() => setFaqExpanded(v => !v)}
+            className="mt-4 w-full py-3 text-sm text-primary hover:text-primary-light transition-colors flex items-center justify-center gap-1.5"
+          >
+            {faqExpanded ? (
+              <><ChevronDown className="w-4 h-4 rotate-180" />收起问题</>
+            ) : (
+              <><ChevronDown className="w-4 h-4" />展开全部 5 个问题</>
+            )}
+          </button>
         </div>
       </section>
 

@@ -160,8 +160,8 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
           <div>
             <h2 className="text-lg font-bold">订单详情</h2>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs font-mono text-slate-500">#{order.orderNo.slice(-12)}</span>
-              <button onClick={handleCopyOrderNo} className="text-slate-600 hover:text-white transition-colors">
+              <span className="text-xs font-mono text-slate-500" title={`完整订单号: ${order.orderNo}`}>#{order.orderNo}</span>
+              <button onClick={handleCopyOrderNo} className="text-slate-600 hover:text-white transition-colors" title="复制订单号">
                 <Copy className="w-3 h-3" />
               </button>
             </div>
