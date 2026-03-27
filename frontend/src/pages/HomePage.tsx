@@ -7,7 +7,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { PullToRefresh } from '../components/ui/PullToRefresh';
 import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
-import { useAccounts, useMyOrders } from '../hooks/useQueries';
+import { useAccounts } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
@@ -740,8 +740,7 @@ const HomePage: React.FC = () => {
 
 // Live transaction toast (social proof)
 const TransactionToast: React.FC = () => {
-  const { data: ordersData } = useMyOrders();
-  const recentOrders: any[] = ordersData?.data?.data?.records || [];
+  const recentOrders: any[] = [];
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState<{ user: string; action: string; title: string; price: string } | null>(null);
 
@@ -776,7 +775,6 @@ const TransactionToast: React.FC = () => {
       setTimeout(() => { setCurrent(pick()); setVisible(true); }, 500);
     }, 7000);
     return () => { clearTimeout(init); clearInterval(cycle); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!current) return null;

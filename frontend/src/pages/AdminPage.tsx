@@ -799,14 +799,16 @@ const AdminPage: React.FC = () => {
                                   {user.status === 'BANNED' ? (
                                     <button onClick={() => setPendingUserBan({ id: user.id, banned: false, username: user.username })}
                                       disabled={banMutation.isPending}
-                                      className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs hover:bg-green-500/30 disabled:opacity-50 transition-colors">
-                                      解封
+                                      className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs hover:bg-green-500/30 disabled:opacity-50 transition-colors flex items-center gap-1">
+                                      {banMutation.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                                      {banMutation.isPending ? '解封中' : '解封'}
                                     </button>
                                   ) : (
                                     <button onClick={() => setPendingUserBan({ id: user.id, banned: true, username: user.username })}
                                       disabled={banMutation.isPending}
-                                      className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 disabled:opacity-50 transition-colors">
-                                      封禁
+                                      className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 disabled:opacity-50 transition-colors flex items-center gap-1">
+                                      {banMutation.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                                      {banMutation.isPending ? '封禁中' : '封禁'}
                                     </button>
                                   )}
                                 </div>
