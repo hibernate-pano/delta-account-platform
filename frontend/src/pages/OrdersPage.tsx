@@ -823,15 +823,18 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
                 aria-checked={star === rating}
                 tabIndex={star === rating ? 0 : -1}
                 onClick={() => setRating(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded"
+                onMouseEnter={() => !reviewMutation.isPending && setHoverRating(star)}
+                onMouseLeave={() => !reviewMutation.isPending && setHoverRating(0)}
+                disabled={reviewMutation.isPending}
+                className={`p-1 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded ${
+                  reviewMutation.isPending ? 'cursor-not-allowed opacity-50' : 'hover:scale-110'
+                }`}
               >
                 <Star
                   className={`w-8 h-8 transition-colors ${
                     star <= (hoverRating || rating)
                       ? 'text-yellow-400 fill-yellow-400'
-                      : 'text-slate-700 hover:text-yellow-500'
+                      : 'text-slate-700'
                   }`}
                 />
               </button>

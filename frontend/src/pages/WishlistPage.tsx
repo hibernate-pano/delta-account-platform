@@ -39,6 +39,7 @@ const WishlistPage: React.FC = () => {
   const [showAlertModal, setShowAlertModal] = useState<number | null>(null);
   const [alertPrice, setAlertPrice] = useState('');
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [isSavingAlert, setIsSavingAlert] = useState(false);
   const [priceAlerts, setPriceAlerts] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem('delta_price_alerts') || '{}'); }
     catch { return {}; }
@@ -521,17 +522,24 @@ const WishlistPage: React.FC = () => {
               </button>
             )}
             <button
+              disabled={isSavingAlert}
               onClick={() => {
                 const price = parseFloat(alertPrice);
                 if (price > 0) {
+                  setIsSavingAlert(true);
                   setPriceAlerts({ ...priceAlerts, [showAlertModal]: price });
                   showToast(`已设置 ¥${price} 的降价提醒`, 'success');
+                  setTimeout(() => {
+                    setShowAlertModal(null);
+                    setIsSavingAlert(false);
+                  }, 200);
+                } else {
+                  setShowAlertModal(null);
                 }
-                setShowAlertModal(null);
               }}
-              className="btn-primary flex-1"
+              className="btn-primary flex-1 disabled:opacity-50"
             >
-              确认设置
+              {isSavingAlert ? '保存中...' : '确认设置'}
             </button>
           </div>
         </div>
