@@ -10,7 +10,7 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { ReviewSkeleton } from '../components/ui/Skeleton';
 import { useAccount, useBuyAccount, useRentAccount, useCreateSession, useSellerReviewStats, useSellerAccounts, useSellerReviews, useWalletBalance } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { formatDateTime, formatCompact } from '../utils/format';
+import { formatDateTime, formatCompact, formatRelativeTime } from '../utils/format';
 import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
@@ -732,6 +732,39 @@ const isOwner = user?.id === account?.sellerId;
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {/* Rating distribution summary */}
+                  {sellerReviews.length > 0 && (() => {
+                    const dist = [5, 4, 3, 2, 1].map(r => ({
+                      rating: r,
+                      count: sellerReviews.filter((rev: any) => rev.rating === r).length,
+                      pct: sellerReviews.length > 0
+                        ? Math.round(sellerReviews.filter((rev: any) => rev.rating === r).length / sellerReviews.length * 100)
+                        : 0,
+                    }));
+                    const avg = sellerReviews.length > 0
+                      ? (sellerReviews.reduce((s: number, r: any) => s + r.rating, 0) / sellerReviews.length).toFixed(1)
+                      : '0.0';
+                    return (
+                      <div className="flex items-center gap-4 p-3 bg-dark rounded-xl border border-dark-border">
+                        <div className="text-center pr-4 border-r border-dark-border">
+                          <p className="text-2xl font-bold text-yellow-400">{avg}</p>
+                          <StarRating rating={parseFloat(avg)} size="sm" />
+                          <p className="text-xs text-slate-600 mt-0.5">{sellerReviews.length}条评价</p>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          {dist.map(({ rating, pct }) => (
+                            <div key={rating} className="flex items-center gap-2 text-xs">
+                              <span className="w-3 text-yellow-400/70 flex-shrink-0">{rating}★</span>
+                              <div className="flex-1 h-1.5 bg-dark-lighter rounded-full overflow-hidden">
+                                <div className="h-full bg-yellow-400/70 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className="text-slate-600 w-8 text-right">{pct}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                   {sellerReviews.slice(0, 5).map((review: any) => (
                     <div key={review.id} className="card p-4">
                       <div className="flex items-start gap-3">
@@ -755,9 +788,17 @@ const isOwner = user?.id === account?.sellerId;
                               ))}
                             </div>
                             <span className="text-xs text-yellow-400/70 font-medium flex-shrink-0">{review.rating}.0</span>
-                            <span className="text-xs text-slate-600 ml-auto flex-shrink-0">
+                            <span className={`text-xs ml-auto flex-shrink-0 ${
+                              (() => {
+                                if (!review.createdAt) return 'text-slate-600';
+                                const days = (Date.now() - new Date(review.createdAt).getTime()) / 86400000;
+                                if (days < 7) return 'text-green-400';
+                                if (days < 30) return 'text-yellow-400';
+                                return 'text-slate-500';
+                              })()
+                            }`}>
                               {review.createdAt
-                                ? new Date(review.createdAt).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
+                                ? `${formatRelativeTime(review.createdAt)} · ${new Date(review.createdAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}`
                                 : ''}
                             </span>
                           </div>
