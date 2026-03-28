@@ -607,7 +607,7 @@ const AccountEditPage: React.FC = () => {
             />
             <button
               onClick={() => setPreviewImg(null)}
-              className="absolute -top-3 -right-3 w-8 h-8 bg-dark-lighter rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+              className="absolute -top-3 -right-3 w-8 h-8 bg-dark-lighter rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark"
             >
               <X className="w-4 h-4" />
             </button>

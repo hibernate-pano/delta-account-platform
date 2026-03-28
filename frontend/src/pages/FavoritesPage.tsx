@@ -141,11 +141,11 @@ const FavoritesPage: React.FC = () => {
             看到心仪的账号，点个心形图标收藏起来，方便随时查看对比
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/accounts" className="btn-primary inline-flex items-center gap-2">
+            <Link to="/accounts" className="btn-primary inline-flex items-center gap-2 active:scale-95">
               <Gamepad2 className="w-4 h-4" />
               浏览账号市场
             </Link>
-            <Link to="/recent" className="btn-secondary inline-flex items-center gap-2">
+            <Link to="/recent" className="btn-secondary inline-flex items-center gap-2 active:scale-95">
               查看最近浏览
             </Link>
           </div>
