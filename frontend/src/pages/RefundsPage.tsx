@@ -395,19 +395,23 @@ const RefundsPage: React.FC = () => {
       {/* Refund stats summary */}
       {refunds.length > 0 && activeTab === 'list' && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="card p-4 text-center">
+          <div className="card p-4 text-center bg-gradient-to-br from-slate-800/50 to-slate-900/50">
+            <RefreshCw className="w-5 h-5 mx-auto mb-2 text-slate-400" />
             <p className="text-xs text-slate-500 mb-1">总退款申请</p>
             <p className="text-xl font-bold text-white">{refundStats.totalCount}</p>
           </div>
-          <div className="card p-4 text-center">
+          <div className="card p-4 text-center bg-gradient-to-br from-green-500/10 to-green-900/10 border border-green-500/20">
+            <DollarSign className="w-5 h-5 mx-auto mb-2 text-green-400" />
             <p className="text-xs text-slate-500 mb-1">已退款总额</p>
             <p className="text-xl font-bold text-green-400">¥{refundStats.totalRefunded.toFixed(2)}</p>
           </div>
-          <div className="card p-4 text-center">
+          <div className="card p-4 text-center bg-gradient-to-br from-yellow-500/10 to-yellow-900/10 border border-yellow-500/20">
+            <Clock className="w-5 h-5 mx-auto mb-2 text-yellow-400" />
             <p className="text-xs text-slate-500 mb-1">待处理金额</p>
             <p className="text-xl font-bold text-yellow-400">¥{refundStats.pendingAmount.toFixed(2)}</p>
           </div>
-          <div className="card p-4 text-center">
+          <div className="card p-4 text-center bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
+            <CheckCircle className="w-5 h-5 mx-auto mb-2 text-primary" />
             <p className="text-xs text-slate-500 mb-1">成功率</p>
             <p className="text-xl font-bold text-primary">{refundStats.successRate}%</p>
           </div>

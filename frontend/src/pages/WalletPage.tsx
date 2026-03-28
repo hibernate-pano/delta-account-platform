@@ -701,7 +701,7 @@ const WalletPage: React.FC = () => {
                     <div
                       key={tx.id}
                       onClick={() => setSelectedTx(tx)}
-                      className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-colors cursor-pointer"
+                      className="py-4 flex items-center justify-between hover:bg-dark/30 -mx-4 px-4 transition-all duration-150 cursor-pointer hover:scale-[1.01] hover:shadow-lg hover:shadow-black/20 active:scale-[0.99]"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${cfg.bg}`}>
