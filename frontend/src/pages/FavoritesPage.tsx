@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star, BadgeCheck, TrendingUp } from 'lucide-react';
+import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star, BadgeCheck, TrendingUp, Wallet } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
 import { GridSkeleton } from '../components/ui/Skeleton';
@@ -133,6 +133,14 @@ const FavoritesPage: React.FC = () => {
             <span className="text-slate-400">价格区间</span>
             <span className="font-semibold text-white">
               ¥{Math.min(...accounts.map((a) => a.price))} ~ ¥{Math.max(...accounts.map((a) => a.price))}
+            </span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <Wallet className="w-4 h-4 text-primary" />
+            <span className="text-slate-400">收藏总值</span>
+            <span className="font-semibold text-primary">
+              ¥{accounts.reduce((sum, a) => sum + a.price, 0).toLocaleString()}
             </span>
           </div>
         </div>

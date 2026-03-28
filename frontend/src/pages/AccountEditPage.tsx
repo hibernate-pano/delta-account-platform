@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { useAccount, queryKeys } from '../hooks/useQueries';
+import { useAccount, queryKeys, useAccounts } from '../hooks/useQueries';
 import SkeletonBase from '../components/ui/Skeleton';
 
 const PLATFORM_FEE_RATE = 0.05;
@@ -72,6 +72,7 @@ const AccountEditPage: React.FC = () => {
 
   const accountId = useMemo(() => id ? Number(id) : null, [id]);
   const { data, isLoading } = useAccount(accountId!);
+  const { data: similarAccounts } = useAccounts({ keyword: data?.data?.data?.gameRank, size: 10 });
 
   useEffect(() => {
     if (!data?.data?.data) return;
@@ -252,6 +253,46 @@ const AccountEditPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Market Comparison */}
+          {similarAccounts?.data?.data?.records && (() => {
+            const similar = similarAccounts.data.data.records.filter(
+              (a: Account) => a.gameRank === formData.gameRank && a.id !== accountId
+            );
+            if (similar.length === 0) return null;
+            const prices = similar.map((a: Account) => a.price);
+            const avg = prices.reduce((s: number, p: number) => s + p, 0) / prices.length;
+            return (
+              <div className="card bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border-blue-500/20 mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-medium text-slate-300">市场行情</span>
+                  <span className="text-[10px] text-slate-600">基于 {similar.length} 个同段位账号</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-dark rounded-lg px-3 py-2">
+                    <p className="text-lg font-bold text-white">¥{Math.min(...prices)}</p>
+                    <p className="text-[10px] text-slate-500">最低价</p>
+                  </div>
+                  <div className="bg-dark rounded-lg px-3 py-2">
+                    <p className="text-lg font-bold text-blue-400">¥{Math.round(avg)}</p>
+                    <p className="text-[10px] text-slate-500">平均价</p>
+                  </div>
+                  <div className="bg-dark rounded-lg px-3 py-2">
+                    <p className="text-lg font-bold text-white">¥{Math.max(...prices)}</p>
+                    <p className="text-[10px] text-slate-500">最高价</p>
+                  </div>
+                </div>
+                {formData.price && (
+                  <p className={`text-[10px] text-center mt-2 ${parseFloat(formData.price) < avg ? 'text-green-400' : 'text-amber-400'}`}>
+                    {parseFloat(formData.price) < avg
+                      ? `低于市场均价 ${Math.round(avg - parseFloat(formData.price))} 元，有竞争力`
+                      : `高于市场均价 ${Math.round(parseFloat(formData.price) - avg)} 元`}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="card space-y-5">
