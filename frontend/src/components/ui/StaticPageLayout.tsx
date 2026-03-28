@@ -107,7 +107,7 @@ export const StaticPageLayout: React.FC<StaticPageLayoutProps> = ({
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-all ${
                     activeSection === item.id
                       ? 'bg-primary/20 text-primary'
-                      : 'text-slate-400 hover:text-white hover:bg-dark-lighter'
+                      : 'text-slate-400 hover:text-white hover:bg-dark-lighter hover:scale-[1.02] active:scale-[0.98]'
                   }`}
                 >
                   <Icon className="w-4 h-4 flex-shrink-0" />
@@ -138,7 +138,7 @@ export const StaticPageLayout: React.FC<StaticPageLayoutProps> = ({
                       className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm text-left transition-all ${
                         activeSection === item.id
                           ? 'bg-primary/20 text-primary border-l-2 border-primary'
-                          : 'text-slate-500 hover:text-white hover:bg-dark-lighter hover:translate-x-1'
+                          : 'text-slate-500 hover:text-white hover:bg-dark-lighter hover:translate-x-1 hover:scale-[1.02] active:scale-[0.98]'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5 flex-shrink-0" />

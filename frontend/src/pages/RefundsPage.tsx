@@ -507,7 +507,7 @@ const RefundsPage: React.FC = () => {
                 return (
                   <div key={refund.id}
                     onClick={() => setSelectedRefund(refund)}
-                    className="py-4 px-2 cursor-pointer hover:bg-dark-lighter/30 transition-colors rounded-lg"
+                    className="py-4 px-2 cursor-pointer hover:bg-dark-lighter/50 border border-transparent hover:border-dark-border rounded-lg transition-all -mx-2"
                   >
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${config.bg}`}>

@@ -503,7 +503,7 @@ const SellPage: React.FC = () => {
                           setFormData((prev) => ({ ...prev, gameRank: '' }));
                         }
                       }}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
                         gameType === preset.label
                           ? 'bg-primary/20 border-primary text-primary'
                           : 'bg-dark-lighter border-dark-border text-slate-400 hover:text-white hover:border-slate-600'
