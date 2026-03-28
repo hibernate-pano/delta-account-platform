@@ -288,14 +288,19 @@ const WishlistPage: React.FC = () => {
                       {/* Price overlay */}
                       <div className="absolute bottom-2 right-2 flex items-center gap-1">
                         {priceAlerts[account.id] && (
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1 ${
                             account.price <= priceAlerts[account.id]
                               ? 'bg-green-500/90 text-white animate-pulse'
                               : 'bg-yellow-500/90 text-black'
                           }`}>
-                            {account.price <= priceAlerts[account.id]
-                              ? '价格已降至 ¥' + account.price
-                              : '目标 ¥' + priceAlerts[account.id]}
+                            {account.price <= priceAlerts[account.id] ? (
+                              <>
+                                <span className="text-[9px] bg-red-500 text-white px-1 rounded-sm font-bold">速</span>
+                                ¥{account.price}
+                              </>
+                            ) : (
+                              <>目标 ¥{priceAlerts[account.id]}</>
+                            )}
                           </span>
                         )}
                         <span className="text-lg font-bold text-white drop-shadow-lg">¥{account.price}</span>

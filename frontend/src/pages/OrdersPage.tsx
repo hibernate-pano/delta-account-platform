@@ -1190,31 +1190,52 @@ const OrdersPage: React.FC = () => {
                 .slice(-6);
               if (sorted.length < 2) return null;
               const maxVal = Math.max(...sorted.map(([, v]) => v), 1);
+              const avgVal = sorted.reduce((s, [, v]) => s + v, 0) / sorted.length;
+              const latestMonth = sorted[sorted.length - 1]?.[0];
+              const latestAmount = sorted[sorted.length - 1]?.[1] ?? 0;
+              const trend = latestAmount >= avgVal ? 'text-green-400' : 'text-yellow-400';
+              const trendIcon = latestAmount >= avgVal ? '↑' : '↓';
               return (
                 <div className="mt-4 pt-4 border-t border-dark-border">
-                  <p className="text-xs text-slate-500 mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    近{sorted.length}个月购买趋势
-                  </p>
-                  <div className="flex items-end gap-1.5 h-14">
-                    {sorted.map(([key, amount]) => {
-                      const pct = maxVal > 0 ? (amount / maxVal) * 100 : 0;
-                      const [, month] = key.split('-');
-                      const label = `${month}月`;
-                      return (
-                        <div key={key} className="flex-1 flex flex-col items-center gap-0.5 group">
-                          <span className="text-[10px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                            ¥{amount.toFixed(0)}
-                          </span>
-                          <div
-                            className="w-full bg-gradient-to-t from-primary/70 to-primary rounded-t transition-all hover:from-primary"
-                            style={{ height: `${Math.max(pct, 4)}%` }}
-                            title={`${key}: ¥${amount.toFixed(2)}`}
-                          />
-                          <span className="text-[9px] text-slate-600">{label}</span>
-                        </div>
-                      );
-                    })}
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs text-slate-500 flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      近{sorted.length}个月购买趋势
+                    </p>
+                    <div className="flex items-center gap-3 text-[10px]">
+                      <span className="text-slate-600">月均 <span className="text-slate-400">¥{avgVal.toFixed(0)}</span></span>
+                      <span className={trend}>本月 {trendIcon} <span className="font-medium">¥{latestAmount.toFixed(0)}</span></span>
+                    </div>
+                  </div>
+                  <div className="relative h-14">
+                    {/* Average line */}
+                    <div
+                      className="absolute left-0 right-0 border-t border-dashed border-slate-600/50 pointer-events-none z-10"
+                      style={{ bottom: `${(avgVal / maxVal) * 100}%` }}
+                    />
+                    <div className="absolute right-0 text-[9px] text-slate-600 pointer-events-none" style={{ bottom: `${(avgVal / maxVal) * 100 + 2}%` }}>
+                      ¥{avgVal.toFixed(0)}
+                    </div>
+                    <div className="flex items-end gap-1.5 h-full">
+                      {sorted.map(([key, amount]) => {
+                        const pct = maxVal > 0 ? (amount / maxVal) * 100 : 0;
+                        const [, month] = key.split('-');
+                        const label = `${month}月`;
+                        return (
+                          <div key={key} className="flex-1 flex flex-col items-center gap-0.5 group flex-1">
+                            <span className="text-[10px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                              ¥{amount.toFixed(0)}
+                            </span>
+                            <div
+                              className={`w-full rounded-t transition-all hover:from-primary/90 ${key === latestMonth ? 'from-green-500/80 to-green-500' : 'from-primary/70 to-primary'}`}
+                              style={{ height: `${Math.max(pct, 4)}%` }}
+                              title={`${key}: ¥${amount.toFixed(2)}`}
+                            />
+                            <span className={`text-[9px] ${key === latestMonth ? 'text-green-400' : 'text-slate-600'}`}>{label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               );
