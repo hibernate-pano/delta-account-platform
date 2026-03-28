@@ -280,7 +280,7 @@ const isOwner = user?.id === account?.sellerId;
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all active:opacity-80 ${
                   activeTab === tab.key
                     ? 'bg-primary text-white'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-slate-400 hover:text-white active:bg-dark-lighter active:text-slate-300'
                 }`}
               >
                 {tab.label}

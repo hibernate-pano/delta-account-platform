@@ -60,7 +60,7 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
           onClick={onCancel}
           disabled={isPending}
           onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
-          className="px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-dark-lighter rounded-lg hover:bg-dark-border hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+          className="px-3 py-1.5 text-xs text-slate-400 hover:text-white bg-dark-lighter rounded-lg hover:bg-dark-border hover:scale-105 active:scale-95 transition-all disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark"
         >
           取消
         </button>
@@ -68,7 +68,7 @@ export const ConfirmInline: React.FC<ConfirmInlineProps> = ({
           onClick={onConfirm}
           disabled={isPending}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onConfirm(); }}
-          className={`px-3 py-1.5 text-xs rounded-lg font-medium flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 ${
+          className={`px-3 py-1.5 text-xs rounded-lg font-medium flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark ${
             confirmVariant === 'danger'
               ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
               : 'bg-primary/20 text-primary hover:bg-primary/30'

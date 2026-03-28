@@ -167,7 +167,7 @@ const RecentlyViewedPage: React.FC = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {filteredItems.map((item) => (
-            <div key={`${item.account.id}-${item.viewedAt}`} className="card group relative hover:border-slate-700 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 transition-all">
+            <div key={`${item.account.id}-${item.viewedAt}`} className="card group relative hover:border-slate-700 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/5 transition-all">
               {/* Wishlist */}
               <div className="absolute top-2 right-2 z-10">
                 <WishlistButton account={item.account} size="sm" />
