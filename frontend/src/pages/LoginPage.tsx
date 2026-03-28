@@ -260,7 +260,7 @@ const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2 disabled:opacity-50 group relative overflow-hidden"
+                className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2 disabled:opacity-50 group relative overflow-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

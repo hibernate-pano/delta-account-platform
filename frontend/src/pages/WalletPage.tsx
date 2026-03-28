@@ -610,8 +610,8 @@ const WalletPage: React.FC = () => {
                   onClick={() => setActiveType(t.key)}
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all text-xs ${
                     activeType === t.key
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'bg-dark-lighter text-slate-500 hover:text-slate-300 border border-transparent'
+                      ? 'bg-primary/20 text-primary border border-primary/30 scale-105'
+                      : 'bg-dark-lighter text-slate-500 hover:text-slate-300 hover:scale-105 border border-transparent'
                   }`}
                 >
                   {t.icon && <t.icon className="w-3 h-3" />}
