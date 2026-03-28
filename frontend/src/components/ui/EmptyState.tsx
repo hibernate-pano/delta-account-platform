@@ -86,7 +86,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
                 <Link
                   key={i}
                   to={action.to}
-                  className={action.variant === 'secondary' ? 'btn-secondary text-sm' : 'btn-primary text-sm'}
+                  className={action.variant === 'secondary' ? 'btn-secondary text-sm hover:scale-105 active:scale-95' : 'btn-primary text-sm hover:scale-105 active:scale-95'}
                 >
                   {Icon2 && <Icon2 className="w-4 h-4" />}
                   {action.label}
@@ -97,7 +97,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               <button
                 key={i}
                 onClick={action.onClick}
-                className={action.variant === 'secondary' ? 'btn-secondary text-sm' : 'btn-primary text-sm'}
+                className={action.variant === 'secondary' ? 'btn-secondary text-sm hover:scale-105 active:scale-95' : 'btn-primary text-sm hover:scale-105 active:scale-95'}
               >
                 {Icon2 && <Icon2 className="w-4 h-4" />}
                 {action.label}

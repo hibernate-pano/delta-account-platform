@@ -138,7 +138,7 @@ export const StaticPageLayout: React.FC<StaticPageLayoutProps> = ({
                       className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm text-left transition-all ${
                         activeSection === item.id
                           ? 'bg-primary/20 text-primary border-l-2 border-primary'
-                          : 'text-slate-500 hover:text-white hover:bg-dark-lighter'
+                          : 'text-slate-500 hover:text-white hover:bg-dark-lighter hover:translate-x-1'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5 flex-shrink-0" />

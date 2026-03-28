@@ -347,7 +347,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
                   className={`flex-shrink-0 w-14 h-10 rounded-lg overflow-hidden transition-all ${
                     idx === lightboxIndex
                       ? 'ring-2 ring-primary scale-110'
-                      : 'opacity-40 hover:opacity-80'
+                      : 'opacity-40 hover:opacity-80 hover:scale-105 active:scale-100'
                   }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
