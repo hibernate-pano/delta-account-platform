@@ -104,7 +104,7 @@ const OrderStepper: React.FC<{ status: string; type: 'BUY' | 'RENT' }> = ({ stat
                   done
                     ? 'bg-primary text-white shadow-lg shadow-primary/30'
                     : 'bg-dark-lighter text-slate-600'
-                } ${active && !done ? 'ring-2 ring-primary/50 animate-pulse' : ''} ${done && active ? 'shadow-lg shadow-primary/50' : ''}`}
+                } ${active && !done ? 'ring-2 ring-primary/50 animate-pulse' : ''} ${done && active ? 'shadow-lg shadow-primary/50 ring-2 ring-primary/30' : ''}`}
               >
                 <StepIcon className="w-3.5 h-3.5" />
               </div>

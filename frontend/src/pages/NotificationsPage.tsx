@@ -206,7 +206,7 @@ const NotificationItem: React.FC<{
             {selectedIds.has(notification.id) && <CheckCircle className="w-3.5 h-3.5 text-white" />}
           </div>
         </button>
-        <div className="px-2 py-4 flex items-start gap-3 hover:bg-dark-lighter/40 transition-colors cursor-pointer active:bg-dark-lighter/60"
+        <div className="px-2 py-4 flex items-start gap-3 hover:bg-dark-lighter/40 hover:scale-[1.005] active:scale-[0.995] transition-all cursor-pointer active:bg-dark-lighter/60"
           onClick={() => {
             // Smart navigate on click
             const target = getNavTarget(notification);

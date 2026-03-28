@@ -433,7 +433,7 @@ const WishlistPage: React.FC = () => {
                     <WishlistButton account={account} size="sm" />
                     <Link
                       to={`/accounts/${account.id}`}
-                      className="p-2 text-slate-500 hover:text-white hover:bg-dark rounded-lg transition-colors"
+                      className="p-2 text-slate-500 hover:text-white hover:bg-dark hover:scale-110 active:scale-95 rounded-lg transition-all"
                       title="查看"
                     >
                       <ArrowRight className="w-4 h-4" />
@@ -441,7 +441,7 @@ const WishlistPage: React.FC = () => {
                     <button
                       onClick={() => handleRemove(account.id)}
                       disabled={removingId === account.id}
-                      className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 text-slate-600 hover:text-red-400 hover:bg-red-500/10 hover:scale-110 active:scale-95 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       title="移除"
                     >
                       {removingId === account.id ? (
