@@ -212,7 +212,7 @@ const WishlistPage: React.FC = () => {
           {viewMode === 'grid' && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
               {sortedItems.map((account) => (
-                <div key={account.id} className="card group relative">
+                <div key={account.id} className="card group relative hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10">
                   {/* Wishlist btn */}
                   <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
                     <WishlistButton account={account} size="sm" />
@@ -339,7 +339,7 @@ const WishlistPage: React.FC = () => {
                       to={`/accounts/${account.id}`}
                       className="flex-1 btn-secondary !py-2 text-xs flex items-center justify-center gap-1.5"
                     >
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                       查看详情
                     </Link>
                     <button
@@ -364,7 +364,7 @@ const WishlistPage: React.FC = () => {
           {viewMode === 'list' && (
             <div className="space-y-3 animate-fade-in">
               {sortedItems.map((account) => (
-                <div key={account.id} className="card flex items-center gap-4 p-4 hover:border-slate-700 transition-all group">
+                <div key={account.id} className="card flex items-center gap-4 p-4 hover:border-slate-700 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary/10 transition-all group">
                   {/* Image */}
                   <Link to={`/accounts/${account.id}`} className="flex-shrink-0">
                     <div className="w-24 h-16 bg-dark rounded-lg overflow-hidden">
