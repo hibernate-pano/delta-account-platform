@@ -868,7 +868,7 @@ const RefundsPage: React.FC = () => {
                     value={newImage}
                     onChange={(e) => setNewImage(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                    className="input flex-1"
+                    className="input flex-1 focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                     placeholder="输入图片URL"
                   />
                   <button
