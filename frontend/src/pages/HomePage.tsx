@@ -332,7 +332,7 @@ const HomePage: React.FC = () => {
                   </button>
                 )}
               </div>
-              <button type="submit" className="btn-primary px-8 py-4 text-lg">
+              <button type="submit" className="btn-primary px-8 py-4 text-lg hover:scale-105 active:scale-95 transition-transform">
                 搜索
               </button>
             </div>

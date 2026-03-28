@@ -193,14 +193,14 @@ const WishlistPage: React.FC = () => {
             <div className="flex bg-dark-lighter rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-slate-500 hover:text-white'}`}
+                className={`p-1.5 rounded transition-all hover:scale-110 active:scale-95 ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-slate-500 hover:text-white'}`}
                 title="网格视图"
               >
                 <Grid3x3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded transition-all ${viewMode === 'list' ? 'bg-primary text-white' : 'text-slate-500 hover:text-white'}`}
+                className={`p-1.5 rounded transition-all hover:scale-110 active:scale-95 ${viewMode === 'list' ? 'bg-primary text-white' : 'text-slate-500 hover:text-white'}`}
                 title="列表视图"
               >
                 <List className="w-4 h-4" />
