@@ -332,7 +332,7 @@ const WishlistPage: React.FC = () => {
                         </div>
                       )}
                       {/* Price overlay */}
-                      <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                      <div className="absolute bottom-2 right-2 flex flex-col items-end gap-1">
                         {priceAlerts[account.id] && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1 ${
                             account.price <= priceAlerts[account.id]
@@ -349,6 +349,14 @@ const WishlistPage: React.FC = () => {
                             )}
                           </span>
                         )}
+                        {priceAlerts[account.id] && account.price <= priceAlerts[account.id] && (() => {
+                          const drop = ((priceAlerts[account.id] - account.price) / priceAlerts[account.id] * 100);
+                          return drop > 0 ? (
+                            <span className="text-[9px] px-1.5 py-0.5 bg-red-500/90 text-white rounded-full font-bold">
+                              -{drop.toFixed(0)}%
+                            </span>
+                          ) : null;
+                        })()}
                         <span className="text-lg font-bold text-white drop-shadow-lg">¥{account.price}</span>
                       </div>
                     </div>

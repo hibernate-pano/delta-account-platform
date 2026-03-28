@@ -534,6 +534,9 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 {order.account.gameType}
               </span>
             )}
+            {order.account?.sellerCreditScore != null && order.account.sellerCreditScore >= 80 && (
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_3px_rgba(52,211,153,0.4)]" />
+            )}
           </div>
           <p className="text-xs text-slate-500 font-mono">#{order.orderNo.slice(-8)}</p>
         </div>
