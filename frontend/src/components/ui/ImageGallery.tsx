@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Maximize2, Download } from 'lucide-react';
 
 interface ImageGalleryProps {
   images: string[];
@@ -269,6 +269,13 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
                 title="放大 (+)"
               >
                 <ZoomIn className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); const link = document.createElement('a'); link.href = images[lightboxIndex]; link.download = `${title || 'image'}-${lightboxIndex + 1}`; link.click(); }}
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                title="下载图片"
+              >
+                <Download className="w-4 h-4" />
               </button>
               {/* Close */}
               <button

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import { paymentApi, orderApi } from '../../api';
 import { useToast } from '../ui/Toast';
-import { X, Wallet, CreditCard, Loader2, AlertCircle, Zap, Clock } from 'lucide-react';
+import { X, Wallet, CreditCard, Loader2, AlertCircle, Zap, Clock, ShieldCheck } from 'lucide-react';
 
 interface PaymentModalProps {
   orderId: number;
@@ -121,6 +121,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             </div>
             <p className="text-white font-medium mb-2 line-clamp-2">{orderTitle}</p>
             <p className="text-2xl font-bold text-primary">¥{amount}</p>
+          </div>
+
+          {/* Escrow protection trust badge */}
+          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-start gap-2">
+            <ShieldCheck className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-green-400 font-medium flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                平台保障交易
+              </p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                资金由平台托管，确认收货后卖家才可提现，有效防止欺诈
+              </p>
+            </div>
           </div>
 
           {/* Balance Info */}
