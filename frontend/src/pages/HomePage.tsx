@@ -475,7 +475,7 @@ const HomePage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-primary font-bold text-sm">¥{account.price}</span>
                       {account.verificationStatus === 'VERIFIED' && (
-                        <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                        <CheckCircle className="w-3.5 h-3.5 text-green-400 drop-shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
                       )}
                     </div>
                   </Link>
