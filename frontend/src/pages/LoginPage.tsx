@@ -293,7 +293,7 @@ const LoginPage: React.FC = () => {
                       key={acc.id}
                       onClick={() => handleDemoLogin(acc.id)}
                       disabled={!!loadingAccountId}
-                      className={`w-full flex items-center gap-4 p-4 bg-dark-lighter border border-transparent rounded-xl text-left transition-all disabled:opacity-50 ${acc.bg}`}
+                      className={`w-full flex items-center gap-4 p-4 bg-dark-lighter border border-transparent rounded-xl text-left transition-all disabled:opacity-50 group ${acc.bg}`}
                     >
                       <div className={`w-11 h-11 rounded-xl bg-dark flex items-center justify-center flex-shrink-0 border border-slate-700/50`}>
                         {isLoading ? (

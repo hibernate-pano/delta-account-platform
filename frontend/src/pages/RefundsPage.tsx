@@ -92,7 +92,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
           {/* Amount */}
           <div className="bg-dark rounded-xl p-4 text-center">
             <p className="text-xs text-slate-500 mb-1">退款金额</p>
-            <p className="text-3xl font-bold text-primary">¥{refund.amount}</p>
+            <p className="text-3xl font-bold text-red-400">-¥{refund.amount}</p>
           </div>
 
           {/* Reason */}
