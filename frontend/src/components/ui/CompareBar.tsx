@@ -106,16 +106,16 @@ const CompareRow: React.FC<{ label: string; values: string[]; isWinner?: boolean
   isWinner,
   highlight,
 }) => (
-  <tr className={highlight ? 'bg-primary/5' : ''}>
-    <td className={`py-3 px-4 text-sm w-28 border-r border-dark-border align-top ${highlight ? 'text-primary font-medium' : 'text-slate-500'}`}>
+  <tr className={`transition-colors duration-150 ${highlight ? 'bg-primary/5' : 'hover:bg-dark-lighter/50'}`}>
+    <td className={`py-3 px-4 text-sm w-28 border-r border-dark-border align-top transition-colors ${highlight ? 'text-primary font-medium' : 'text-slate-500'}`}>
       {label}
     </td>
     {values.map((val, i) => (
       <td
         key={i}
-        className={`py-3 px-4 text-sm text-center align-top ${
+        className={`py-3 px-4 text-sm text-center align-top transition-colors duration-150 ${
           isWinner?.[i] ? 'bg-green-500/5' : ''
-        } ${highlight ? (isWinner?.[i] ? 'text-green-400 font-semibold' : 'text-slate-300') : ''}`}
+        } ${highlight ? (isWinner?.[i] ? 'text-green-400 font-semibold' : 'text-slate-300') : 'hover:bg-dark-lighter/30'}`}
       >
         <span className={isWinner?.[i] && !highlight ? 'text-green-400 font-semibold' : ''}>
           {val}

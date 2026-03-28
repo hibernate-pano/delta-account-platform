@@ -29,10 +29,10 @@ export const StarRating: React.FC<StarRatingProps> = ({
       {[1, 2, 3, 4, 5].map((s) => (
         <Star
           key={s}
-          className={`${sizeClasses[size]} ${
+          className={`${sizeClasses[size]} transition-all duration-150 hover:scale-125 ${
             s <= filledStars
-              ? 'text-yellow-400 fill-yellow-400'
-              : 'text-slate-600'
+              ? 'text-yellow-400 fill-yellow-400 hover:drop-shadow-[0_0_6px_rgba(250,204,21,0.6)]'
+              : 'text-slate-600 hover:text-slate-400'
           }`}
         />
       ))}
