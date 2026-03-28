@@ -64,6 +64,11 @@ const ReviewCard: React.FC<{
             {review.accountTitle && (
               <span className="text-[10px] px-1.5 py-0.5 bg-dark rounded text-slate-500">账号: {review.accountTitle}</span>
             )}
+            {review.reply && (
+              <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded flex items-center gap-0.5">
+                <CheckCircle className="w-2.5 h-2.5" /> 商家已回复
+              </span>
+            )}
           </div>
           {review.content && (
             <p className="text-sm text-slate-400 leading-relaxed">{review.content}</p>
