@@ -31,6 +31,8 @@ export const CompareBar: React.FC<CompareBarProps> = ({
   const recoveryHours = accounts.map((a) => a.rentalPrice && a.price > 0 ? a.price / a.rentalPrice : Infinity);
   const depositRatios = accounts.map((a) => a.deposit && a.price > 0 ? a.deposit / a.price : Infinity);
   const depositBest = depositRatios.map((v, i) => v < Infinity && v === Math.min(...depositRatios, Infinity) && depositRatios.filter(x => x === v).length === 1 ? i : -1);
+  const skinPriceRatios = accounts.map((a) => a.skinCount > 0 && a.price > 0 ? a.price / a.skinCount : Infinity);
+  const skinPriceBest = skinPriceRatios.map((v, i) => v < Infinity && v === Math.min(...skinPriceRatios, Infinity) && skinPriceRatios.filter(x => x === v).length === 1 ? i : -1);
   const winnerIndices = (() => {
     if (items.length < 2) return [];
     const prices = accounts.map((a) => a.price);
@@ -49,7 +51,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
     const orderBest = orderCounts.map((v, i) => v > 0 && v === Math.max(...orderCounts, -Infinity) && orderCounts.filter(x => x === v).length === 1 ? i : -1);
     const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores, -Infinity) && valueScores.filter(x => x === v).length === 1 ? i : -1);
     const recoveryBest = recoveryHours.map((v, i) => v < Infinity && v === Math.min(...recoveryHours, Infinity) && recoveryHours.filter(x => x === v).length === 1 ? i : -1);
-    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest, recoveryBest];
+    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest, recoveryBest, depositBest, skinPriceBest];
     const counts = accounts.map((_, idx) => allBest.filter(best => best.includes(idx)).length);
     const maxCount = Math.max(...counts);
     if (maxCount === 0) return [];
@@ -255,6 +257,12 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
     { label: '价格', values: accounts.map((a) => `¥${a.price}`), bestIdx: priceBest },
     { label: '段位', values: accounts.map((a) => a.gameRank || '未填写') },
     { label: '皮肤数量', values: accounts.map((a) => `${a.skinCount || 0} 个`), bestIdx: skinBest },
+    {
+      label: '皮肤单价',
+      values: accounts.map((a, i) => skinPriceRatios[i] < Infinity ? `¥${skinPriceRatios[i].toFixed(1)}/皮` : '—'),
+      bestIdx: skinPriceBest,
+      subLabel: '单价越低越优',
+    },
     { label: '所属英雄', values: accounts.map((a) => a.weapons || '未填写') },
     { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '已认证' : '待认证') },
     { label: '时租价', values: accounts.map((a) => a.rentalPrice ? `¥${a.rentalPrice}/时` : '不支持') },
