@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette, AlertTriangle } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -684,7 +684,12 @@ const AccountsPage: React.FC = () => {
                 {account.rentalPrice && (
                   <span className="text-xs text-slate-500">
                     租 ¥{account.rentalPrice}/时
-                    {account.deposit != null && account.deposit > 0 && <span className="text-slate-600">(+¥{account.deposit}押金)</span>}
+                    {account.deposit != null && account.deposit > 0 && (() => {
+                      const isHigh = account.deposit > account.rentalPrice * 10;
+                      return <span className={isHigh ? 'text-red-400' : 'text-slate-600'}>
+                        (+¥{account.deposit}押金{isHigh && <AlertTriangle className="w-2.5 h-2.5 inline ml-0.5" />})
+                      </span>;
+                    })()}
                   </span>
                 )}
               </div>
@@ -805,7 +810,12 @@ const AccountsPage: React.FC = () => {
                     </span>
                   )}
                   {account.rentalPrice && (
-                    <span className="text-sm text-slate-500">租 ¥{account.rentalPrice}/时{account.deposit != null && account.deposit > 0 && <span className="text-slate-600 text-[10px] ml-0.5">(+¥{account.deposit}押金)</span>}</span>
+                    <span className="text-sm text-slate-500">租 ¥{account.rentalPrice}/时{account.deposit != null && account.deposit > 0 && (() => {
+                      const isHigh = account.deposit > account.rentalPrice * 10;
+                      return <span className={`text-[10px] ml-0.5 ${isHigh ? 'text-red-400' : 'text-slate-600'}`}>
+                        (+¥{account.deposit}押金{isHigh && <AlertTriangle className="w-2.5 h-2.5 inline ml-0.5" />})
+                      </span>;
+                    })()}</span>
                   )}
                 </div>
                 {/* Engagement stats */}
@@ -939,9 +949,14 @@ const AccountsPage: React.FC = () => {
                     <div className="text-right">
                       <p className="text-xs text-slate-500 mb-1">时租价</p>
                       <p className="text-xl font-semibold text-purple-400">¥{quickViewAccount.rentalPrice}/时</p>
-                      {quickViewAccount.deposit != null && quickViewAccount.deposit > 0 && (
-                        <p className="text-[10px] text-slate-500 mt-0.5">押金 ¥{quickViewAccount.deposit}</p>
-                      )}
+                      {quickViewAccount.deposit != null && quickViewAccount.deposit > 0 && (() => {
+                        const isHigh = quickViewAccount.rentalPrice ? quickViewAccount.deposit > quickViewAccount.rentalPrice * 10 : quickViewAccount.deposit > 200;
+                        return (
+                          <p className={`text-[10px] mt-0.5 flex items-center gap-0.5 ${isHigh ? 'text-red-400' : 'text-slate-500'}`}>
+                            押金 ¥{quickViewAccount.deposit}{isHigh && <><AlertTriangle className="w-2.5 h-2.5" />偏高</>}
+                          </p>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>

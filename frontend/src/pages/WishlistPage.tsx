@@ -392,12 +392,18 @@ const WishlistPage: React.FC = () => {
                           {account.orderCount}笔交易
                         </span>
                       )}
-                      {recentItems.some((r: any) => r.account.id === account.id) && (
-                        <span className="text-primary/60 flex items-center gap-0.5">
-                          <Eye className="w-3 h-3" />
-                          已浏览
-                        </span>
-                      )}
+                      {(() => {
+                        const recent = recentItems.find((r: any) => r.account.id === account.id);
+                        if (!recent || !recent.viewedAt) return null;
+                        const mins = Math.floor((Date.now() - recent.viewedAt) / 60000);
+                        const label = mins < 1 ? '刚看过' : mins < 60 ? `${mins}分钟前` : mins < 1440 ? `${Math.floor(mins / 60)}小时前` : '今天';
+                        return (
+                          <span className="text-primary/60 flex items-center gap-0.5">
+                            <Eye className="w-3 h-3" />
+                            {label}
+                          </span>
+                        );
+                      })()}
                       <span className="ml-auto opacity-60">{formatRelativeTime(account.createdAt)}</span>
                     </div>
                   </Link>
