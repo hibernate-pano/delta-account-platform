@@ -976,7 +976,12 @@ const AccountsPage: React.FC = () => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">{quickViewAccount.sellerNickname || quickViewAccount.sellerUsername || '卖家'}</p>
+                    <p className="text-sm font-medium text-white flex items-center gap-1">
+                      {quickViewAccount.sellerNickname || quickViewAccount.sellerUsername || '卖家'}
+                      {quickViewAccount.sellerCreditScore != null && quickViewAccount.sellerCreditScore >= 80 && (
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+                      )}
+                    </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <StarRating score={quickViewAccount.sellerCreditScore || 50} size="sm" showScore scoreText={`${quickViewAccount.sellerCreditScore || '—'}`} />
                     </div>

@@ -366,6 +366,9 @@ const WishlistPage: React.FC = () => {
                         {account.verificationStatus === 'VERIFIED' && (
                           <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0" />
                         )}
+                        {account.sellerCreditScore != null && account.sellerCreditScore >= 80 && (
+                          <ShieldCheck className="w-3 h-3 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+                        )}
                       </div>
                       {/* Escrow protection badge */}
                       {account.verificationStatus === 'VERIFIED' && (account.sellerCreditScore ?? 0) >= 70 && (
