@@ -1293,17 +1293,17 @@ const OrdersPage: React.FC = () => {
               <p className="text-slate-600 text-xs mb-6">开始探索账号市场吧</p>
               {/* Quick action cards */}
               <div className="flex justify-center gap-3 mb-6">
-                <Link to="/accounts" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+                <Link to="/accounts" className="card p-4 text-left hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/60 active:scale-[0.98] transition-all duration-200 w-40 flex-shrink-0">
                   <ShoppingBag className="w-5 h-5 text-blue-400 mb-2" />
                   <p className="text-sm font-medium text-slate-300">购买账号</p>
                   <p className="text-xs text-slate-600">浏览精选账号</p>
                 </Link>
-                <Link to="/accounts?rental=true" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+                <Link to="/accounts?rental=true" className="card p-4 text-left hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/60 active:scale-[0.98] transition-all duration-200 w-40 flex-shrink-0">
                   <Clock className="w-5 h-5 text-purple-400 mb-2" />
                   <p className="text-sm font-medium text-slate-300">租赁账号</p>
                   <p className="text-xs text-slate-600">按小时计费</p>
                 </Link>
-                <Link to="/sell" className="card-static p-4 text-left hover:border-primary/50 transition-all w-40 flex-shrink-0">
+                <Link to="/sell" className="card p-4 text-left hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/60 active:scale-[0.98] transition-all duration-200 w-40 flex-shrink-0">
                   <TrendingUp className="w-5 h-5 text-green-400 mb-2" />
                   <p className="text-sm font-medium text-slate-300">发布账号</p>
                   <p className="text-xs text-slate-600">快速变现</p>
