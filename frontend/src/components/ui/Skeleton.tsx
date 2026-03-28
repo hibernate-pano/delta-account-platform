@@ -8,6 +8,17 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => {
   return <div className={`skeleton ${className}`} />;
 };
 
+export const SkeletonText: React.FC<{ lines?: number; className?: string }> = ({ lines = 3, className = '' }) => (
+  <div className={`space-y-2 ${className}`}>
+    {Array.from({ length: lines }).map((_, i) => (
+      <Skeleton
+        key={i}
+        className={`h-4 rounded ${i === lines - 1 ? 'w-3/4' : 'w-full'}`}
+      />
+    ))}
+  </div>
+);
+
 export const AccountCardSkeleton: React.FC<{ delay?: number }> = ({ delay = 0 }) => {
   const d = (ms: number) => ({ style: { animationDelay: `${delay + ms}ms` } } as React.HTMLAttributes<HTMLDivElement>);
   return (

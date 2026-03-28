@@ -483,8 +483,8 @@ const SellPage: React.FC = () => {
                   required autoFocus
                 />
                 {fieldErrors.title && (
-                  <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />{fieldErrors.title}
+                  <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-lg animate-fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.title}
                   </p>
                 )}
               </div>

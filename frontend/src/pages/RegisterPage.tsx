@@ -161,8 +161,8 @@ const RegisterPage: React.FC = () => {
                 autoFocus
               />
               {fieldErrors.username && (
-                <p className="text-xs text-red-400 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />{fieldErrors.username}
+                <p className="text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-lg animate-fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.username}
                 </p>
               )}
             </div>
@@ -199,8 +199,8 @@ const RegisterPage: React.FC = () => {
                 placeholder="可选，用于找回密码"
               />
               {fieldErrors.email && (
-                <p className="text-xs text-red-400 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />{fieldErrors.email}
+                <p className="text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-lg animate-fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.email}
                 </p>
               )}
             </div>
@@ -253,8 +253,8 @@ const RegisterPage: React.FC = () => {
                 </div>
               )}
               {fieldErrors.password && (
-                <p className="text-xs text-red-400 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />{fieldErrors.password}
+                <p className="text-xs text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-lg animate-fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />{fieldErrors.password}
                 </p>
               )}
             </div>
