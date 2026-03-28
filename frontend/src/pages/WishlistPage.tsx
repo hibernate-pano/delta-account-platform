@@ -388,7 +388,7 @@ const WishlistPage: React.FC = () => {
                         <span className="text-xs px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded-full hover:scale-105 active:scale-95 transition-all cursor-default">{account.gameType}</span>
                       )}
                       {account.gameRank && (
-                        <span className="text-xs px-1.5 py-0.5 bg-primary/20 text-primary rounded">{account.gameRank}</span>
+                        <span className="badge badge-primary">{account.gameRank}</span>
                       )}
                     </div>
                     <Link to={`/accounts/${account.id}`}>

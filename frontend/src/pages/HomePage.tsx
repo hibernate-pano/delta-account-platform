@@ -597,8 +597,22 @@ const HomePage: React.FC = () => {
                   </div>
                   <Link to={`/accounts/${account.id}`} className="block">
                     <h4 className="font-medium text-sm mb-2 line-clamp-1 group-hover:text-primary transition-colors">{account.title}</h4>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                      {account.gameType && (
+                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs">{account.gameType}</span>
+                      )}
+                      {account.gameRank && (
+                        <span className="px-2 py-0.5 bg-primary/20 text-primary/80 rounded-full text-xs">{account.gameRank}</span>
+                      )}
+                      <span className="text-xs text-slate-500 flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400/60" /> {account.skinCount}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                        {account.rentalPrice && (
+                          <span className="ml-1 text-xs text-slate-500">/ 租 ¥{account.rentalPrice}/时</span>
+                        )}
+                      </div>
                       {account.sellerNickname && (
                         <span className="text-xs text-slate-500 truncate max-w-[80px]">{account.sellerNickname}</span>
                       )}
