@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
@@ -420,6 +420,24 @@ const NotificationsPage: React.FC = () => {
   const unreadCount = notifications.filter((n) => n.status === 'UNREAD').length;
   const highPriorityCount = notifications.filter((n) => n.status === 'UNREAD' && (typeConfig[n.type]?.priority === 'HIGH')).length;
 
+  // Type distribution stats
+  const typeStats = useMemo(() => {
+    const counts: Record<string, number> = {};
+    notifications.forEach((n) => {
+      const label = typeConfig[n.type]?.label || '其他';
+      counts[label] = (counts[label] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 4)
+      .map(([label, count]) => {
+        const entry = Object.entries(typeConfig).find(([, v]) => v.label === label);
+        return { label, count, color: entry ? typeConfig[entry[0]]?.color : 'text-slate-400', bg: entry ? typeConfig[entry[0]]?.bg : 'bg-slate-500/20' };
+      });
+  }, [notifications]);
+
+  const readRate = notifications.length > 0 ? Math.round(((notifications.length - unreadCount) / notifications.length) * 100) : 0;
+
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -540,6 +558,41 @@ const NotificationsPage: React.FC = () => {
           </p>
         )}
       </div>
+
+      {/* Notification stats banner */}
+      {notifications.length > 0 && (
+        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+          <div className="flex items-center gap-1.5 text-sm">
+            <Bell className="w-4 h-4 text-primary" />
+            <span className="text-slate-400">共</span>
+            <span className="font-semibold text-white">{notifications.length}</span>
+            <span className="text-slate-400">条通知</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="text-slate-400">未读</span>
+            <span className={`font-semibold ${unreadCount > 0 ? 'text-yellow-400' : 'text-green-400'}`}>{unreadCount}</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="text-slate-400">已读率</span>
+            <span className="font-semibold text-green-400">{readRate}%</span>
+          </div>
+          {typeStats.length > 0 && (
+            <>
+              <div className="w-px h-4 bg-dark-border" />
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500">类型:</span>
+                {typeStats.map((s) => (
+                  <span key={s.label} className={`flex items-center gap-1 text-xs px-2 py-0.5 ${s.bg} ${s.color} rounded-full`}>
+                    {s.label} {s.count}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-1 mb-3 bg-dark-lighter rounded-lg p-1 w-fit">

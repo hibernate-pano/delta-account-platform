@@ -131,6 +131,40 @@ const WishlistPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Wishlist stats banner */}
+      {wishlistItems.length > 0 && (
+        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+          <div className="flex items-center gap-1.5 text-sm">
+            <Heart className="w-4 h-4 text-red-400 fill-red-400" />
+            <span className="text-slate-400">共</span>
+            <span className="font-semibold text-white">{wishlistItems.length}</span>
+            <span className="text-slate-400">个收藏</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <ShieldCheck className="w-4 h-4 text-green-500" />
+            <span className="text-slate-400">已认证</span>
+            <span className="font-semibold text-green-400">{verifiedCount}</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <SortAsc className="w-4 h-4 text-purple-400" />
+            <span className="text-slate-400">价格区间</span>
+            <span className="font-semibold text-white">
+              {priceRange.max > 0 ? `¥${priceRange.min} ~ ¥${priceRange.max}` : '—'}
+            </span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span className="text-slate-400">收藏总值</span>
+            <span className="font-semibold text-amber-400">
+              ¥{wishlistItems.reduce((sum: number, a: any) => sum + a.price, 0).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      )}
+
       {showClearConfirm && (
         <div className="mb-4">
           <ConfirmInline
