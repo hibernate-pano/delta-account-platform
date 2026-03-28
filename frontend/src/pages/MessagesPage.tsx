@@ -645,12 +645,14 @@ const MessagesPage: React.FC = () => {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-2xl font-bold">消息中心</h1>
-          {unreadCount > 0 && (
+          {unreadCount > 0 ? (
             <p className="text-sm text-slate-500 mt-0.5">
               <span className="inline-flex items-center justify-center w-4 h-4 bg-red-500 rounded-full text-[10px] text-white mr-1">{unreadCount}</span>
               条未读消息
             </p>
-          )}
+          ) : sessions.length > 0 ? (
+            <p className="text-xs text-slate-600 mt-0.5">{sessions.length} 个会话</p>
+          ) : null}
         </div>
         <Link to="/accounts" className="btn-secondary flex items-center gap-2 text-sm">
           <MessageCircle className="w-4 h-4" />

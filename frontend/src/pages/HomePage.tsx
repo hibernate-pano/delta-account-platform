@@ -644,7 +644,12 @@ const HomePage: React.FC = () => {
                   <Crown className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">精选认证账号</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold">精选认证账号</h2>
+                    <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full font-medium">
+                      {featuredAccounts.length} 个
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3 text-green-400" /> 已通过平台审核，放心交易
                   </p>
