@@ -629,6 +629,9 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                   {order.account?.sellerCreditScore != null && (
                     <span className="text-xs text-yellow-400/70">({order.account.sellerCreditScore}分)</span>
                   )}
+                  {order.account?.sellerCreditScore != null && order.account.sellerCreditScore >= 80 && (
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_3px_rgba(52,211,153,0.4)]" />
+                  )}
                 </div>
                 <button
                   onClick={handleContact}

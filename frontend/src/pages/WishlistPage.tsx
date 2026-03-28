@@ -519,7 +519,7 @@ const WishlistPage: React.FC = () => {
                       <p className="text-xs text-slate-600 mt-1 line-clamp-1">{account.description}</p>
                     )}
                     {/* Engagement stats */}
-                    {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0)) && (
+                    {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0) || recentItems.some((r: any) => r.account.id === account.id)) && (
                       <div className="flex items-center gap-3 mt-1">
                         {account.viewCount != null && (
                           <span className="flex items-center gap-0.5 text-[10px] text-slate-600">
@@ -531,6 +531,18 @@ const WishlistPage: React.FC = () => {
                             <ShoppingCart className="w-3 h-3" />{account.orderCount}笔交易
                           </span>
                         )}
+                        {(() => {
+                          const recent = recentItems.find((r: any) => r.account.id === account.id);
+                          if (!recent || !recent.viewedAt) return null;
+                          const mins = Math.floor((Date.now() - recent.viewedAt) / 60000);
+                          const label = mins < 1 ? '刚看过' : mins < 60 ? `${mins}分钟前` : mins < 1440 ? `${Math.floor(mins / 60)}小时前` : '今天';
+                          return (
+                            <span className="flex items-center gap-0.5 text-[10px] text-primary/60">
+                              <Eye className="w-3 h-3" />
+                              {label}
+                            </span>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
