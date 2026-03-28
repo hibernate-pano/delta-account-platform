@@ -761,7 +761,7 @@ const isOwner = user?.id === account?.sellerId;
               <button
                 onClick={handleContactSeller}
                 disabled={createSessionMutation.isPending}
-                className="btn-secondary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="btn-secondary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98] transition-transform"
               >
                 {createSessionMutation.isPending ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />

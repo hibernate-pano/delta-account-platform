@@ -714,7 +714,7 @@ const HomePage: React.FC = () => {
           </div>
           <button
             onClick={() => setFaqExpanded(v => !v)}
-            className="mt-4 w-full py-3 text-sm text-primary hover:text-primary-light transition-colors flex items-center justify-center gap-1.5"
+            className="mt-4 w-full py-3 text-sm text-primary hover:text-primary-light hover:bg-primary/5 active:scale-[0.98] rounded-lg transition-all flex items-center justify-center gap-1.5"
           >
             {faqExpanded ? (
               <><ChevronDown className="w-4 h-4 rotate-180" />收起问题</>
