@@ -340,10 +340,10 @@ const ProfilePage: React.FC = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as typeof activeTab)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all hover:scale-105 active:scale-95 ${
               activeTab === tab.key
-                ? 'bg-primary text-white'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                : 'text-slate-400 hover:text-white hover:bg-dark-lighter/80'
             }`}
           >
             <tab.icon className="w-4 h-4" />

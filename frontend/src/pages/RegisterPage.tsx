@@ -155,7 +155,7 @@ const RegisterPage: React.FC = () => {
                   else if (formData.username.length < 3 || formData.username.length > 20) setFieldErrors(f => ({ ...f, username: '用户名需要3-20个字符' }));
                   else setFieldErrors(f => { const n = { ...f }; delete n.username; return n; });
                 }}
-                className={`input transition-all ${focusedField === 'username' ? 'ring-2 ring-primary/50' : ''} ${fieldErrors.username ? 'border-red-500 focus:border-red-500' : ''}`}
+                className={`input transition-all ${focusedField === 'username' ? 'ring-2 ring-primary/50 scale-[1.005]' : ''} ${fieldErrors.username ? 'border-red-500' : ''}`}
                 placeholder="3-20个字符"
                 autoComplete="username"
                 autoFocus
@@ -186,14 +186,16 @@ const RegisterPage: React.FC = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setFieldErrors(f => { const n = { ...f }; delete n.email; return n; }); }}
+                onFocus={() => setFocusedField('email')}
                 onBlur={() => {
+                  setFocusedField(null);
                   if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
                     setFieldErrors(f => ({ ...f, email: '请输入有效的邮箱地址' }));
                   } else {
                     setFieldErrors(f => { const n = { ...f }; delete n.email; return n; });
                   }
                 }}
-                className={`input ${fieldErrors.email ? 'border-red-500 focus:border-red-500' : ''}`}
+                className={`input transition-all ${focusedField === 'email' ? 'ring-2 ring-primary/50' : ''} ${fieldErrors.email ? 'border-red-500' : ''}`}
                 placeholder="可选，用于找回密码"
               />
               {fieldErrors.email && (
