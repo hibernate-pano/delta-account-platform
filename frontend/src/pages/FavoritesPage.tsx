@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star } from 'lucide-react';
+import { Gamepad2, Heart, Trash2, X, RefreshCw, AlertCircle, CheckCircle, Star, BadgeCheck, TrendingUp } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../components/ui/Toast';
 import { GridSkeleton } from '../components/ui/Skeleton';
@@ -111,6 +111,32 @@ const FavoritesPage: React.FC = () => {
           </span>
         )}
       </div>
+
+      {accounts.length > 0 && (
+        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="text-slate-400">共</span>
+            <span className="font-semibold text-white">{accounts.length}</span>
+            <span className="text-slate-400">个收藏</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <BadgeCheck className="w-4 h-4 text-green-500" />
+            <span className="text-slate-400">已认证</span>
+            <span className="font-semibold text-green-400">
+              {accounts.filter((a) => a.verificationStatus === 'VERIFIED').length}
+            </span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <TrendingUp className="w-4 h-4 text-purple-400" />
+            <span className="text-slate-400">价格区间</span>
+            <span className="font-semibold text-white">
+              ¥{Math.min(...accounts.map((a) => a.price))} ~ ¥{Math.max(...accounts.map((a) => a.price))}
+            </span>
+          </div>
+        </div>
+      )}
 
       {accounts.length === 0 ? (
         <div className="text-center py-20 animate-fade-in">

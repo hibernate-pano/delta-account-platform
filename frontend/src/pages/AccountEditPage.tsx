@@ -6,7 +6,7 @@ import { Account } from '../types';
 import {
   Plus, X, DollarSign, Info, Gamepad2, BarChart3, RefreshCw,
   Shield, Camera, Image as ImageIcon, Sparkles, CheckCircle2,
-  AlertTriangle, Star, ChevronUp, ExternalLink, Lightbulb, Edit3, ArrowLeft
+  AlertTriangle, Star, ChevronUp, ExternalLink, Lightbulb, Edit3, ArrowLeft, TrendingUp
 } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -224,6 +224,34 @@ const AccountEditPage: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Performance Stats */}
+          {data?.data?.data && ((data.data.data.viewCount ?? 0) > 0 || (data.data.data.orderCount ?? 0) > 0) && (
+            <div className="card bg-gradient-to-br from-green-500/10 to-emerald-500/5 border-green-500/20 mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-4 h-4 text-green-400" />
+                <span className="text-sm font-medium text-slate-300">账号表现</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-dark rounded-lg px-3 py-2">
+                  <p className="text-lg font-bold text-white">{data.data.data.viewCount ?? 0}</p>
+                  <p className="text-[10px] text-slate-500">浏览次数</p>
+                </div>
+                <div className="bg-dark rounded-lg px-3 py-2">
+                  <p className="text-lg font-bold text-green-400">{data.data.data.orderCount ?? 0}</p>
+                  <p className="text-[10px] text-slate-500">已售出</p>
+                </div>
+                <div className="bg-dark rounded-lg px-3 py-2">
+                  <p className="text-lg font-bold text-white">
+                    {data.data.data.createdAt
+                      ? Math.floor((Date.now() - new Date(data.data.data.createdAt).getTime()) / (1000 * 60 * 60 * 24)) + '天'
+                      : '-'}
+                  </p>
+                  <p className="text-[10px] text-slate-500">上架时间</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="card space-y-5">
