@@ -164,9 +164,10 @@ const NotificationItem: React.FC<{
   };
 
   const isHigh = config.priority === 'HIGH';
+  const isLow = config.priority === 'LOW';
 
   return (
-    <div className={`relative overflow-hidden transition-all ${isUnread ? 'bg-primary/4' : ''}`}>
+    <div className={`relative overflow-hidden transition-all ${isUnread ? 'bg-primary/4' : ''} ${isLow && !isUnread ? 'opacity-60 border-l-2 border-slate-800' : ''}`}>
       {/* Swipe-to-delete action */}
       <div
         className="absolute inset-y-0 right-0 w-20 bg-red-500/90 flex items-center justify-center cursor-pointer"
@@ -238,6 +239,11 @@ const NotificationItem: React.FC<{
               {isHigh && (
                 <span className={`text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 ${PRIORITY_LABEL.HIGH.color}`}>
                   {PRIORITY_LABEL.HIGH.label}
+                </span>
+              )}
+              {isLow && !isUnread && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-600">
+                  {PRIORITY_LABEL.LOW.label}
                 </span>
               )}
               {isUnread && (

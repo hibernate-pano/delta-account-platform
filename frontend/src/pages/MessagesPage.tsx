@@ -494,6 +494,11 @@ const MessagesPage: React.FC = () => {
                   <span className="text-xs text-slate-500 truncate">
                     账号: {currentSession.accountTitle}
                   </span>
+                  {account?.price && (
+                    <span className="text-xs font-semibold text-primary flex-shrink-0">
+                      ¥{account.price}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
