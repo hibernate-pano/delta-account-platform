@@ -175,8 +175,11 @@ const MessagesPage: React.FC = () => {
         </div>
         <div className="flex-1 min-w-0 pl-1">
           <div className="flex items-center justify-between mb-1">
-            <p className={`font-medium truncate text-sm ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
+            <p className={`font-medium truncate text-sm flex items-center gap-1 ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
               {session.otherUser?.nickname || session.otherUser?.username || '用户'}
+              {session.otherUser?.creditScore != null && session.otherUser!.creditScore >= 80 && (
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+              )}
             </p>
             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
               {session.otherUser?.creditScore != null && (
@@ -398,9 +401,12 @@ const MessagesPage: React.FC = () => {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base font-bold truncate">
+              <h1 className="text-base font-bold truncate flex items-center gap-1.5">
                 {currentSession?.otherUser?.nickname ||
                   currentSession?.otherUser?.username || '聊天'}
+                {currentSession?.otherUser?.creditScore != null && currentSession!.otherUser!.creditScore >= 80 && (
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+                )}
               </h1>
               <p className="text-[11px] mt-0.5">
                 {partnerOnline ? (

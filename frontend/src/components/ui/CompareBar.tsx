@@ -81,7 +81,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
                   </div>
                 )}
                 {winnerIndices.includes(idx) && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg z-10">
+                  <span className="absolute -top-1 -left-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg z-10">
                     <Crown className="w-2.5 h-2.5 text-black" />
                   </span>
                 )}
