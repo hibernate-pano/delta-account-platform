@@ -385,6 +385,16 @@ const HomePage: React.FC = () => {
             </Link>
           </div>
 
+          {/* CTA-to-Stats divider */}
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-dark-border/50" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-4 bg-dark text-slate-600 text-xs">or</span>
+            </div>
+          </div>
+
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             {isLoading ? (
