@@ -667,9 +667,13 @@ const isOwner = user?.id === account?.sellerId;
                     </div>
                   ))}
                   {sellerReviews.length > 5 && (
-                    <p className="text-center text-xs text-slate-600 py-2">
-                      还有 {sellerReviews.length - 5} 条评价
-                    </p>
+                    <button
+                      onClick={() => {}}
+                      className="flex items-center justify-center gap-1 w-full py-3 bg-dark hover:bg-dark-lighter rounded-lg text-sm text-slate-400 hover:text-primary transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                      还有 {sellerReviews.length - 5} 条评价，点击查看全部
+                    </button>
                   )}
                 </div>
               )}

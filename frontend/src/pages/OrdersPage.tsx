@@ -1069,7 +1069,7 @@ const OrdersPage: React.FC = () => {
           { label: '已完成', value: stats.completed, icon: CheckCircle, color: 'text-green-400' },
           { label: '总消费', value: stats.totalSpent > 0 ? `¥${stats.totalSpent.toFixed(0)}` : '—', icon: TrendingUp, color: 'text-purple-400', small: stats.totalSpent > 0 },
         ].map((stat, idx) => (
-          <div key={idx} className="card p-4 text-center">
+          <div key={idx} className="card p-4 text-center cursor-pointer hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10 transition-all duration-200">
             <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
             <div className={`font-bold ${stat.color} ${stat.small ? 'text-lg' : 'text-xl'}`}>{stat.value}</div>
             <div className="text-xs text-slate-500">{stat.label}</div>
