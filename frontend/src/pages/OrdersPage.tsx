@@ -1078,6 +1078,7 @@ const OrdersPage: React.FC = () => {
     pending: orders.filter(o => o.status === 'PENDING').length,
     processing: orders.filter(o => ['PAID', 'PROCESSING'].includes(o.status)).length,
     cancelled: orders.filter(o => ['CANCELLED', 'REFUNDED'].includes(o.status)).length,
+    completionRate: orders.length > 0 ? Math.round((orders.filter(o => o.status === 'COMPLETED').length / orders.length) * 100) : 0,
     totalSpent: orders
       .filter(o => o.status === 'COMPLETED' && o.type === 'BUY')
       .reduce((sum, o) => sum + o.amount, 0),
@@ -1141,6 +1142,40 @@ const OrdersPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Completion rate ring — inline trust signal */}
+      {stats.total > 0 && (
+        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-dark-card border border-dark-border rounded-xl hover:border-slate-600 transition-all">
+          <div className="relative w-12 h-12 flex-shrink-0">
+            <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" className="text-dark-lighter" strokeWidth="4" />
+              <circle
+                cx="24" cy="24" r="20" fill="none"
+                stroke="currentColor"
+                className={stats.completionRate >= 80 ? 'text-green-400' : stats.completionRate >= 50 ? 'text-yellow-400' : 'text-red-400'}
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray={`${stats.completionRate} 100`}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className={`text-xs font-bold ${stats.completionRate >= 80 ? 'text-green-400' : stats.completionRate >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {stats.completionRate}%
+              </span>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white">完成率</p>
+            <p className="text-xs text-slate-500">{stats.completed}/{stats.total} 笔已完成</p>
+          </div>
+          <div className="ml-auto text-right">
+            <p className={`text-lg font-bold ${stats.completionRate >= 80 ? 'text-green-400' : stats.completionRate >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+              {stats.completionRate >= 80 ? '极高' : stats.completionRate >= 50 ? '良好' : '偏低'}
+            </p>
+            <p className="text-[10px] text-slate-600">信用等级</p>
+          </div>
+        </div>
+      )}
 
       {/* Order status distribution bar */}
       {stats.total > 0 && (

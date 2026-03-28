@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { messageApi } from '../api';
 import { Account } from '../types';
@@ -15,7 +15,7 @@ import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, ShieldCheck
+  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, ShieldCheck, Scale
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -38,6 +38,33 @@ const AccountDetailPage: React.FC = () => {
   const { data: sellerReviewsData, isLoading: reviewsLoading, isError: reviewsError, refetch: refetchReviews } = useSellerReviews(account?.sellerId);
   const sellerReviews = sellerReviewsData?.data?.data || [];
   const [votedReviews, setVotedReviews] = useState<Set<number>>(new Set());
+  const [isComparing, setIsComparing] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('delta_compare_list');
+    if (stored) {
+      try {
+        const list: Account[] = JSON.parse(stored);
+        setIsComparing(list.some((a: Account) => a.id === account?.id));
+      } catch {}
+    }
+  }, [account?.id]);
+
+  const toggleCompare = () => {
+    const key = 'delta_compare_list';
+    const stored = localStorage.getItem(key);
+    let list: Account[] = [];
+    try { list = stored ? JSON.parse(stored) : []; } catch { list = []; }
+    if (isComparing) {
+      list = list.filter((a: Account) => a.id !== account?.id);
+    } else {
+      if (list.length >= 4) { showToast('最多对比4个账号', 'warning'); return; }
+      if (account) list.push(account);
+    }
+    localStorage.setItem(key, JSON.stringify(list));
+    setIsComparing(!isComparing);
+    showToast(isComparing ? '已移出对比' : '已加入对比', 'success');
+  };
   const { data: sellerAccountsData, isLoading: sellerAccountsLoading } = useSellerAccounts(account?.sellerId);
   const sellerAccounts = useMemo(() =>
     (sellerAccountsData?.data?.data || []).filter(
@@ -266,6 +293,19 @@ const isOwner = user?.id === account?.sellerId;
               </span>
             )}
           </div>
+
+          {/* Compare toggle */}
+          <button
+            onClick={toggleCompare}
+            className={`w-full mb-4 py-2.5 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
+              isComparing
+                ? 'bg-purple-500/20 border border-purple-500/40 text-purple-400 hover:bg-purple-500/30'
+                : 'bg-slate-800/60 border border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-300 hover:border-slate-600'
+            }`}
+          >
+            <Scale className="w-4 h-4" />
+            {isComparing ? '已加入对比' : '加入对比'}
+          </button>
 
           {/* Price */}
           <div className="card mb-6 bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/20">
