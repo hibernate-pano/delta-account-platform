@@ -64,6 +64,22 @@ const WishlistPage: React.FC = () => {
       });
   }, [wishlistItems, filterVerified, sortMode, filterGameType]);
 
+  const sortCounts = useMemo(() => {
+    const filtered = wishlistItems.filter((a: any) => {
+      if (filterVerified && a.verificationStatus !== 'VERIFIED') return false;
+      if (filterGameType && a.gameType !== filterGameType) return false;
+      return true;
+    });
+    return {
+      default: filtered.length,
+      price_asc: [...filtered].sort((a, b) => a.price - b.price).length,
+      price_desc: [...filtered].sort((a, b) => b.price - a.price).length,
+      recent: [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).length,
+      value: [...filtered].sort((a, b) => ((b.skinCount || 0) / b.price) - ((a.skinCount || 0) / a.price)).length,
+      seller_rating: [...filtered].sort((a, b) => (b.sellerCreditScore || 0) - (a.sellerCreditScore || 0)).length,
+    };
+  }, [wishlistItems, filterVerified, filterGameType]);
+
   const uniqueGameTypes = useMemo(() => {
     const types = wishlistItems.map((a: any) => a.gameType).filter(Boolean);
     return [...new Set(types)] as string[];
@@ -250,19 +266,25 @@ const WishlistPage: React.FC = () => {
             </button>
 
             {/* Sort */}
-            <select
-              value={sortMode}
-              onChange={(e) => setSortMode(e.target.value as SortMode)}
-              aria-label="排序方式"
-              className="bg-dark-lighter border border-dark-border text-slate-400 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary"
-            >
-              <option value="default">默认排序</option>
-              <option value="price_asc">价格从低到高</option>
-              <option value="price_desc">价格从高到低</option>
-              <option value="recent">最近添加</option>
-              <option value="value">性价比最高</option>
-              <option value="seller_rating">卖家评分</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-500">排序</span>
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as SortMode)}
+                aria-label="排序方式"
+                className="bg-dark-lighter border border-dark-border text-slate-400 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary"
+              >
+                <option value="default">默认排序</option>
+                <option value="price_asc">价格从低到高</option>
+                <option value="price_desc">价格从高到低</option>
+                <option value="recent">最近添加</option>
+                <option value="value">性价比最高</option>
+                <option value="seller_rating">卖家评分</option>
+              </select>
+              <span className="text-[10px] text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-full">
+                {sortedItems.length}个
+              </span>
+            </div>
 
             {/* Sort icon hints */}
             <div className="ml-auto flex items-center gap-1 text-xs text-slate-500">

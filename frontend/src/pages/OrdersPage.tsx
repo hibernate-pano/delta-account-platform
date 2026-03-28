@@ -213,6 +213,11 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
             </div>
             <div className="text-right">
               <p className="text-xl font-bold text-primary">¥{order.amount}</p>
+              {order.account?.skinCount && order.account.skinCount > 0 && (
+                <p className="text-[10px] text-amber-400/60 flex items-center gap-0.5 mt-0.5 justify-end">
+                  <Sparkles className="w-2.5 h-2.5" /> ¥{(order.amount / order.account.skinCount).toFixed(1)}/皮
+                </p>
+              )}
               <p className="text-xs text-slate-500">{order.type === 'BUY' ? '购买' : '租赁'}</p>
             </div>
           </div>
@@ -549,6 +554,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               <span className="text-xs font-normal text-slate-500 ml-1">+押金¥{order.deposit}</span>
             )}
           </div>
+          {order.account?.skinCount && order.account.skinCount > 0 && (
+            <p className="text-[10px] text-amber-400/60 flex items-center gap-0.5 mt-0.5 justify-end">
+              <Sparkles className="w-2.5 h-2.5" />
+              ¥{(order.amount / order.account.skinCount).toFixed(1)}/皮
+            </p>
+          )}
           <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${statusConfig[order.status]?.bg} ${statusConfig[order.status]?.color}`}>
             <StatusIcon className="w-2.5 h-2.5" />
             {statusConfig[order.status]?.label || order.status}
