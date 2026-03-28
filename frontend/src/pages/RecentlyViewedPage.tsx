@@ -85,7 +85,7 @@ const RecentlyViewedPage: React.FC = () => {
 
       {/* Stats banner */}
       {recentItems.length > 0 && (
-        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border rounded-xl">
+        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
           <div className="flex items-center gap-1.5 text-sm">
             <Users className="w-4 h-4 text-primary" />
             <span className="text-slate-400">共</span>
