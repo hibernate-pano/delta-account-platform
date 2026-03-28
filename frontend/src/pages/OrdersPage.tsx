@@ -12,7 +12,7 @@ import {
   Package, ChevronRight, FileText, Clock, CheckCircle, XCircle,
   AlertCircle, ShoppingBag, CreditCard, RefreshCw,
   Calendar, Gamepad2, ZoomIn, ZoomOut, X, ExternalLink, Copy, MessageCircle,
-  Shield, User, Star, Search, TrendingUp, TrendingDown, Sparkles
+  Shield, User, Star, Search, TrendingUp, TrendingDown, Sparkles, ShieldCheck
 } from 'lucide-react';
 
 interface Order {
@@ -275,8 +275,11 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-white truncate flex items-center gap-1">
                       {order.account?.sellerNickname || order.account?.sellerUsername}
+                      {order.account?.sellerCreditScore != null && order.account.sellerCreditScore >= 80 && (
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+                      )}
                     </p>
                     {order.account?.verificationStatus === 'VERIFIED' && (
                       <span className="flex-shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex items-center gap-0.5">
@@ -667,8 +670,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-medium text-white truncate">
+                    <p className="text-xs font-medium text-white truncate flex items-center gap-1">
                       {order.account?.sellerNickname || order.account?.sellerUsername || '卖家'}
+                      {order.account?.sellerCreditScore != null && order.account.sellerCreditScore >= 80 && (
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+                      )}
                     </p>
                     {order.account?.verificationStatus === 'VERIFIED' && (
                       <span className="flex-shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex items-center gap-0.5">

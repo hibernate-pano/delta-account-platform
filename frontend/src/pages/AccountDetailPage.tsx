@@ -15,7 +15,7 @@ import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame
+  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, ShieldCheck
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -385,8 +385,11 @@ const isOwner = user?.id === account?.sellerId;
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-semibold text-white truncate">
+                    <p className="font-semibold text-white truncate flex items-center gap-1">
                       {account.sellerNickname || account.sellerUsername}
+                      {account.sellerCreditScore != null && account.sellerCreditScore >= 80 && (
+                        <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
+                      )}
                     </p>
                     {account.verificationStatus === 'VERIFIED' && (
                       <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex-shrink-0 flex items-center gap-0.5 border border-emerald-500/30 shadow-sm shadow-emerald-500/20">
