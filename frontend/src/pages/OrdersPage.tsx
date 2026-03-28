@@ -563,6 +563,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             {order.account?.sellerCreditScore != null && order.account.sellerCreditScore >= 80 && (
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_3px_rgba(52,211,153,0.4)]" />
             )}
+            {order.account?.weapons && (
+              <span className="flex-shrink-0 text-[10px] px-1.5 py-0.5 bg-rose-500/20 text-rose-400/80 rounded-full">
+                {order.account.weapons.length > 8 ? `${order.account.weapons.slice(0, 8)}…` : order.account.weapons}
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 font-mono">#{order.orderNo.slice(-8)}</p>
         </div>

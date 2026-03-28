@@ -117,6 +117,23 @@ export const CompareBar: React.FC<CompareBarProps> = ({
               </div>
             ))}
           </div>
+          {/* Deposit row */}
+          <div className="flex items-center -space-x-2">
+            {items.slice(0, maxItems).map((item, idx) => (
+              <div
+                key={`deposit-${item.account.id}`}
+                className={`w-8 text-center text-[9px] leading-none ${
+                  item.account.deposit == null || item.account.deposit === 0
+                    ? 'text-slate-700'
+                    : depositRatios[idx] < 0.1
+                    ? 'text-green-400'
+                    : 'text-yellow-400/70'
+                }`}
+              >
+                {item.account.deposit ? `押¥${item.account.deposit}` : '无押'}
+              </div>
+            ))}
+          </div>
         </div>
 
         <button
