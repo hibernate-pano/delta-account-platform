@@ -581,7 +581,14 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 font-mono">#{order.orderNo.slice(-8)}</p>
+          <button
+            onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(order.orderNo); showToast('订单号已复制', 'success'); }}
+            className="text-xs text-slate-500 font-mono hover:text-white transition-colors flex items-center gap-0.5"
+            title={`复制: ${order.orderNo}`}
+          >
+            #{order.orderNo.slice(-8)}
+            <Copy className="w-2.5 h-2.5 opacity-50 hover:opacity-100" />
+          </button>
         </div>
 
         {/* Amount + Status */}

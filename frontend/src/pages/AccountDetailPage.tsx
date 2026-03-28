@@ -383,7 +383,7 @@ const isOwner = user?.id === account?.sellerId;
                   { label: '游戏类型', value: account.gameType || '王者荣耀' },
                   { label: '游戏段位', value: account.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
-                  { label: '装备描述', value: account.weapons || '未填写' },
+                  { label: '装备描述', value: account.weapons ? `${account.weapons}` : '未填写', hasIcon: true },
                   { label: '发布时间', value: account.createdAt ? `${formatDate(account.createdAt)} (${freshnessLabel(account.createdAt)})` : '未知' },
                   ...(account.updatedAt && account.updatedAt !== account.createdAt
                     ? [{ label: '最近编辑', value: `${formatDate(account.updatedAt)} (${freshnessLabel(account.updatedAt)})` }]
@@ -403,7 +403,10 @@ const isOwner = user?.id === account?.sellerId;
                     className="flex items-center justify-between py-2 border-b border-dark-border last:border-0"
                   >
                     <span className="text-slate-500">{item.label}</span>
-                    <span className="font-medium">{item.value}</span>
+                    <span className="font-medium flex items-center gap-1">
+                      {item.hasIcon && <Sword className="w-3.5 h-3.5 text-rose-400/80" />}
+                      {item.value}
+                    </span>
                   </div>
                 ))}
               </div>
