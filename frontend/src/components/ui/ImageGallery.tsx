@@ -217,7 +217,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 idx === currentIndex
                   ? 'ring-2 ring-primary opacity-100 scale-105'
-                  : 'opacity-50 hover:opacity-80'
+                  : 'opacity-50 hover:opacity-80 hover:scale-105'
               }`}
             >
               {!thumbLoaded.has(idx) && (
