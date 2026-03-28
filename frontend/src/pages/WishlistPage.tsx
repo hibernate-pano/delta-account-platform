@@ -492,6 +492,12 @@ const WishlistPage: React.FC = () => {
                   {/* Price + Seller */}
                   <div className="text-right flex-shrink-0">
                     <p className="text-xl font-bold text-primary">¥{account.price}</p>
+                    {account.skinCount > 0 && (
+                      <p className="text-[10px] text-amber-400/60 flex items-center gap-0.5 mt-0.5 justify-end">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        ¥{(account.price / account.skinCount).toFixed(1)}/皮肤
+                      </p>
+                    )}
                     {account.rentalPrice && (
                       <p className="text-xs text-slate-500">租 ¥{account.rentalPrice}/时</p>
                     )}

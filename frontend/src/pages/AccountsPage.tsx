@@ -957,6 +957,30 @@ const AccountsPage: React.FC = () => {
                 ))}
               </div>
 
+              {/* Engagement metrics — social proof */}
+              {(quickViewAccount.viewCount != null || (quickViewAccount.orderCount != null && quickViewAccount.orderCount > 0)) && (
+                <div className="grid grid-cols-2 gap-3">
+                  {quickViewAccount.viewCount != null && (
+                    <div className="bg-dark rounded-lg px-3 py-2.5">
+                      <p className="text-[10px] text-slate-500 mb-0.5">浏览量</p>
+                      <p className="text-sm font-medium text-slate-200 flex items-center gap-1">
+                        <Eye className="w-3.5 h-3.5 text-purple-400" />
+                        {formatCompact(quickViewAccount.viewCount)}
+                      </p>
+                    </div>
+                  )}
+                  {quickViewAccount.orderCount != null && quickViewAccount.orderCount > 0 && (
+                    <div className="bg-dark rounded-lg px-3 py-2.5">
+                      <p className="text-[10px] text-slate-500 mb-0.5">已售出</p>
+                      <p className="text-sm font-medium text-green-400 flex items-center gap-1">
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        {quickViewAccount.orderCount} 笔
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Description */}
               {quickViewAccount.description && (
                 <div>
