@@ -225,18 +225,18 @@ const isOwner = user?.id === account?.sellerId;
           )}
           <div className="flex flex-wrap gap-2 mb-6">
             {account.gameType && (
-              <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium">
+              <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium hover:scale-105 active:scale-95 transition-all cursor-default">
                 {account.gameType}
               </span>
             )}
-            <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium">
+            <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm font-medium hover:scale-105 active:scale-95 transition-all cursor-default">
               {account.gameRank || '暂无段位'}
             </span>
-            <span className="px-3 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm flex items-center gap-1.5">
+            <span className="px-3 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-default">
               <Sparkles className="w-4 h-4 text-amber-400/80" /> {account.skinCount} 皮肤
             </span>
             <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
+              className={`px-3 py-1 rounded-full text-sm font-medium hover:scale-105 active:scale-95 transition-all cursor-default ${
                 account.verificationStatus === 'VERIFIED'
                   ? 'bg-green-500/20 text-green-400'
                   : 'bg-yellow-500/20 text-yellow-400'
@@ -245,7 +245,7 @@ const isOwner = user?.id === account?.sellerId;
               {account.verificationStatus === 'VERIFIED' ? <span className="inline-flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-400" /> 已认证</span> : <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-yellow-400" /> 待审核</span>}
             </span>
             {account.status === 'ON_SALE' && (
-              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium inline-flex items-center gap-1.5">
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium inline-flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-default">
                 <Flame className="w-4 h-4" />
                 出售中
               </span>

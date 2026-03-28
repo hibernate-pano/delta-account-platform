@@ -1246,7 +1246,7 @@ const OrdersPage: React.FC = () => {
             <button
               key={tab.key}
               onClick={() => setActiveType(tab.key as typeof activeType)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all text-xs flex-shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap transition-all hover:scale-105 active:scale-95 text-xs flex-shrink-0 ${
                 activeType === tab.key
                   ? 'bg-primary/20 text-primary border border-primary/30'
                   : 'bg-dark-lighter text-slate-500 hover:text-slate-300 border border-transparent'
