@@ -555,7 +555,7 @@ const AccountsPage: React.FC = () => {
                 )}
                 {/* HOT badge */}
                 {((account.viewCount ?? 0) >= 100 || (account.orderCount ?? 0) >= 5) && (
-                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-orange-500/90 text-white text-[10px] rounded flex items-center gap-0.5 z-10" style={isNewAccount(account.createdAt) ? { top: '1.75rem' } : {}}>
+                  <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-orange-500/90 text-white text-[10px] rounded flex items-center gap-0.5 z-10 shadow-lg shadow-orange-500/40" style={isNewAccount(account.createdAt) ? { top: '1.75rem' } : {}}>
                     <Flame className="w-3 h-3" /> 热门
                   </span>
                 )}
@@ -694,7 +694,7 @@ const AccountsPage: React.FC = () => {
                     {account.title}
                   </h3>
                   {((account.viewCount ?? 0) >= 100 || (account.orderCount ?? 0) >= 5) && (
-                    <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-[10px] rounded flex items-center gap-0.5">
+                    <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-[10px] rounded flex items-center gap-0.5 shadow-lg shadow-orange-500/30">
                       <Flame className="w-3 h-3" /> 热门
                     </span>
                   )}

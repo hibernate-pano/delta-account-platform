@@ -222,7 +222,7 @@ const RegisterPage: React.FC = () => {
                     else if (formData.password.length < 6) setFieldErrors(f => ({ ...f, password: '密码至少需要6位' }));
                     else setFieldErrors(f => { const n = { ...f }; delete n.password; return n; });
                   }}
-                  className={`input pr-10 ${fieldErrors.password ? 'border-red-500 focus:border-red-500' : ''}`}
+                  className={`input pr-10 transition-all focus:ring-2 focus:ring-primary/50 ${fieldErrors.password ? 'border-red-500 focus:border-red-500' : ''}`}
                   placeholder="至少6位"
                   autoComplete="new-password"
                 />
@@ -269,7 +269,7 @@ const RegisterPage: React.FC = () => {
                   type={showConfirm ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className={`input pr-10 ${
+                  className={`input pr-10 transition-all focus:ring-2 focus:ring-primary/50 ${
                     formData.confirmPassword && formData.password !== formData.confirmPassword
                       ? formData.confirmPassword.startsWith(formData.password) && formData.confirmPassword.length >= 3
                         ? 'border-yellow-500 focus:border-yellow-500'
