@@ -1136,6 +1136,23 @@ const SellPage: React.FC = () => {
               </div>
             )}
 
+            {/* Listing quality hint */}
+            <div className="flex items-center gap-3 text-[10px] text-slate-500 px-1">
+              <span className={`flex items-center gap-1 ${completionPercent >= 80 ? 'text-green-400' : completionPercent >= 60 ? 'text-yellow-400' : 'text-slate-600'}`}>
+                <BarChart3 className="w-3 h-3" />
+                完整度 {completionPercent}%
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                审核约1小时
+              </span>
+              {completionPercent < 80 && (
+                <span className="ml-auto text-yellow-500/70">
+                  补充更多信息可提升曝光
+                </span>
+              )}
+            </div>
+
             {/* Notice */}
             <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 flex gap-3 relative">
               {/* Submitting overlay */}

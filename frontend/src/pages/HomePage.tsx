@@ -10,6 +10,7 @@ import { useRecentStore } from '../store/recent';
 import { useWishlistStore } from '../store/wishlist';
 import { useAccounts, useMyOrders, useUnreadCount } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { formatRelativeTime } from '../utils/format';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
@@ -558,9 +559,16 @@ const HomePage: React.FC = () => {
                     <p className="text-xs text-slate-400 line-clamp-1 mb-1">{account.title}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-primary font-bold text-sm">¥{account.price}</span>
-                      {account.verificationStatus === 'VERIFIED' && (
-                        <CheckCircle className="w-3.5 h-3.5 text-green-400 drop-shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {account.verificationStatus === 'VERIFIED' && (
+                          <CheckCircle className="w-3.5 h-3.5 text-green-400 drop-shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
+                        )}
+                        {account.createdAt && (
+                          <span className="text-[10px] text-slate-600">
+                            {formatRelativeTime(account.createdAt)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </Link>
                 ))}
