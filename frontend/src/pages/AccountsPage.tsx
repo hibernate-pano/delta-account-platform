@@ -692,6 +692,9 @@ const AccountsPage: React.FC = () => {
                   )}
                   <span className="text-[10px] text-slate-600 flex items-center gap-0.5">
                     <Clock className="w-3 h-3" />{freshnessLabel(account.createdAt)}
+                    {account.updatedAt && account.updatedAt !== account.createdAt && (
+                      <span className="text-[9px] text-yellow-400/60" title={`编辑于 ${account.updatedAt}`}>·已编辑</span>
+                    )}
                   </span>
                 </div>
                 {account.sellerCreditScore && (
@@ -861,6 +864,9 @@ const AccountsPage: React.FC = () => {
                         </span>
                       );
                     })()}
+                    {account.updatedAt && account.updatedAt !== account.createdAt && (
+                      <span className="text-[10px] text-yellow-400/60">已编辑</span>
+                    )}
                   </div>
                 ) : null}
                 {/* Seller info */}

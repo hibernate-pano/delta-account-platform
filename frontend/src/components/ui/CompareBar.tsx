@@ -29,6 +29,8 @@ export const CompareBar: React.FC<CompareBarProps> = ({
   // Compute overall winner across all items (reuses comparison metrics)
   const accounts = items.map((i) => i.account);
   const recoveryHours = accounts.map((a) => a.rentalPrice && a.price > 0 ? a.price / a.rentalPrice : Infinity);
+  const depositRatios = accounts.map((a) => a.deposit && a.price > 0 ? a.deposit / a.price : Infinity);
+  const depositBest = depositRatios.map((v, i) => v < Infinity && v === Math.min(...depositRatios, Infinity) && depositRatios.filter(x => x === v).length === 1 ? i : -1);
   const winnerIndices = (() => {
     if (items.length < 2) return [];
     const prices = accounts.map((a) => a.price);
@@ -239,6 +241,12 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
     { label: '所属英雄', values: accounts.map((a) => a.weapons || '未填写') },
     { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '已认证' : '待认证') },
     { label: '时租价', values: accounts.map((a) => a.rentalPrice ? `¥${a.rentalPrice}/时` : '不支持') },
+    {
+      label: '押金',
+      values: accounts.map((a) => a.deposit ? `¥${a.deposit}` : '无'),
+      bestIdx: depositBest,
+      subLabel: '押金越低越优',
+    },
     {
       label: '租售回本',
       values: accounts.map((a, i) => recoveryHours[i] < Infinity ? `${Math.round(recoveryHours[i])}小时` : '—'),
