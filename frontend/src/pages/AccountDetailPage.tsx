@@ -287,6 +287,26 @@ const isOwner = user?.id === account?.sellerId;
                 <span className="text-xs text-slate-400">¥{(account.price / account.skinCount).toFixed(1)}/皮肤 · {account.skinCount}个</span>
               </div>
             )}
+            {account.deposit != null && account.deposit > 0 && account.price > 0 && (
+              <div className="mt-1.5 pt-1.5 border-t border-primary/10">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs text-slate-600">押金友好度</span>
+                  <span className={`text-xs font-medium flex items-center gap-1 ${(() => {
+                    const pct = (account.deposit / account.price) * 100;
+                    return pct <= 5 ? 'text-green-400' : pct <= 15 ? 'text-yellow-400' : 'text-red-400';
+                  })()}`}>
+                    占购价 {((account.deposit / account.price) * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="h-1 bg-dark-lighter rounded-full overflow-hidden">
+                  {(() => {
+                    const pct = Math.min(50, (account.deposit / account.price) * 100);
+                    const color = pct <= 5 ? 'bg-green-400' : pct <= 15 ? 'bg-yellow-400' : 'bg-red-400';
+                    return <div className={`h-full ${color} transition-all rounded-full`} style={{ width: `${pct * 2}%` }} />;
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tabs */}
@@ -565,11 +585,13 @@ const isOwner = user?.id === account?.sellerId;
                 </Link>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                {sellerAccounts.slice(0, 6).map((acc: any) => (
+                {sellerAccounts.slice(0, 6).map((acc: any) => {
+                  const priceTier = acc.price < account.price ? '更便宜' : acc.price > account.price ? '更高端' : '';
+                  return (
                   <Link
                     key={acc.id}
                     to={`/accounts/${acc.id}`}
-                    className="flex-shrink-0 w-36 card p-2.5 hover:border-primary/40 transition-all group"
+                    className="flex-shrink-0 w-36 card p-2.5 hover:border-primary/40 transition-all group relative"
                   >
                     <div className="aspect-video bg-dark rounded-lg mb-2 overflow-hidden">
                       {acc.images?.[0] ? (
@@ -579,16 +601,29 @@ const isOwner = user?.id === account?.sellerId;
                           <Gamepad2 className="w-5 h-5 text-slate-700" />
                         </div>
                       )}
+                      {priceTier && (
+                        <span className={`absolute top-1 left-1 px-1 py-0.5 text-[9px] rounded ${
+                          priceTier === '更便宜' ? 'bg-green-500/90 text-white' : 'bg-purple-500/90 text-white'
+                        }`}>
+                          {priceTier}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-400 line-clamp-1 mb-1">{acc.title}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-primary font-bold text-sm">¥{acc.price}</span>
-                      {acc.verificationStatus === 'VERIFIED' && (
-                        <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                      )}
+                      <div className="flex items-center gap-1">
+                        {acc.skinCount > 0 && acc.price > 0 && (
+                          <span className="text-[9px] text-amber-400/60">¥{(acc.price / acc.skinCount).toFixed(0)}/皮</span>
+                        )}
+                        {acc.verificationStatus === 'VERIFIED' && (
+                          <CheckCircle className="w-3 h-3 text-green-400" />
+                        )}
+                      </div>
                     </div>
                   </Link>
-                ))}
+                );
+                })}
               </div>
             </div>
           )}
