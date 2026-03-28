@@ -154,7 +154,7 @@ const MessagesPage: React.FC = () => {
       >
         {/* Unread left border */}
         {session.unreadCount ? (
-          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r-full" />
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r-full shadow-lg shadow-primary/50" />
         ) : (
           <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-transparent" />
         )}
@@ -197,7 +197,7 @@ const MessagesPage: React.FC = () => {
           </p>
         </div>
         {!session.unreadCount && (
-          <div className="w-1.5 h-1.5 rounded-full bg-slate-700 flex-shrink-0" />
+          <div className="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0 animate-pulse opacity-60" />
         )}
       </div>
     ));

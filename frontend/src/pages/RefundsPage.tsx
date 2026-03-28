@@ -515,7 +515,7 @@ const RefundsPage: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.color} ${refund.status === 'PENDING' ? 'animate-pulse' : ''}`}>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.color} ${refund.status === 'PENDING' ? 'animate-pulse shadow-lg shadow-yellow-500/30' : ''}`}>
                             {config.label}
                           </span>
                           <span className="text-sm text-slate-500 font-mono">#{refund.orderId}</span>
