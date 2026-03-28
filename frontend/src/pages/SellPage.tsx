@@ -77,7 +77,7 @@ const weaponPresets = ['传说皮肤', '限定皮肤', '全英雄', '全皮肤',
 const SellPage: React.FC = () => {
   usePageTitle('发布账号');
   const navigate = useNavigate();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { showToast } = useToast();
   const createMutation = useCreateAccount();
 
@@ -341,6 +341,35 @@ const SellPage: React.FC = () => {
             />
           </div>
         )}
+
+      {/* Seller context banner */}
+      {user && (
+        <div className="mb-6 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {user.avatar ? (
+              <img src={user.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium">{user.nickname || user.username}</p>
+              <p className="text-[11px] text-slate-500">卖家中心</p>
+            </div>
+          </div>
+          {user.creditScore != null && (
+            <>
+              <div className="w-px h-8 bg-dark-border" />
+              <div className="flex items-center gap-1 text-sm">
+                <Shield className="w-4 h-4 text-green-400" />
+                <span className="text-slate-400">信誉</span>
+                <span className="font-semibold text-yellow-400">{user.creditScore}分</span>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Form completion progress indicator */}
       {step === 1 && (
@@ -1028,10 +1057,19 @@ const SellPage: React.FC = () => {
                   </div>
                   {/* Seller info row */}
                   <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dark-border">
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
-                      <User className="w-2.5 h-2.5 text-primary" />
-                    </div>
-                    <span className="text-[11px] text-slate-500">发布账号</span>
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
+                        <User className="w-2.5 h-2.5 text-primary" />
+                      </div>
+                    )}
+                    <span className="text-[11px] text-slate-400">
+                      {user?.nickname || user?.username || '用户'}
+                      {user?.creditScore != null && (
+                        <span className="ml-1 text-yellow-400/70">· {user.creditScore}分</span>
+                      )}
+                    </span>
                     <div className="ml-auto flex items-center gap-0.5">
                       <Shield className="w-3 h-3 text-green-400" />
                       <span className="text-[10px] text-green-400">平台托管</span>

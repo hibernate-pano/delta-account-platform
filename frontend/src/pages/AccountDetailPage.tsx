@@ -125,6 +125,14 @@ const AccountDetailPage: React.FC = () => {
   };
 
   const formatDate = formatDateTime;
+  const freshnessLabel = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d < 1) return '今日上架';
+    if (d < 7) return `${d}天前`;
+    if (d < 30) return `${Math.floor(d / 7)}周前`;
+    return `${Math.floor(d / 30)}月前`;
+  };
 
 const isOwner = user?.id === account?.sellerId;
   const isOnSale = account?.status === 'ON_SALE';
@@ -297,7 +305,7 @@ const isOwner = user?.id === account?.sellerId;
                   { label: '游戏段位', value: account.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
                   { label: '装备描述', value: account.weapons || '未填写' },
-                  { label: '发布时间', value: account.createdAt ? formatDate(account.createdAt) : '未知' },
+                  { label: '发布时间', value: account.createdAt ? `${formatDate(account.createdAt)} (${freshnessLabel(account.createdAt)})` : '未知' },
                   ...(account.viewCount != null || account.orderCount != null
                     ? [{
                         label: '热度数据',
