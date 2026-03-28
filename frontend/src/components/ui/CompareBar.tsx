@@ -26,6 +26,32 @@ export const CompareBar: React.FC<CompareBarProps> = ({
   const [visible, setVisible] = useState(true);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
+  // Compute overall winner across all items (reuses comparison metrics)
+  const winnerIndices = (() => {
+    if (items.length < 2) return [];
+    const accounts = items.map((i) => i.account);
+    const prices = accounts.map((a) => a.price);
+    const skins = accounts.map((a) => a.skinCount ?? 0);
+    const credits = accounts.map((a) => a.sellerCreditScore ?? 0);
+    const viewCounts = accounts.map((a) => a.viewCount ?? 0);
+    const orderCounts = accounts.map((a) => a.orderCount ?? 0);
+    const valueScores = accounts.map((a) => {
+      if (!a.price || a.price === 0) return 0;
+      return ((a.skinCount ?? 0) + (a.sellerCreditScore ?? 0) * 0.5) / a.price * 100;
+    });
+    const priceBest = prices.map((v, i) => v > 0 && v === Math.min(...prices, Infinity) && prices.filter(x => x === v).length === 1 ? i : -1);
+    const skinBest = skins.map((v, i) => v > 0 && v === Math.max(...skins, -Infinity) && skins.filter(x => x === v).length === 1 ? i : -1);
+    const creditBest = credits.map((v, i) => v > 0 && v === Math.max(...credits, -Infinity) && credits.filter(x => x === v).length === 1 ? i : -1);
+    const viewBest = viewCounts.map((v, i) => v > 0 && v === Math.max(...viewCounts, -Infinity) && viewCounts.filter(x => x === v).length === 1 ? i : -1);
+    const orderBest = orderCounts.map((v, i) => v > 0 && v === Math.max(...orderCounts, -Infinity) && orderCounts.filter(x => x === v).length === 1 ? i : -1);
+    const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores, -Infinity) && valueScores.filter(x => x === v).length === 1 ? i : -1);
+    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest];
+    const counts = accounts.map((_, idx) => allBest.filter(best => best.includes(idx)).length);
+    const maxCount = Math.max(...counts);
+    if (maxCount === 0) return [];
+    return counts.reduce<number[]>((acc, c, idx) => { if (c === maxCount) acc.push(idx); return acc; }, []);
+  })();
+
   if (items.length === 0 || !visible) return null;
 
   return (
@@ -41,7 +67,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
 
         {/* Mini thumbnails */}
         <div className="flex items-center -space-x-2">
-          {items.slice(0, maxItems).map((item) => (
+          {items.slice(0, maxItems).map((item, idx) => (
             <div
               key={item.account.id}
               className="w-8 h-8 rounded-lg overflow-hidden border-2 border-dark ring-1 ring-primary/30 relative group"
@@ -52,6 +78,11 @@ export const CompareBar: React.FC<CompareBarProps> = ({
                 <div className="w-full h-full bg-dark flex items-center justify-center">
                   <Gamepad2 className="w-3 h-3 text-slate-600" />
                 </div>
+              )}
+              {winnerIndices.includes(idx) && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg z-10">
+                  <Crown className="w-2.5 h-2.5 text-black" />
+                </span>
               )}
               <button
                 onClick={() => onRemove(item.account.id)}

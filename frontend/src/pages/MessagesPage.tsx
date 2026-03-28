@@ -178,15 +178,28 @@ const MessagesPage: React.FC = () => {
             <p className={`font-medium truncate text-sm ${session.unreadCount ? 'text-white' : 'text-slate-300'}`}>
               {session.otherUser?.nickname || session.otherUser?.username || '用户'}
             </p>
-            <span
-              className="text-xs text-slate-600 flex-shrink-0 ml-2 cursor-help hover:text-slate-400 transition-colors"
-              title={session.lastMessageAt ? new Date(session.lastMessageAt).toLocaleString('zh-CN', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit',
-              }) : ''}
-            >
-              {formatSessionTime(session.lastMessageAt)}
-            </span>
+            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+              {session.otherUser?.creditScore != null && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                  session.otherUser!.creditScore >= 80
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : session.otherUser!.creditScore >= 60
+                    ? 'bg-yellow-500/20 text-yellow-400'
+                    : 'bg-slate-500/20 text-slate-500'
+                }`}>
+                  {session.otherUser!.creditScore}分
+                </span>
+              )}
+              <span
+                className="text-xs text-slate-600 cursor-help hover:text-slate-400 transition-colors"
+                title={session.lastMessageAt ? new Date(session.lastMessageAt).toLocaleString('zh-CN', {
+                  year: 'numeric', month: 'long', day: 'numeric',
+                  hour: '2-digit', minute: '2-digit',
+                }) : ''}
+              >
+                {formatSessionTime(session.lastMessageAt)}
+              </span>
+            </div>
           </div>
           {session.accountTitle && (
             <p className="text-[11px] text-primary/70 mb-0.5 truncate">
