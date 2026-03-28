@@ -187,7 +187,7 @@ const isOwner = user?.id === account?.sellerId;
           <h1 className="text-lg font-medium text-slate-400 truncate">{account.title}</h1>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleShare} className="btn-ghost p-2" title="分享">
+          <button onClick={handleShare} className="btn-ghost p-2 hover:scale-110 active:scale-95 transition-all hover:bg-primary/10 hover:text-primary" title="分享">
             {copied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5" />}
           </button>
           {account && <WishlistButton account={account} size="md" className="!relative" />}
@@ -348,7 +348,7 @@ const isOwner = user?.id === account?.sellerId;
                       {account.sellerNickname || account.sellerUsername}
                     </p>
                     {account.verificationStatus === 'VERIFIED' && (
-                      <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex-shrink-0 flex items-center gap-0.5">
+                      <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded flex-shrink-0 flex items-center gap-0.5 border border-emerald-500/30 shadow-sm shadow-emerald-500/20">
                         <CheckCircle className="w-3 h-3" /> 已认证
                       </span>
                     )}
