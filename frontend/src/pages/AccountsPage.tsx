@@ -187,6 +187,14 @@ const AccountsPage: React.FC = () => {
     const diff = Date.now() - new Date(createdAt).getTime();
     return diff < 86400000; // 24 hours
   };
+  const freshnessLabel = (createdAt: string) => {
+    const diff = Date.now() - new Date(createdAt).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d < 1) return '今日';
+    if (d < 7) return `${d}天前`;
+    if (d < 30) return `${Math.floor(d / 7)}周前`;
+    return `${Math.floor(d / 30)}月前`;
+  };
 
   const sortOptions = [
     { key: '', label: '最新', icon: Sparkles },
@@ -617,7 +625,12 @@ const AccountsPage: React.FC = () => {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                  <span className="text-[10px] text-slate-600 flex items-center gap-0.5">
+                    <Clock className="w-3 h-3" />{freshnessLabel(account.createdAt)}
+                  </span>
+                </div>
                 {account.sellerCreditScore && (
                   <span className="text-[10px] text-yellow-400/80 flex items-center gap-0.5">
                     <Star className="w-3 h-3 fill-yellow-400/80 text-yellow-400/80" />

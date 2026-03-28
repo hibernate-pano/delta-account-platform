@@ -158,9 +158,13 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
   // Value = skins per 1000 yuan (higher = better deal)
   const valueScores = accounts.map((a) => a.price > 0 ? ((a.skinCount || 0) / a.price * 1000) : 0);
   const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores, -Infinity) && valueScores.filter(x => x === v).length === 1 ? i : -1);
+  const views = accounts.map((a) => a.viewCount ?? 0);
+  const viewBest = views.map((v, i) => v > 0 && v === Math.max(...views, -Infinity) && views.filter(x => x === v).length === 1 ? i : -1);
+  const orders = accounts.map((a) => a.orderCount ?? 0);
+  const orderBest = orders.map((o, i) => o > 0 && o === Math.max(...orders, -Infinity) && orders.filter(x => x === o).length === 1 ? i : -1);
 
   // Compute overall winner: count wins across all bestIdx values
-  const allBestIdcs = [priceBest, skinBest, creditBest, valueBest];
+  const allBestIdcs = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest];
   const winnerCounts = accounts.map((_, idx) => allBestIdcs.filter(best => best.includes(idx)).length);
   const maxWins = Math.max(...winnerCounts);
   const overallWinnerIdx = maxWins > 0 ? winnerCounts.indexOf(maxWins) : -1;
@@ -196,6 +200,16 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
     {
       label: '上架时间',
       values: accounts.map((a) => freshnessLabel(a.createdAt)),
+    },
+    {
+      label: '浏览量',
+      values: accounts.map((a) => a.viewCount != null ? `${a.viewCount} 次` : '—'),
+      bestIdx: viewBest,
+    },
+    {
+      label: '已售笔数',
+      values: accounts.map((a) => a.orderCount != null ? `${a.orderCount} 笔` : '—'),
+      bestIdx: orderBest,
     },
     { label: '描述', values: accounts.map((a) => a.description?.slice(0, 60) || '暂无') },
   ];
