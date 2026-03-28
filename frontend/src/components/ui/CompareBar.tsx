@@ -72,7 +72,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
         <button
           onClick={onCompare}
           disabled={items.length < 2}
-          className="btn-primary !py-2 !px-4 text-sm disabled:opacity-40 flex items-center gap-1.5"
+          className="btn-primary !py-2 !px-4 text-sm disabled:opacity-40 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark"
         >
           <Scale className="w-3.5 h-3.5" />
           对比
@@ -81,7 +81,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
 
         <button
           onClick={() => setShowClearConfirm(true)}
-          className="text-slate-500 hover:text-white transition-colors p-1"
+          className="text-slate-500 hover:text-white transition-colors p-1 focus-visible:text-white focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark rounded-md"
           title="清除"
         >
           <X className="w-4 h-4" />

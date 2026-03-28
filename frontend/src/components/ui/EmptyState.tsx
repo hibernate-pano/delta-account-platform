@@ -86,7 +86,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
                 <Link
                   key={i}
                   to={action.to}
-                  className={action.variant === 'secondary' ? 'btn-secondary text-sm hover:scale-105 active:scale-95' : 'btn-primary text-sm hover:scale-105 active:scale-95'}
+                  className={action.variant === 'secondary' ? 'btn-secondary text-sm hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark' : 'btn-primary text-sm hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark'}
                 >
                   {Icon2 && <Icon2 className="w-4 h-4" />}
                   {action.label}
@@ -97,7 +97,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               <button
                 key={i}
                 onClick={action.onClick}
-                className={action.variant === 'secondary' ? 'btn-secondary text-sm hover:scale-105 active:scale-95' : 'btn-primary text-sm hover:scale-105 active:scale-95'}
+                className={action.variant === 'secondary' ? 'btn-secondary text-sm hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark' : 'btn-primary text-sm hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark'}
               >
                 {Icon2 && <Icon2 className="w-4 h-4" />}
                 {action.label}

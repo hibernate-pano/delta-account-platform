@@ -33,14 +33,14 @@ export const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={onFirst}
         disabled={!canGoPrev}
-        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30 active:scale-95"
       >
         首页
       </button>
       <button
         onClick={onPrev}
         disabled={!canGoPrev}
-        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30 active:scale-95"
       >
         上一页
       </button>
@@ -62,14 +62,14 @@ export const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={onNext}
         disabled={!canGoNext}
-        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30 active:scale-95"
       >
         下一页
       </button>
       <button
         onClick={onLast}
         disabled={!canGoNext}
-        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30"
+        className="btn-ghost !px-3 !py-1.5 text-sm disabled:opacity-30 active:scale-95"
       >
         末页
       </button>
