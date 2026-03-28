@@ -574,6 +574,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 {order.account.weapons.length > 8 ? `${order.account.weapons.slice(0, 8)}…` : order.account.weapons}
               </span>
             )}
+            {order.account?.orderCount != null && order.account.orderCount > 0 && (
+              <span className="flex-shrink-0 text-[10px] px-1.5 py-0.5 bg-green-500/15 text-green-400/80 rounded-full">
+                已售{order.account.orderCount}笔
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 font-mono">#{order.orderNo.slice(-8)}</p>
         </div>

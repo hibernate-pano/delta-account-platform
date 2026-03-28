@@ -52,6 +52,16 @@ const ReviewCard: React.FC<{
             <span className="text-sm font-medium text-slate-300">
               {review.reviewer?.nickname || review.reviewer?.username || '匿名用户'}
             </span>
+            {review.reviewer?.creditScore != null && (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
+                review.reviewer.creditScore >= 80
+                  ? 'bg-emerald-500/15 text-emerald-400'
+                  : 'bg-yellow-500/10 text-yellow-400/80'
+              }`}>
+                {review.reviewer.creditScore >= 80 && <ShieldCheck className="w-2.5 h-2.5" />}
+                {review.reviewer.creditScore}分
+              </span>
+            )}
             <div className="flex items-center gap-0.5">
               {Array.from({ length: 5 }, (_, i) => (
                 <Star
