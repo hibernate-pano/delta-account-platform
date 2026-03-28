@@ -255,7 +255,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               {/* Zoom controls */}
               <button
                 onClick={(e) => { e.stopPropagation(); setZoomLevel((z) => Math.max(z - 0.5, 0.5)); }}
-                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90"
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 title="缩小 (-)"
               >
                 <ZoomOut className="w-4 h-4" />
@@ -265,7 +265,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               </span>
               <button
                 onClick={(e) => { e.stopPropagation(); setZoomLevel((z) => Math.min(z + 0.5, 4)); }}
-                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90"
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 title="放大 (+)"
               >
                 <ZoomIn className="w-4 h-4" />
@@ -274,7 +274,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               <button
                 onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); setZoomLevel(1); }}
                 aria-label="关闭图片查看"
-                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all ml-2"
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -318,14 +318,14 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               <button
                 onClick={(e) => { e.stopPropagation(); navigatePrev(); }}
                 aria-label="上一张图片"
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <ChevronLeft className="w-7 h-7" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); navigateNext(); }}
                 aria-label="下一张图片"
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <ChevronRight className="w-7 h-7" />
               </button>

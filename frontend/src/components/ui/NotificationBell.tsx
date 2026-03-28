@@ -148,7 +148,7 @@ export const NotificationBell: React.FC = () => {
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-3 rounded-lg cursor-pointer hover:bg-dark hover:scale-[1.01] active:scale-[0.99] transition-all ${n.status === 'UNREAD' ? 'bg-primary/5' : ''}`}
+                    className={`p-3 rounded-lg cursor-pointer hover:bg-dark hover:scale-[1.01] active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${n.status === 'UNREAD' ? 'bg-primary/5' : ''}`}
                     onClick={async () => {
                       if (n.status === 'UNREAD') {
                         try {
