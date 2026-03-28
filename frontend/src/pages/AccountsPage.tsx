@@ -567,6 +567,17 @@ const AccountsPage: React.FC = () => {
                     <Flame className="w-3 h-3" /> 热门
                   </span>
                 )}
+                {/* Trending badge — view velocity > 5/day, mutually exclusive with NEW/HOT */}
+                {!isNewAccount(account.createdAt) && !((account.viewCount ?? 0) >= 100 || (account.orderCount ?? 0) >= 5) && (() => {
+                  if (!account.createdAt || account.viewCount == null || (account.orderCount ?? 0) > 0) return null;
+                  const days = Math.max(1, Math.floor((Date.now() - new Date(account.createdAt).getTime()) / 86400000));
+                  const velocity = account.viewCount / days;
+                  return velocity > 5 ? (
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-rose-500/90 text-white text-[10px] rounded flex items-center gap-0.5 z-10 shadow-lg shadow-rose-500/40 animate-pulse">
+                      <Zap className="w-3 h-3" /> 飙升中
+                    </span>
+                  ) : null;
+                })()}
                 {/* Verified badge */}
                 {account.verificationStatus === 'VERIFIED' && (
                   <span className="absolute left-2 bottom-2 px-1.5 py-0.5 bg-emerald-500/90 text-white text-[10px] rounded flex items-center gap-0.5">

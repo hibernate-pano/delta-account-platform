@@ -224,6 +224,26 @@ const MessagesPage: React.FC = () => {
   const { data: messagesData, isLoading: messagesLoading, isError: messagesError, refetch } = useSessionMessages(currentSessionId!);
   const messages: Message[] = [...(messagesData?.data?.data || []), ...optimisticMessages];
 
+  // Compute average seller response time (gap from user msg to partner's next msg)
+  const avgResponseTime = useMemo(() => {
+    if (!user?.id || messages.length < 2) return null;
+    const gaps: number[] = [];
+    for (let i = 0; i < messages.length - 1; i++) {
+      const curr = messages[i];
+      const next = messages[i + 1];
+      // User sent a message → partner replied
+      if (curr.senderId === user.id && next.senderId !== user.id) {
+        gaps.push(new Date(next.createdAt).getTime() - new Date(curr.createdAt).getTime());
+      }
+    }
+    if (gaps.length === 0) return null;
+    const avgMs = gaps.reduce((s, g) => s + g, 0) / gaps.length;
+    const avgMins = Math.round(avgMs / 60000);
+    if (avgMins < 1) return '通常<1分钟回复';
+    if (avgMins < 60) return `通常${avgMins}分钟内回复`;
+    return `通常${Math.round(avgMins / 60)}小时内回复`;
+  }, [messages, user?.id]);
+
   const sendMessageMutation = useSendMessage();
   const createSessionMutation = useCreateSession();
 
@@ -415,6 +435,9 @@ const MessagesPage: React.FC = () => {
                   <span className="text-slate-600">
                     离线{session.lastMessageAt && <span className="ml-1 text-slate-700">({formatRelativeTime(session.lastMessageAt)})</span>}
                   </span>
+                )}
+                {avgResponseTime && (
+                  <span className="ml-2 text-[10px] text-slate-600">· {avgResponseTime}</span>
                 )}
               </p>
               {currentSession?.accountTitle && (
