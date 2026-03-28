@@ -99,7 +99,7 @@ export const NotificationBell: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="relative p-2 text-slate-400 hover:text-white transition-colors"
+        className="relative p-2 text-slate-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark rounded-lg"
         aria-label={`通知${totalUnread > 0 ? `，${totalUnread}条未读` : ''}`}
         aria-expanded={showDropdown}
         aria-haspopup="true"
