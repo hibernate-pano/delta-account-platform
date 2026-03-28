@@ -614,7 +614,7 @@ const HomePage: React.FC = () => {
           <div className="grid md:grid-cols-4 gap-6 stagger-children">
             {steps.map((step) => (
               <div key={step.num} className="card-static text-center group relative">
-                <div className="absolute top-4 right-4 text-5xl font-bold text-dark-border select-none">
+                <div className="absolute top-4 right-4 text-5xl font-bold text-dark-border select-none group-hover:text-dark-border/60 transition-colors duration-300">
                   {step.num}
                 </div>
                 <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/30 group-hover:scale-110 transition-all duration-300">

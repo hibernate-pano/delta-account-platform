@@ -177,7 +177,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               <div
                 key={i}
                 className={`h-1 rounded-full transition-all duration-300 ${
-                  i === currentIndex ? 'w-5 bg-white' : 'w-1 bg-white/40'
+                  i === currentIndex ? 'w-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]' : 'w-1 bg-white/40 hover:scale-150 hover:bg-white/60'
                 }`}
               />
             ))}
