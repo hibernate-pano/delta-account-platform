@@ -253,6 +253,15 @@ const MessagesPage: React.FC = () => {
                 })()
               : (session.lastMessage || '暂无消息')}
           </p>
+          {session.createdAt && (() => {
+            const daysSince = Math.floor((Date.now() - new Date(session.createdAt).getTime()) / 86400000);
+            return daysSince > 0 ? (
+              <p className="text-[10px] text-slate-700 mt-0.5 flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                {daysSince < 1 ? '今日开始' : `${daysSince}天前开始`}
+              </p>
+            ) : null;
+          })()}
         </div>
         {!session.unreadCount && (
           <div className="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0 animate-pulse opacity-60" />

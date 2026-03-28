@@ -589,14 +589,21 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             #{order.orderNo.slice(-8)}
             <Copy className="w-2.5 h-2.5 opacity-50 hover:opacity-100" />
           </button>
+          {order.type === 'BUY' && order.deposit && order.deposit > 0 && (
+            <p className="text-[10px] text-amber-400/80 mt-0.5 flex items-center gap-0.5">
+              <span className="px-1 py-0.5 bg-amber-500/15 rounded">押金¥{order.deposit}（归还后退）</span>
+            </p>
+          )}
         </div>
 
         {/* Amount + Status */}
         <div className="text-right flex-shrink-0">
           <div className="text-base font-bold text-white">
             ¥{order.amount.toFixed(0)}
-            {order.type === 'RENT' && order.deposit && order.deposit > 0 && (
-              <span className="text-xs font-normal text-slate-500 ml-1">+押金¥{order.deposit}</span>
+            {order.deposit && order.deposit > 0 && (
+              <span className={`text-xs font-normal ml-1 ${order.type === 'RENT' ? 'text-slate-500' : 'text-amber-400'}`}>
+                +押金¥{order.deposit}
+              </span>
             )}
           </div>
           {order.account?.skinCount && order.account.skinCount > 0 && (
