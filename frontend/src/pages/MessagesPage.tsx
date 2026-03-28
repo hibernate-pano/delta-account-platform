@@ -145,7 +145,29 @@ const MessagesPage: React.FC = () => {
         />
       );
     }
-    return filteredSessions.map((session) => (
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 86400000);
+    const weekAgo = new Date(today.getTime() - 7 * 86400000);
+    const groups: Record<string, typeof filteredSessions> = { 今天: [], 昨天: [], 本周: [], 更早: [] };
+    filteredSessions.forEach((s) => {
+      const d = new Date(s.lastMessageAt);
+      if (d >= today) groups['今天'].push(s);
+      else if (d >= yesterday) groups['昨天'].push(s);
+      else if (d >= weekAgo) groups['本周'].push(s);
+      else groups['更早'].push(s);
+    });
+    const sessionGroupLabels = (['今天', '昨天', '本周', '更早'] as const);
+
+    return sessionGroupLabels.map((label) => {
+      const group = groups[label];
+      if (group.length === 0) return null;
+      return (
+        <div key={label}>
+          <div className="px-4 py-1.5 text-[11px] text-slate-600 font-medium uppercase tracking-wider bg-dark/60 sticky top-0 z-10">
+            {label}{label !== '今天' && <span className="ml-1 text-slate-700">({group.length})</span>}
+          </div>
+          {group.map((session) => (
       <div
         key={session.id}
         onClick={() => navigate(`/messages/${session.id}`)}
@@ -225,7 +247,10 @@ const MessagesPage: React.FC = () => {
           <div className="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0 animate-pulse opacity-60" />
         )}
       </div>
-    ));
+          ))}
+        </div>
+      );
+    });
   }, [filteredSessions, sessionSearch, navigate]);
 
   const currentSessionId = sessionId ? parseInt(sessionId) : null;

@@ -663,8 +663,14 @@ const AccountsPage: React.FC = () => {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-lg font-bold text-primary">¥{account.price}</span>
+                  {account.skinCount > 0 && account.price > 0 && (() => {
+                    const ratio = account.skinCount / account.price;
+                    if (ratio >= 2.0) return <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] rounded flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> 超值</span>;
+                    if (ratio >= 1.0) return <span className="px-1.5 py-0.5 bg-yellow-400/15 text-yellow-300/80 text-[10px] rounded flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> 性价优</span>;
+                    return null;
+                  })()}
                   <span className="text-[10px] text-slate-600 flex items-center gap-0.5">
                     <Clock className="w-3 h-3" />{freshnessLabel(account.createdAt)}
                   </span>
