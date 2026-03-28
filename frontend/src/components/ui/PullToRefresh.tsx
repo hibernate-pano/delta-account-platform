@@ -55,6 +55,16 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ children, onRefres
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !refreshing) {
+          e.preventDefault();
+          setRefreshing(true);
+          onRefresh().finally(() => setRefreshing(false));
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label="下拉刷新"
       className="relative"
     >
       {/* Pull indicator — uses translateY so it stays attached to scroll position */}

@@ -66,7 +66,7 @@ export const StaticPageLayout: React.FC<StaticPageLayoutProps> = ({
       <div className="mb-8">
         <Link
           to={backTo}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-white transition-colors text-sm mb-5 w-fit"
+          className="flex items-center gap-1.5 text-slate-500 hover:text-white transition-colors text-sm mb-5 w-fit focus-visible:outline-none focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dark rounded"
         >
           <ArrowLeft className="w-4 h-4" />
           返回

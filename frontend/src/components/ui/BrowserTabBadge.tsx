@@ -28,7 +28,7 @@ export const UnreadIndicator: React.FC = () => {
 
   return (
     <div className="fixed top-3 right-3 z-[150] flex items-center gap-1.5 animate-fade-in">
-      <div className="flex items-center gap-1 px-2 py-1 bg-dark-card border border-dark-border rounded-lg shadow-lg text-xs">
+      <div className="flex items-center gap-1 px-2 py-1 bg-dark-card border border-dark-border rounded-lg shadow-lg text-xs transition-all duration-200 hover:shadow-xl hover:border-primary/30 hover:scale-105 active:scale-95 cursor-default">
         <Bell className="w-3 h-3 text-yellow-400" />
         <span className="text-yellow-400 font-bold">{data.notificationCount}</span>
         <span className="text-slate-600">|</span>
