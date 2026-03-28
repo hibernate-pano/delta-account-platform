@@ -312,9 +312,7 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
                   ]
               ).map((item, i) => (
                 <div key={item.label} className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    item.done ? 'bg-primary/20 text-primary' : 'bg-dark-lighter text-slate-600'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${item.done ? 'bg-primary/20 text-primary shadow-[0_0_6px_rgba(99,102,241,0.4)]' : 'bg-dark-lighter text-slate-600'}`}>
                     {item.done ? <CheckCircle className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">{i + 1}</span>}
                   </div>
                   <div className="flex-1">
