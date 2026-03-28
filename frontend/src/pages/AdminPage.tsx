@@ -541,7 +541,7 @@ const AdminPage: React.FC = () => {
               )}
               {filteredAccounts.map((account) => (
                 <div key={account.id}
-                  className={`card flex items-center gap-4 p-4 transition-all group ${selectedAccounts.has(account.id) ? 'border-primary/40 bg-primary/5' : 'hover:border-slate-700'}`}>
+                  className={`card flex items-center gap-4 p-4 transition-all group hover:scale-[1.01] active:scale-[0.99] ${selectedAccounts.has(account.id) ? 'border-primary/40 bg-primary/5' : 'hover:border-slate-700'}`}>
                   {/* Bulk select checkbox */}
                   <input
                     type="checkbox"
@@ -611,7 +611,7 @@ const AdminPage: React.FC = () => {
                 { label: '已完成', value: stats.completedOrders ?? 0, color: 'text-green-400' },
                 { label: '收入总额', value: `¥${(stats.totalRevenue ?? 0).toFixed(2)}`, color: 'text-primary' },
               ].map(item => (
-                <div key={item.label} className="card py-4 text-center">
+                <div key={item.label} className="card py-4 text-center hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10 transition-all duration-200">
                   <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
                   <p className="text-xs text-slate-500 mt-1">{item.label}</p>
                 </div>
