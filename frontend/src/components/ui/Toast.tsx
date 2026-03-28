@@ -190,7 +190,7 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
             <button
               onClick={() => removeToast(toast.id)}
               aria-label="关闭通知"
-              className="flex-shrink-0 text-slate-500 hover:text-white transition-colors"
+              className="flex-shrink-0 text-slate-500 hover:text-white hover:scale-110 active:scale-95 transition-all"
             >
               <X className="w-4 h-4" />
             </button>
