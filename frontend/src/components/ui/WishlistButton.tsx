@@ -86,6 +86,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
         ${sizeClasses[size]}
         rounded-full flex items-center justify-center
         transition-all duration-200
+        hover:scale-110 active:scale-95
         ${pending ? 'opacity-60' : ''}
         ${wishlisted
           ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'

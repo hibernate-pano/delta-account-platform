@@ -166,7 +166,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   key={method.id}
                   onClick={() => !isDisabled && setSelectedMethod(method.id)}
                   disabled={isDisabled}
-                  className={`w-full p-4 rounded-xl border-2 flex items-center gap-4 transition-all ${
+                  className={`w-full p-4 rounded-xl border-2 flex items-center gap-4 transition-all hover:scale-[1.01] active:scale-[0.99] ${
                     isSelected
                       ? 'border-primary bg-primary/10'
                       : 'border-dark-border hover:border-slate-600'
