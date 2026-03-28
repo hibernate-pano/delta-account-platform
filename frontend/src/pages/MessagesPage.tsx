@@ -148,7 +148,7 @@ const MessagesPage: React.FC = () => {
       <div
         key={session.id}
         onClick={() => navigate(`/messages/${session.id}`)}
-        className={`py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 transition-colors active:bg-dark-lighter relative ${
+        className={`py-4 px-4 flex items-center gap-3 cursor-pointer hover:bg-dark-lighter/60 hover:scale-[1.005] active:scale-[0.998] transition-all duration-150 active:bg-dark-lighter relative ${
           session.unreadCount ? 'bg-primary/5' : ''
         }`}
       >

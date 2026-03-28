@@ -202,13 +202,13 @@ const FAQPage: React.FC = () => {
           return (
             <div
               key={idx}
-              className={`card transition-all ${isOpen ? 'border-primary/30' : 'hover:border-slate-700'}`}
+              className={`card transition-all group ${isOpen ? 'border-primary/30' : 'hover:border-slate-700'}`}
             >
               <button
                 onClick={() => setOpenQuestion(isOpen ? null : idx)}
                 className="w-full flex items-center gap-3 py-4 px-4 text-left hover:bg-dark-lighter/30 transition-colors rounded-xl"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover/section:scale-110 ${isOpen ? 'bg-primary/20' : 'bg-dark-lighter group-hover/section:bg-slate-700/30'}`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:scale-110 ${isOpen ? 'bg-primary/20' : 'bg-dark-lighter group-hover:bg-slate-700/30'}`}>
                   <Icon className={`w-4 h-4 transition-colors ${isOpen ? 'text-primary' : 'text-slate-500'}`} />
                 </div>
                 <span className={`flex-1 text-sm font-medium ${isOpen ? 'text-primary' : 'text-slate-300'}`}>
