@@ -463,6 +463,12 @@ const isOwner = user?.id === account?.sellerId;
                   <Clock className="w-3 h-3 text-purple-400" />
                   <span>快速交付</span>
                 </div>
+                {account.orderCount != null && account.orderCount > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <ShoppingCart className="w-3 h-3 text-amber-400" />
+                    <span>累计售出 {account.orderCount} 单</span>
+                  </div>
+                )}
               </div>
               {/* Trust stats grid */}
               {reviewStatsLoading ? (

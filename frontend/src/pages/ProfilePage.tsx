@@ -404,6 +404,39 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Seller accounts aggregate stats */}
+              {accounts.length > 0 && (
+                <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <Package className="w-4 h-4 text-primary" />
+                    <span className="text-slate-400">上架中</span>
+                    <span className="font-semibold text-white">{stats.onSale}</span>
+                  </div>
+                  <div className="w-px h-4 bg-dark-border" />
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-slate-400">已售</span>
+                    <span className="font-semibold text-green-400">{stats.sold}</span>
+                  </div>
+                  <div className="w-px h-4 bg-dark-border" />
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                    <span className="text-slate-400">总价值</span>
+                    <span className="font-semibold text-amber-400">
+                      ¥{accounts.filter((a: any) => a.status === 'ON_SALE').reduce((s: number, a: any) => s + a.price, 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="w-px h-4 bg-dark-border" />
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <Eye className="w-4 h-4 text-purple-400" />
+                    <span className="text-slate-400">总浏览</span>
+                    <span className="font-semibold text-purple-400">
+                      {accounts.reduce((s: number, a: any) => s + (a.viewCount || 0), 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {accountsLoading ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[1, 2, 3].map((i) => (
