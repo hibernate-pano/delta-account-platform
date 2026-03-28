@@ -7,12 +7,13 @@ import {
   useMessageSessions, useSessionMessages, useSendMessage, useCreateSession, useAccount
 } from '../hooks/useQueries';
 import { messageApi } from '../api';
+import { formatRelativeTime } from '../utils/format';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { MessageSkeleton } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles, HelpCircle
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles, HelpCircle, ShieldCheck
 } from 'lucide-react';
 
 interface Session {
@@ -637,6 +638,53 @@ const MessagesPage: React.FC = () => {
           新会话
         </Link>
       </div>
+
+      {/* Messages stats banner */}
+      {sessions.length > 0 && (
+        <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+          <div className="flex items-center gap-1.5 text-sm">
+            <MessageCircle className="w-4 h-4 text-primary" />
+            <span className="text-slate-400">总会话</span>
+            <span className="font-semibold text-white">{sessions.length}</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="text-slate-400">未读</span>
+            <span className={`font-semibold ${unreadCount > 0 ? 'text-red-400' : 'text-green-400'}`}>{unreadCount}</span>
+          </div>
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <User className="w-4 h-4 text-purple-400" />
+            <span className="text-slate-400">交易对象</span>
+            <span className="font-semibold text-white">
+              {new Set(sessions.map((s) => s.otherUser?.id).filter(Boolean)).size}
+            </span>
+          </div>
+          {(() => {
+            const verifiedSellers = sessions.filter((s) => s.otherUser?.creditScore && s.otherUser.creditScore >= 80).length;
+            return verifiedSellers > 0 ? (
+              <>
+                <div className="w-px h-4 bg-dark-border" />
+                <div className="flex items-center gap-1.5 text-sm">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  <span className="text-slate-400">高信誉</span>
+                  <span className="font-semibold text-green-400">{verifiedSellers}</span>
+                </div>
+              </>
+            ) : null;
+          })()}
+          <div className="w-px h-4 bg-dark-border" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <Clock className="w-4 h-4 text-blue-400" />
+            <span className="text-slate-400">最近</span>
+            <span className="font-semibold text-blue-400">
+              {sessions[0]?.lastMessageAt
+                ? formatRelativeTime(sessions[0].lastMessageAt)
+                : '—'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Session Search */}
       <div className="relative mb-4">
