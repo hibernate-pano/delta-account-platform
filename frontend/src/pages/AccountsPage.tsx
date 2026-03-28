@@ -1002,6 +1002,30 @@ const AccountsPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Freshness urgency meter */}
+              {quickViewAccount.createdAt && (
+                <div className="bg-dark rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-slate-500">上架时间</span>
+                    <span className="text-xs text-slate-400">{formatRelativeTime(quickViewAccount.createdAt)}</span>
+                  </div>
+                  <div className="h-1.5 bg-dark-lighter rounded-full overflow-hidden">
+                    {(() => {
+                      const age = Date.now() - new Date(quickViewAccount.createdAt).getTime();
+                      const ageDays = age / 86400000;
+                      const pct = Math.min(100, ageDays * 20);
+                      const color = ageDays < 1 ? 'bg-green-400' : ageDays < 3 ? 'bg-yellow-400' : 'bg-red-400';
+                      return <div className={`h-full ${color} transition-all rounded-full`} style={{ width: `${pct}%` }} />;
+                    })()}
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[9px] text-green-400">新上架</span>
+                    <span className="text-[9px] text-yellow-400">上架中</span>
+                    <span className="text-[9px] text-red-400">久挂</span>
+                  </div>
+                </div>
+              )}
+
               {/* Description */}
               {quickViewAccount.description && (
                 <div>

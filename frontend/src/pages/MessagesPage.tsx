@@ -189,6 +189,17 @@ const MessagesPage: React.FC = () => {
               <User className="w-5 h-5 text-primary" />
             </div>
           )}
+          {/* Seller responded dot — shown when unread AND we know sender */}
+          {session.unreadCount && session.lastMessage && (() => {
+            const isPartnerMsg = session.otherUser?.id != null && user?.id != null
+              ? (user.id === session.buyerId ? session.otherUser.id === session.sellerId : session.otherUser.id === session.buyerId)
+              : null;
+            return isPartnerMsg === true ? (
+              <span className="absolute -bottom-0.5 left-6 w-3 h-3 bg-emerald-400 rounded-full border-2 border-dark-card shadow-lg shadow-emerald-400/40" title="卖家已回复" />
+            ) : isPartnerMsg === false ? (
+              <span className="absolute -bottom-0.5 left-6 w-3 h-3 bg-yellow-400 rounded-full border-2 border-dark-card" title="等待卖家回复" />
+            ) : null;
+          })()}
           {session.unreadCount && session.unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold leading-none animate-pulse">
               {session.unreadCount > 9 ? '9+' : session.unreadCount}
