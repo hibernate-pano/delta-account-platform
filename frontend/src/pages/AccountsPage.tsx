@@ -11,7 +11,7 @@ import { Pagination } from '../components/ui/Pagination';
 import { usePagination } from '../hooks/usePagination';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { formatCompact } from '../utils/format';
+import { formatCompact, formatRelativeTime } from '../utils/format';
 import { useAccounts, useBuyAccount, useCreateSession } from '../hooks/useQueries';
 import { useRecentStore } from '../store/recent';
 import { useToast } from '../components/ui/Toast';
@@ -537,7 +537,7 @@ const AccountsPage: React.FC = () => {
               to={`/accounts/${account.id}`}
               className="card hover:border-primary transition-all duration-200 group"
             >
-              <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative">
+              <div className={`aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative ${isCompareSelected(account.id) ? 'ring-2 ring-yellow-400/60 shadow-lg shadow-yellow-400/20' : ''}`}>
                 {account.images && account.images.length > 0 ? (
                   <img
                     src={account.images[0]}
@@ -672,7 +672,7 @@ const AccountsPage: React.FC = () => {
               to={`/accounts/${account.id}`}
               className="card flex gap-4 hover:border-primary transition-all group"
             >
-              <div className="w-40 h-28 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative">
+              <div className={`w-40 h-28 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative ${isCompareSelected(account.id) ? 'ring-2 ring-yellow-400/60 shadow-lg shadow-yellow-400/20' : ''}`}>
                 {account.images && account.images.length > 0 ? (
                   <img
                     src={account.images[0]}
@@ -883,7 +883,7 @@ const AccountsPage: React.FC = () => {
                   { label: '游戏段位', value: quickViewAccount.gameRank || '未填写' },
                   { label: '皮肤数量', value: `${quickViewAccount.skinCount} 个` },
                   { label: '装备描述', value: quickViewAccount.weapons || '未填写' },
-                  { label: '发布时间', value: quickViewAccount.createdAt ? new Date(quickViewAccount.createdAt).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' }) : '未知' },
+                  { label: '发布时间', value: quickViewAccount.createdAt ? formatRelativeTime(quickViewAccount.createdAt) : '未知' },
                 ].map((item) => (
                   <div key={item.label} className="bg-dark rounded-lg px-3 py-2.5">
                     <p className="text-[10px] text-slate-500 mb-0.5">{item.label}</p>
