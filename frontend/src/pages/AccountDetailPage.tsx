@@ -281,6 +281,12 @@ const isOwner = user?.id === account?.sellerId;
                 </span>
               </div>
             )}
+            {account.skinCount > 0 && account.price > 0 && (
+              <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-primary/10">
+                <span className="text-xs text-slate-600">均价</span>
+                <span className="text-xs text-slate-400">¥{(account.price / account.skinCount).toFixed(1)}/皮肤 · {account.skinCount}个</span>
+              </div>
+            )}
           </div>
 
           {/* Tabs */}

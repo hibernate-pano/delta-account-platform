@@ -514,6 +514,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
               {order.account?.title || `账号 #${order.accountId}`}
             </p>
+            {order.account?.gameType && (
+              <span className="flex-shrink-0 text-[10px] px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">
+                {order.account.gameType}
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 font-mono">#{order.orderNo.slice(-8)}</p>
         </div>
