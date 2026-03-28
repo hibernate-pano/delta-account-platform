@@ -321,21 +321,22 @@ body {
 /* Skeleton loading */
 .skeleton {
   background: linear-gradient(
-    90deg,
-    var(--color-dark) 25%,
-    var(--color-dark-lighter) 50%,
-    var(--color-dark) 75%
+    110deg,
+    var(--color-dark) 20%,
+    var(--color-dark-lighter) 40%,
+    var(--color-dark-lighter) 60%,
+    var(--color-dark) 80%
   );
   background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
+  animation: skeleton-loading 1.8s ease-in-out infinite;
 }
 
 @keyframes skeleton-loading {
   0% {
-    background-position: 200% 0;
+    background-position: 200% 100%;
   }
   100% {
-    background-position: -200% 0;
+    background-position: -200% 100%;
   }
 }
 
