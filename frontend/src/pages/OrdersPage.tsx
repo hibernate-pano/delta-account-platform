@@ -547,6 +547,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
             <ExternalLink className="w-4 h-4 text-white" />
           </div>
+          {/* Seller avatar badge */}
+          {(order.account?.sellerAvatar) && (
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-dark overflow-hidden bg-dark-lighter shadow-md">
+              <img src={order.account.sellerAvatar} alt="" className="w-full h-full object-cover" />
+            </div>
+          )}
         </div>
 
         {/* Info */}

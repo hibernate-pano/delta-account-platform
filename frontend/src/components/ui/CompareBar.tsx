@@ -33,6 +33,8 @@ export const CompareBar: React.FC<CompareBarProps> = ({
   const depositBest = depositRatios.map((v, i) => v < Infinity && v === Math.min(...depositRatios, Infinity) && depositRatios.filter(x => x === v).length === 1 ? i : -1);
   const skinPriceRatios = accounts.map((a) => a.skinCount > 0 && a.price > 0 ? a.price / a.skinCount : Infinity);
   const skinPriceBest = skinPriceRatios.map((v, i) => v < Infinity && v === Math.min(...skinPriceRatios, Infinity) && skinPriceRatios.filter(x => x === v).length === 1 ? i : -1);
+  const conversionRates = accounts.map((a) => a.viewCount && a.viewCount > 0 ? ((a.orderCount || 0) / a.viewCount) : Infinity);
+  const conversionBest = conversionRates.map((v, i) => v < Infinity && v === Math.min(...conversionRates, Infinity) && conversionRates.filter(x => x === v).length === 1 ? i : -1);
   const winnerIndices = (() => {
     if (items.length < 2) return [];
     const prices = accounts.map((a) => a.price);
@@ -51,7 +53,7 @@ export const CompareBar: React.FC<CompareBarProps> = ({
     const orderBest = orderCounts.map((v, i) => v > 0 && v === Math.max(...orderCounts, -Infinity) && orderCounts.filter(x => x === v).length === 1 ? i : -1);
     const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores, -Infinity) && valueScores.filter(x => x === v).length === 1 ? i : -1);
     const recoveryBest = recoveryHours.map((v, i) => v < Infinity && v === Math.min(...recoveryHours, Infinity) && recoveryHours.filter(x => x === v).length === 1 ? i : -1);
-    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest, recoveryBest, depositBest, skinPriceBest];
+    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest, recoveryBest, depositBest, skinPriceBest, conversionBest];
     const counts = accounts.map((_, idx) => allBest.filter(best => best.includes(idx)).length);
     const maxCount = Math.max(...counts);
     if (maxCount === 0) return [];
@@ -262,6 +264,12 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
       values: accounts.map((a, i) => skinPriceRatios[i] < Infinity ? `¥${skinPriceRatios[i].toFixed(1)}/皮` : '—'),
       bestIdx: skinPriceBest,
       subLabel: '单价越低越优',
+    },
+    {
+      label: '转化率',
+      values: accounts.map((a, i) => conversionRates[i] < Infinity ? `${(conversionRates[i] * 100).toFixed(1)}%` : '—'),
+      bestIdx: conversionBest,
+      subLabel: '售出/浏览越高越好',
     },
     { label: '所属英雄', values: accounts.map((a) => a.weapons || '未填写') },
     { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '已认证' : '待认证') },
