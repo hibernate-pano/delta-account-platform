@@ -581,7 +581,7 @@ const HomePage: React.FC = () => {
                   <div className="absolute top-2 right-2 z-10">
                     <WishlistButton account={account} size="sm" />
                   </div>
-                  <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden">
+                  <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative group">
                     {account.images?.[0] ? (
                       <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
@@ -589,8 +589,17 @@ const HomePage: React.FC = () => {
                         <Gamepad2 className="w-8 h-8 text-slate-700" />
                       </div>
                     )}
-                    <div className="absolute bottom-2 left-2">
-                      <span className="px-2 py-0.5 bg-green-500/90 text-white text-xs rounded-full flex items-center gap-1">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="flex flex-wrap gap-1">
+                        {account.gameType && (
+                          <span className="px-2 py-0.5 bg-purple-500/90 text-white text-[10px] rounded-full">{account.gameType}</span>
+                        )}
+                        {account.gameRank && (
+                          <span className="px-2 py-0.5 bg-primary/90 text-white text-[10px] rounded-full">{account.gameRank}</span>
+                        )}
+                      </div>
+                      <span className="px-2 py-0.5 bg-green-500/90 text-white text-[10px] rounded-full flex items-center gap-0.5">
                         <CheckCircle className="w-3 h-3" /> 已认证
                       </span>
                     </div>

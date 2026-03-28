@@ -267,7 +267,7 @@ const NotificationItem: React.FC<{
               <button
                 onClick={(e) => { e.stopPropagation(); onMarkRead(notification.id); }}
                 disabled={markReadPending}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-green-400 hover:bg-green-500/10 transition-all disabled:opacity-50"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-green-400 hover:bg-green-500/20 hover:scale-105 transition-all disabled:opacity-50"
                 title="标记已读"
               >
                 {markReadPending ? (
@@ -280,7 +280,7 @@ const NotificationItem: React.FC<{
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(notification.id); setSwipeX(0); }}
               disabled={markDeletePending}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:cursor-wait"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-500/20 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-wait"
               title="删除"
             >
               {markDeletePending ? (
