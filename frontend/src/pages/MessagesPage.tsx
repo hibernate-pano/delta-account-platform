@@ -628,19 +628,30 @@ const MessagesPage: React.FC = () => {
                               className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm group/bubble ${
                                 isMe
                                   ? 'bg-gradient-to-br from-primary to-purple-600 text-white rounded-br-sm'
+                                  : msg.type === 'SYSTEM' || msg.type === 'ORDER_UPDATE'
+                                  ? 'bg-amber-500/10 border border-amber-500/20 text-amber-300/90 rounded-bl-sm italic'
                                   : 'bg-dark-lighter text-white rounded-bl-sm'
                               }`}
                             >
-                              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                              {/* Copy button - visible on hover */}
-                              <button
-                                type="button"
-                                onClick={() => { navigator.clipboard.writeText(msg.content); showToast('已复制', 'success'); }}
-                                className="absolute top-1 right-1 w-6 h-6 rounded bg-black/30 text-white/60 flex items-center justify-center opacity-0 group-hover/bubble:opacity-100 transition-opacity hover:bg-black/50 hover:text-white"
-                                title="复制"
-                              >
-                                <Copy className="w-3 h-3" />
-                              </button>
+                              {msg.type === 'SYSTEM' || msg.type === 'ORDER_UPDATE' ? (
+                                <p className="whitespace-pre-wrap break-words text-xs not-italic">
+                                  <Sparkles className="w-3 h-3 inline mr-1 opacity-60" />
+                                  {msg.content}
+                                </p>
+                              ) : (
+                                <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                              )}
+                              {/* Copy button - visible on hover, hidden for system messages */}
+                              {!(msg.type === 'SYSTEM' || msg.type === 'ORDER_UPDATE') && (
+                                <button
+                                  type="button"
+                                  onClick={() => { navigator.clipboard.writeText(msg.content); showToast('已复制', 'success'); }}
+                                  className="absolute top-1 right-1 w-6 h-6 rounded bg-black/30 text-white/60 flex items-center justify-center opacity-0 group-hover/bubble:opacity-100 transition-opacity hover:bg-black/50 hover:text-white"
+                                  title="复制"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </button>
+                              )}
                             </div>
                             {/* Time + status */}
                             <div className={`flex items-center gap-1 mt-1 text-[10px] text-slate-600 ${isMe ? 'justify-end' : ''}`}>

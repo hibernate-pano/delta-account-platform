@@ -853,7 +853,10 @@ const AccountsPage: React.FC = () => {
                       return <span className={`text-[10px] ml-0.5 ${isHigh ? 'text-red-400' : 'text-slate-600'}`}>
                         (+¥{account.deposit}押金{isHigh && <AlertTriangle className="w-2.5 h-2.5 inline ml-0.5" />})
                       </span>;
-                    })()}</span>
+                    })()}
+                    {account.skinCount && account.skinCount > 0 && (
+                      <span className="text-[10px] text-amber-400/60 ml-1">¥{(account.rentalPrice / account.skinCount).toFixed(2)}/时/皮</span>
+                    )}</span>
                   )}
                 </div>
                 {/* Engagement stats */}
