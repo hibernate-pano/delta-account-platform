@@ -406,7 +406,9 @@ const MessagesPage: React.FC = () => {
                 {partnerOnline ? (
                   <span className="text-green-400">在线</span>
                 ) : (
-                  <span className="text-slate-600">离线</span>
+                  <span className="text-slate-600">
+                    离线{session.lastMessageAt && <span className="ml-1 text-slate-700">({formatRelativeTime(session.lastMessageAt)})</span>}
+                  </span>
                 )}
               </p>
               {currentSession?.accountTitle && (

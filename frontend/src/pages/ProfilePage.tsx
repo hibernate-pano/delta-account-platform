@@ -13,7 +13,7 @@ import {
   User, Package, FileText, LogOut, ChevronRight,
   Star, Shield, TrendingUp, Gamepad2, CheckCircle, Clock, Heart, X,
   MessageCircle, Bell, Wallet, Edit2, BarChart2, RefreshCw, AlertCircle, Send, Upload, Eye, ShoppingCart,
-  Image, Pencil, Smartphone, Mail, Crown, Sparkles, ShoppingBag
+  Image, Pencil, Smartphone, Mail, Crown, Sparkles, ShoppingBag, ThumbsUp
 } from 'lucide-react';
 
 import { Review } from '../types';
@@ -26,6 +26,8 @@ const ReviewCard: React.FC<{
 }> = ({ review, replyMutation, showToast }) => {
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const [helpfulCount, setHelpfulCount] = useState(0);
+  const [voted, setVoted] = useState(false);
 
   const handleSubmitReply = async () => {
     if (!replyText.trim()) return;
@@ -100,13 +102,29 @@ const ReviewCard: React.FC<{
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setShowReplyInput(true)}
-                  className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  回复评价
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowReplyInput(true)}
+                    className="text-xs text-primary/70 hover:text-primary transition-colors flex items-center gap-1"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    回复评价
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (voted) return;
+                      setHelpfulCount((c) => c + 1);
+                      setVoted(true);
+                      showToast('感谢您的认可', 'success');
+                    }}
+                    className={`text-xs flex items-center gap-1 transition-colors ${
+                      voted ? 'text-emerald-400 cursor-default' : 'text-slate-600 hover:text-emerald-400'
+                    }`}
+                  >
+                    <ThumbsUp className={`w-3.5 h-3.5 ${voted ? 'fill-emerald-400' : ''}`} />
+                    有帮助{helpfulCount > 0 && <span className="ml-0.5 opacity-70">({helpfulCount})</span>}
+                  </button>
+                </div>
               )}
             </div>
           )}
