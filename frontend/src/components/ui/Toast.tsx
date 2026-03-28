@@ -44,6 +44,7 @@ const getAriaLive = (type: ToastType) =>
 
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [dismissing, setDismissing] = useState<Set<string>>(new Set());
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -63,6 +64,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const showToast = useCallback((message: string, type: ToastType = 'info', action?: Toast['action']) => {
     const id = crypto.randomUUID();
+    setTotalCount((c) => c + 1);
     setToasts((prev) => {
       const next = [{ id, message, type, action }, ...prev];
       return next.length > MAX_VISIBLE ? next.slice(0, MAX_VISIBLE) : next;
@@ -112,14 +114,15 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ toasts, showToast, toast, removeToast, pauseToast, resumeToast }}>
       {children}
-      <ToastContainer toasts={toasts} removeToast={removeToast} dismissing={dismissing} pauseToast={pauseToast} resumeToast={resumeToast} />
+      <ToastContainer toasts={toasts} totalCount={totalCount} removeToast={removeToast} dismissing={dismissing} pauseToast={pauseToast} resumeToast={resumeToast} />
     </ToastContext.Provider>
   );
 };
 
 
-const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => void; dismissing: Set<string>; pauseToast: (id: string) => void; resumeToast: (id: string) => void }> = ({
+const ToastContainer: React.FC<{ toasts: Toast[]; totalCount: number; removeToast: (id: string) => void; dismissing: Set<string>; pauseToast: (id: string) => void; resumeToast: (id: string) => void }> = ({
   toasts,
+  totalCount,
   removeToast,
   dismissing,
   pauseToast,
@@ -197,6 +200,11 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
           </div>
         </div>
       ))}
+      {totalCount > MAX_VISIBLE && (
+        <div className="text-xs text-slate-500 text-center py-1">
+          还有 {totalCount - MAX_VISIBLE} 条通知
+        </div>
+      )}
     </div>
   );
 };

@@ -581,7 +581,47 @@ const ProfilePage: React.FC = () => {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <>
+                  {/* Orders aggregate stats */}
+                  <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <FileText className="w-4 h-4 text-primary" />
+                      <span className="text-slate-400">总订单</span>
+                      <span className="font-semibold text-white">{stats.totalOrders}</span>
+                    </div>
+                    <div className="w-px h-4 bg-dark-border" />
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <span className="text-slate-400">已完成</span>
+                      <span className="font-semibold text-green-400">{stats.completedOrders}</span>
+                    </div>
+                    <div className="w-px h-4 bg-dark-border" />
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <TrendingUp className="w-4 h-4 text-amber-400" />
+                      <span className="text-slate-400">总消费</span>
+                      <span className="font-semibold text-amber-400">
+                        {stats.totalSpent > 0 ? `¥${Math.round(stats.totalSpent).toLocaleString()}` : '—'}
+                      </span>
+                    </div>
+                    <div className="w-px h-4 bg-dark-border" />
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <ShoppingCart className="w-4 h-4 text-blue-400" />
+                      <span className="text-slate-400">购买</span>
+                      <span className="font-semibold text-blue-400">
+                        {orders.filter((o: any) => o.type === 'BUY').length}
+                      </span>
+                    </div>
+                    <div className="w-px h-4 bg-dark-border" />
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Clock className="w-4 h-4 text-purple-400" />
+                      <span className="text-slate-400">租赁</span>
+                      <span className="font-semibold text-purple-400">
+                        {orders.filter((o: any) => o.type === 'RENT').length}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
                   {orders.map((order: any) => (
                     <div
                       key={order.id}
@@ -640,6 +680,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                   ))}
                 </div>
+                </>
               )}
             </div>
           )}
