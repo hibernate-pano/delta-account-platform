@@ -572,7 +572,7 @@ const MessagesPage: React.FC = () => {
                 <span className="text-[10px] text-slate-600 font-medium">快捷回复</span>
               </div>
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-              {['账号还在吗？', '可以便宜一点吗？', '什么时候交易？', '加我私聊'].map((tpl) => (
+              {['账号还在吗？', '可以便宜一点吗？', '什么时候交易？', '加我私聊', '支持中介吗？', '确定要了！'].map((tpl) => (
                 <button
                   key={tpl}
                   type="button"
