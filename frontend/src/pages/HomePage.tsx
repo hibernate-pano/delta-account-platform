@@ -591,7 +591,7 @@ const HomePage: React.FC = () => {
                   <div className="absolute top-2 right-2 z-10">
                     <WishlistButton account={account} size="sm" />
                   </div>
-                  <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative group">
+                  <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative group cursor-zoom-in">
                     {account.images?.[0] ? (
                       <img src={account.images[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
