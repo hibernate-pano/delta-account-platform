@@ -266,6 +266,27 @@ const OrderDetailModal: React.FC<{ order: Order; onClose: () => void; onReview: 
             ))}
           </div>
 
+          {/* Deposit affordability meter */}
+          {order.deposit && order.amount > 0 && (
+            <div className="mt-3 px-3 py-2.5 bg-dark rounded-xl">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] text-slate-500">押金友好度</span>
+                <span className={`text-xs font-medium ${
+                  (order.deposit / order.amount) < 0.05 ? 'text-green-400' :
+                  (order.deposit / order.amount) < 0.15 ? 'text-yellow-400' : 'text-red-400'
+                }`}>
+                  押金 ¥{order.deposit} · 占比 {(order.deposit / order.amount * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div className="h-2 bg-dark-lighter rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${
+                  (order.deposit / order.amount) < 0.05 ? 'bg-green-400' :
+                  (order.deposit / order.amount) < 0.15 ? 'bg-yellow-400' : 'bg-red-400'
+                }`} style={{ width: `${Math.min((order.deposit / order.amount) * 100 * 3, 100)}%` }} />
+              </div>
+            </div>
+          )}
+
           {/* Seller info */}
           {(order.account?.sellerNickname || order.account?.sellerUsername) && (
             <div className="mt-3 p-3 bg-dark rounded-xl border border-dark-border">

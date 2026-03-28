@@ -15,7 +15,7 @@ import { StarRating } from '../components/ui/StarRating';
 import {
   Gamepad2, User, Star, AlertCircle, MessageCircle, ChevronRight,
   ShoppingCart, ArrowLeft, Share2, Copy, Check, Clock, RefreshCw,
-  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, ShieldCheck, Scale
+  Shield, CheckCircle, ThumbsUp, Eye, Sparkles, Flame, ShieldCheck, Scale, Sword
 } from 'lucide-react';
 
 const AccountDetailPage: React.FC = () => {
@@ -277,6 +277,12 @@ const isOwner = user?.id === account?.sellerId;
             <span className="px-3 py-1 bg-dark-lighter text-slate-400 rounded-full text-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-default">
               <Sparkles className="w-4 h-4 text-amber-400/80" /> {account.skinCount} 皮肤
             </span>
+            {account.weapons && account.weapons !== '未填写' && (
+              <span className="px-3 py-1 bg-rose-500/15 text-rose-400/80 rounded-full text-sm font-medium inline-flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-default">
+                <Sword className="w-3.5 h-3.5" />
+                {account.weapons.length > 10 ? `${account.weapons.slice(0, 10)}…` : account.weapons}
+              </span>
+            )}
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium hover:scale-105 active:scale-95 transition-all cursor-default ${
                 account.verificationStatus === 'VERIFIED'
