@@ -11,6 +11,8 @@ interface PaginationProps {
   onLast?: () => void;
   canGoNext?: boolean;
   canGoPrev?: boolean;
+  totalCount?: number;
+  pageSize?: number;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -23,6 +25,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   onLast,
   canGoNext = currentPage < totalPages,
   canGoPrev = currentPage > 1,
+  totalCount,
+  pageSize = 12,
 }) => {
   if (totalPages <= 1) return null;
 
@@ -30,6 +34,11 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex items-center justify-center gap-2 mt-8">
+      {totalCount != null && (
+        <span className="text-xs text-slate-500 mr-1">
+          第 {currentPage}/{totalPages} 页 · 共 {totalCount} 条
+        </span>
+      )}
       <button
         onClick={onFirst}
         disabled={!canGoPrev}

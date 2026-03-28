@@ -785,6 +785,8 @@ const AccountsPage: React.FC = () => {
         onLast={() => setCurrentPage(totalPages)}
         canGoNext={currentPage < totalPages}
         canGoPrev={currentPage > 1}
+        totalCount={data?.data?.data?.total}
+        pageSize={data?.data?.data?.size}
       />
 
       {/* Compare floating bar */}

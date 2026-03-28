@@ -437,6 +437,21 @@ const WishlistPage: React.FC = () => {
                     {account.description && (
                       <p className="text-xs text-slate-600 mt-1 line-clamp-1">{account.description}</p>
                     )}
+                    {/* Engagement stats */}
+                    {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0)) && (
+                      <div className="flex items-center gap-3 mt-1">
+                        {account.viewCount != null && (
+                          <span className="flex items-center gap-0.5 text-[10px] text-slate-600">
+                            <Eye className="w-3 h-3" />{account.viewCount}次浏览
+                          </span>
+                        )}
+                        {account.orderCount != null && account.orderCount > 0 && (
+                          <span className="flex items-center gap-0.5 text-[10px] text-slate-600">
+                            <ShoppingCart className="w-3 h-3" />{account.orderCount}笔交易
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Price + Seller */}
