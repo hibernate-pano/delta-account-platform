@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette, AlertTriangle, Sword } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette, AlertTriangle, Sword, Image } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -639,6 +639,12 @@ const AccountsPage: React.FC = () => {
                 >
                   <Eye className="w-4 h-4" />
                 </button>
+                {/* Image count badge */}
+                {account.images && account.images.length > 1 && (
+                  <span className="absolute left-2 bottom-2 px-1.5 py-0.5 bg-black/70 text-white text-[10px] rounded flex items-center gap-0.5 z-10">
+                    <Image className="w-3 h-3" />{account.images.length}张
+                  </span>
+                )}
               </div>
               <h3 className="font-medium mb-2 group-hover:text-primary transition-colors line-clamp-1">
                 {account.title}
@@ -789,6 +795,11 @@ const AccountsPage: React.FC = () => {
                 >
                   {isCompareSelected(account.id) ? <Check className="w-4 h-4" /> : <Scale className="w-4 h-4" />}
                 </button>
+                {account.images && account.images.length > 1 && (
+                  <span className="absolute right-2 bottom-2 px-1.5 py-0.5 bg-black/70 text-white text-[10px] rounded flex items-center gap-0.5 z-10">
+                    <Image className="w-3 h-3" />{account.images.length}张
+                  </span>
+                )}
               </div>
               <div className="flex-1 py-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -953,13 +964,18 @@ const AccountsPage: React.FC = () => {
 
             <div className="p-6 space-y-5">
               {/* Images */}
-              <div className="aspect-video bg-dark rounded-xl overflow-hidden">
+              <div className="aspect-video bg-dark rounded-xl overflow-hidden relative">
                 {quickViewAccount.images && quickViewAccount.images.length > 0 ? (
                   <img src={quickViewAccount.images[0]} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Gamepad2 className="w-16 h-16 text-slate-700" />
                   </div>
+                )}
+                {quickViewAccount.images && quickViewAccount.images.length > 1 && (
+                  <span className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 text-white text-xs rounded-lg flex items-center gap-1.5 z-10">
+                    <Image className="w-4 h-4" />{quickViewAccount.images.length} 张图片
+                  </span>
                 )}
               </div>
 
@@ -1035,6 +1051,9 @@ const AccountsPage: React.FC = () => {
                   { label: '皮肤数量', value: `${quickViewAccount.skinCount} 个` },
                   { label: '装备描述', value: quickViewAccount.weapons || '未填写' },
                   { label: '发布时间', value: quickViewAccount.createdAt ? formatRelativeTime(quickViewAccount.createdAt) : '未知' },
+                  ...(quickViewAccount.updatedAt && quickViewAccount.updatedAt !== quickViewAccount.createdAt
+                    ? [{ label: '最后更新', value: formatRelativeTime(quickViewAccount.updatedAt) }]
+                    : []),
                 ].map((item) => (
                   <div key={item.label} className="bg-dark rounded-lg px-3 py-2.5">
                     <p className="text-[10px] text-slate-500 mb-0.5">{item.label}</p>
