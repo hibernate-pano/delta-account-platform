@@ -354,8 +354,8 @@ const HomePage: React.FC = () => {
               { icon: Clock, color: 'bg-purple-500/20 text-purple-400', label: '快速交付' },
               { icon: TrendingUp, color: 'bg-yellow-500/20 text-yellow-400', label: '找回包赔' },
             ].map(({ icon: Icon, color, label }) => (
-              <div key={label} className="flex items-center gap-2 text-sm text-slate-400">
-                <div className={`w-6 h-6 ${color} rounded-full flex items-center justify-center`}>
+              <div key={label} className="flex items-center gap-2 text-sm text-slate-400 group cursor-default">
+                <div className={`w-6 h-6 ${color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
                   <Icon className="w-3.5 h-3.5" />
                 </div>
                 <span>{label}</span>
@@ -617,7 +617,7 @@ const HomePage: React.FC = () => {
                 <div className="absolute top-4 right-4 text-5xl font-bold text-dark-border select-none">
                   {step.num}
                 </div>
-                <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/30 transition-colors">
+                <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/30 group-hover:scale-110 transition-all duration-300">
                   <step.icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
