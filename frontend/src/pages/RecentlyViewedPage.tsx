@@ -218,6 +218,9 @@ const RecentlyViewedPage: React.FC = () => {
                     <span className="badge badge-primary">{item.account.gameRank}</span>
                   )}
                   <span className="flex items-center gap-0.5"><Sparkles className="w-3 h-3" /> {item.account.skinCount} 皮肤</span>
+                  {(item.account.viewCount ?? 0) > 0 && (
+                    <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" /> {item.account.viewCount}</span>
+                  )}
                 </div>
                 {/* Seller info */}
                 {(item.account.sellerNickname || item.account.sellerUsername) && (

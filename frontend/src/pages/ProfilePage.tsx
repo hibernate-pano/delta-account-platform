@@ -740,6 +740,44 @@ const ProfilePage: React.FC = () => {
                 );
               })()}
 
+              {/* Review Stats Summary */}
+              {!reviewStatsLoading && reviewStats && (
+                <div className="card">
+                  <h3 className="font-medium mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-400" />
+                    评价概览
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">平均评分</span>
+                      <span className="font-medium text-yellow-400 flex items-center gap-1">
+                        {(reviewStats.avgRating || 0).toFixed(1)}
+                        <Star className="w-3 h-3 fill-yellow-400" />
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">好评率</span>
+                      <span className={`font-medium ${
+                        (reviewStats.positiveRate || 0) >= 90 ? 'text-emerald-400' :
+                        (reviewStats.positiveRate || 0) >= 70 ? 'text-yellow-400' : 'text-red-400'
+                      }`}>
+                        {Math.round(reviewStats.positiveRate || 0)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">评价总数</span>
+                      <span className="font-medium text-blue-400">{reviewStats.totalCount}条</span>
+                    </div>
+                    {(reviewStats.fiveStarCount ?? 0) > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600 text-xs">5星</span>
+                        <span className="text-xs text-slate-400">{reviewStats.fiveStarCount}条</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Activity Timeline */}
               {!ordersLoading && orders.length > 0 && (
                 <div className="card">
