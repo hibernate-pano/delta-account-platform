@@ -706,7 +706,10 @@ const NotificationsPage: React.FC = () => {
           />
         ) : (
           <div>
-            {grouped.map((group) => (
+            {grouped.map((group) => {
+              const unread = group.items.filter((n) => n.status === 'UNREAD');
+              const read = group.items.filter((n) => n.status === 'READ');
+              return (
               <div key={group.label}>
                 {/* Date Header */}
                 <div className="px-4 py-2.5 bg-dark-darker text-xs text-slate-500 font-medium sticky top-0 z-10 flex items-center justify-between">
@@ -714,30 +717,68 @@ const NotificationsPage: React.FC = () => {
                   <span className="text-slate-600">{group.items.length} 条</span>
                 </div>
 
-                {/* Items */}
+                {/* Items — split by read status */}
                 <div className="divide-y divide-dark-border">
-                  {group.items.map((notification) => (
-                    <NotificationItem
-                      key={notification.id}
-                      notification={notification}
-                      onMarkRead={handleMarkAsRead}
-                      onDelete={handleDelete}
-                      onView={setSelectedNotification}
-                      markReadPending={pendingIds.has(notification.id)}
-                      markDeletePending={deletingIds.has(notification.id)}
-                      selectedIds={selectedIds}
-                      onToggleSelect={(id) => {
-                        setSelectedIds((prev) => {
-                          const next = new Set(prev);
-                          next.has(id) ? next.delete(id) : next.add(id);
-                          return next;
-                        });
-                      }}
-                    />
-                  ))}
+                  {unread.length > 0 && (
+                    <>
+                      {unread.length > 1 && (
+                        <div className="px-4 py-1.5 bg-dark/50 text-[10px] text-slate-600 font-medium flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse flex-shrink-0" />
+                          未读 ({unread.length})
+                        </div>
+                      )}
+                      {unread.map((notification) => (
+                        <NotificationItem
+                          key={notification.id}
+                          notification={notification}
+                          onMarkRead={handleMarkAsRead}
+                          onDelete={handleDelete}
+                          onView={setSelectedNotification}
+                          markReadPending={pendingIds.has(notification.id)}
+                          markDeletePending={deletingIds.has(notification.id)}
+                          selectedIds={selectedIds}
+                          onToggleSelect={(id) => {
+                            setSelectedIds((prev) => {
+                              const next = new Set(prev);
+                              next.has(id) ? next.delete(id) : next.add(id);
+                              return next;
+                            });
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
+                  {read.length > 0 && (
+                    <>
+                      {read.length > 0 && (
+                        <div className="px-4 py-1.5 bg-dark/50 text-[10px] text-slate-700 font-medium">
+                          已读 ({read.length})
+                        </div>
+                      )}
+                      {read.map((notification) => (
+                        <NotificationItem
+                          key={notification.id}
+                          notification={notification}
+                          onMarkRead={handleMarkAsRead}
+                          onDelete={handleDelete}
+                          onView={setSelectedNotification}
+                          markReadPending={pendingIds.has(notification.id)}
+                          markDeletePending={deletingIds.has(notification.id)}
+                          selectedIds={selectedIds}
+                          onToggleSelect={(id) => {
+                            setSelectedIds((prev) => {
+                              const next = new Set(prev);
+                              next.has(id) ? next.delete(id) : next.add(id);
+                            });
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

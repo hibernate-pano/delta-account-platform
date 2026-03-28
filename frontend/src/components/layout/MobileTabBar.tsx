@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth';
 import {
-  Home, Gamepad2, ShoppingCart, MessageCircle, User, Plus, Bell
+  Home, Gamepad2, Heart, MessageCircle, User, Plus, Bell
 } from 'lucide-react';
 
 interface TabBarItem {
@@ -31,7 +31,7 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
         { to: '/', icon: Home, label: '首页' },
         { to: '/accounts', icon: Gamepad2, label: '市场' },
         { to: '/sell', icon: Plus, label: '发布', isAction: true },
-        { to: '/orders', icon: ShoppingCart, label: '订单' },
+        { to: '/wishlist', icon: Heart, label: '收藏' },
         { to: '/messages', icon: MessageCircle, label: '消息', badge: msgUnreadCount },
         { to: '/notifications', icon: Bell, label: '通知', badge: notifUnreadCount },
         { to: '/profile', icon: User, label: '我的' },
