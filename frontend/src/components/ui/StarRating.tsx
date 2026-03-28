@@ -6,6 +6,7 @@ interface StarRatingProps {
   size?: 'xs' | 'sm' | 'md';
   showScore?: boolean;
   scoreText?: string; // custom score label, e.g. "4.8分"
+  showTotalCount?: number; // e.g. 128条评价
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
   size = 'sm',
   showScore = false,
   scoreText,
+  showTotalCount,
   className = '',
 }) => {
   const filledStars = Math.round(score / 20); // convert 0-100 to 0-5 stars
@@ -39,6 +41,11 @@ export const StarRating: React.FC<StarRatingProps> = ({
       {showScore && (
         <span className={`ml-0.5 text-yellow-400 ${size === 'xs' ? 'text-[10px]' : size === 'sm' ? 'text-xs' : 'text-sm'}`}>
           {scoreText ?? `${score}分`}
+          {showTotalCount != null && (
+            <span className={`ml-0.5 text-slate-500 ${size === 'xs' ? 'text-[10px]' : 'text-[10px]'}`}>
+              ({showTotalCount}条评价)
+            </span>
+          )}
         </span>
       )}
     </div>

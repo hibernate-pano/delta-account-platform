@@ -724,6 +724,28 @@ const SellPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Listing quality tips */}
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-medium text-blue-400">提升成交率的技巧</span>
+              </div>
+              <ul className="text-xs text-slate-400 space-y-1.5">
+                <li className="flex items-start gap-1.5">
+                  <Check className="w-3 h-3 text-green-400 mt-0.5 flex-shrink-0" />
+                  <span>上传清晰的账号凭证截图，方便买家快速验证真实性</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <Check className="w-3 h-3 text-green-400 mt-0.5 flex-shrink-0" />
+                  <span>描述中包含绑定信息、历史充值记录等关键细节</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <Check className="w-3 h-3 text-green-400 mt-0.5 flex-shrink-0" />
+                  <span>标题包含关键词如"满皮肤"、"限定"可提高搜索曝光</span>
+                </li>
+              </ul>
+            </div>
+
             <button type="button" onClick={handleNextToStep2} disabled={navigatingStep} className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50">
               下一步 <ArrowRight className="w-5 h-5" />
             </button>
