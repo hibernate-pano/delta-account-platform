@@ -31,6 +31,7 @@ const WishlistPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [filterVerified, setFilterVerified] = useState(false);
+  const [filterGameType, setFilterGameType] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState<number | null>(null);
   const [alertPrice, setAlertPrice] = useState('');
@@ -48,7 +49,11 @@ const WishlistPage: React.FC = () => {
 
   const sortedItems = useMemo(() => {
     return [...wishlistItems]
-      .filter((a) => !filterVerified || a.verificationStatus === 'VERIFIED')
+      .filter((a) => {
+        if (filterVerified && a.verificationStatus !== 'VERIFIED') return false;
+        if (filterGameType && a.gameType !== filterGameType) return false;
+        return true;
+      })
       .sort((a, b) => {
         if (sortMode === 'price_asc') return a.price - b.price;
         if (sortMode === 'price_desc') return b.price - a.price;
@@ -57,7 +62,12 @@ const WishlistPage: React.FC = () => {
         if (sortMode === 'seller_rating') return (b.sellerCreditScore || 0) - (a.sellerCreditScore || 0);
         return 0;
       });
-  }, [wishlistItems, filterVerified, sortMode]);
+  }, [wishlistItems, filterVerified, sortMode, filterGameType]);
+
+  const uniqueGameTypes = useMemo(() => {
+    const types = wishlistItems.map((a: any) => a.gameType).filter(Boolean);
+    return [...new Set(types)] as string[];
+  }, [wishlistItems]);
 
   const handleClearAll = () => {
     setShowClearConfirm(true);
@@ -176,6 +186,28 @@ const WishlistPage: React.FC = () => {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* GameType quick filter chips */}
+      {wishlistItems.length > 0 && uniqueGameTypes.length > 1 && (
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+          <span className="text-xs text-slate-600 flex-shrink-0">游戏:</span>
+          <button
+            onClick={() => setFilterGameType(null)}
+            className={`px-2.5 py-1 rounded-full text-xs flex-shrink-0 transition-all ${!filterGameType ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-dark-border text-slate-400 hover:text-slate-200'}`}
+          >
+            全部
+          </button>
+          {uniqueGameTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilterGameType(type === filterGameType ? null : type)}
+              className={`px-2.5 py-1 rounded-full text-xs flex-shrink-0 transition-all ${filterGameType === type ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30' : 'bg-dark-border text-slate-400 hover:text-slate-200'}`}
+            >
+              {type}
+            </button>
+          ))}
         </div>
       )}
 

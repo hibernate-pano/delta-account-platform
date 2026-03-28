@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Account } from '../../types';
-import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus, Star, Zap, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { X, Scale, ChevronRight, Crown, Gamepad2, Check, Minus, Star, Zap, CheckCircle, Clock, TrendingUp, ShieldCheck } from 'lucide-react';
 import { ConfirmInline } from './ConfirmInline';
 
 interface CompareItem {
@@ -277,6 +277,11 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
       bestIdx: orderBest,
     },
     { label: '描述', values: accounts.map((a) => a.description?.slice(0, 60) || '暂无') },
+    {
+      label: '卖家',
+      values: accounts.map((a) => a.sellerNickname || a.sellerUsername || '未知'),
+      subValues: accounts.map((a) => a.sellerCreditScore ? `${a.sellerCreditScore}分` : null),
+    },
   ];
 
   return (
@@ -335,6 +340,17 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
                   <div className="w-full h-full flex items-center justify-center">
                     <Gamepad2 className="w-8 h-8 text-slate-700" />
                   </div>
+                )}
+              </div>
+              <div className="flex items-center justify-center gap-1 mb-1">
+                {account.sellerAvatar && (
+                  <img src={account.sellerAvatar} alt="" className="w-4 h-4 rounded-full object-cover" />
+                )}
+                <span className="text-[10px] text-slate-500 truncate max-w-[80px]">
+                  {account.sellerNickname || account.sellerUsername || ''}
+                </span>
+                {account.sellerCreditScore != null && account.sellerCreditScore >= 80 && (
+                  <ShieldCheck className="w-3 h-3 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_3px_rgba(52,211,153,0.5)]" />
                 )}
               </div>
               <p className="text-sm font-medium line-clamp-1 mb-1">{account.title}</p>
