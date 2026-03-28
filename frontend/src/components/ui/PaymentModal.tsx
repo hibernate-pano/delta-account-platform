@@ -99,7 +99,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-border">
           <h2 id="payment-modal-title" className="text-xl font-bold text-white">确认支付</h2>
-          <button onClick={onClose} aria-label="关闭" className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-dark-lighter">
+          <button onClick={onClose} aria-label="关闭" className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-dark-lighter transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark">
             <X className="w-5 h-5" />
           </button>
         </div>

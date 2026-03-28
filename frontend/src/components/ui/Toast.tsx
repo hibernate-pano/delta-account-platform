@@ -181,7 +181,7 @@ const ToastContainer: React.FC<{ toasts: Toast[]; removeToast: (id: string) => v
               {toast.action && (
                 <button
                   onClick={() => { toast.action?.onClick(); removeToast(toast.id); }}
-                  className="mt-1.5 text-xs text-primary hover:text-primary-light font-medium transition-colors"
+                  className="mt-1.5 text-xs text-primary hover:text-primary-light active:scale-95 font-medium transition-colors"
                 >
                   {toast.action.label}
                 </button>
