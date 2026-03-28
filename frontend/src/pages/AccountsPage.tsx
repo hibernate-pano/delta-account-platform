@@ -598,8 +598,8 @@ const AccountsPage: React.FC = () => {
                 {account.title}
               </h3>
               <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-                <span className="px-2 py-1 bg-dark rounded">{account.gameType}</span>
-                <span className="px-2 py-1 bg-dark rounded">{account.gameRank || '暂无'}</span>
+                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs">{account.gameType}</span>
+                <span className="px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs">{account.gameRank || '暂无'}</span>
                 <span>{account.skinCount} 皮肤</span>
                 {(account.viewCount != null || account.orderCount != null) && (
                   <div className="flex items-center gap-2 text-[10px]">
@@ -705,8 +705,8 @@ const AccountsPage: React.FC = () => {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-2">
-                  <span className="px-2 py-0.5 bg-dark rounded">{account.gameType}</span>
-                  <span className="px-2 py-0.5 bg-dark rounded">{account.gameRank || '暂无'}</span>
+                  <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs">{account.gameType}</span>
+                  <span className="px-2 py-0.5 bg-primary/20 text-primary rounded-full text-xs">{account.gameRank || '暂无'}</span>
                   <span className="flex items-center gap-1"><Crown className="w-3.5 h-3.5 text-amber-400/80" /> {account.skinCount} 皮肤</span>
                   {account.description && (
                     <span className="line-clamp-1">{account.description}</span>
