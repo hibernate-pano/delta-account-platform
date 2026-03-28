@@ -780,7 +780,7 @@ const RefundsPage: React.FC = () => {
                       step={0.01}
                       value={refundAmount || 0}
                       onChange={(e) => { setRefundAmount(e.target.value); setAmountError(''); }}
-                      className="w-full h-1.5 bg-dark-lighter rounded-full appearance-none cursor-pointer accent-primary"
+                      className="w-full h-1.5 bg-dark-lighter rounded-full appearance-none cursor-pointer accent-primary [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-primary/30 [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:border-0"
                       style={{
                         background: selectedOrder.amount > 0
                           ? `linear-gradient(to right, rgb(99,102,241) 0%, rgb(99,102,241) ${(parseFloat(refundAmount || '0') / selectedOrder.amount) * 100}%, #1e293b ${(parseFloat(refundAmount || '0') / selectedOrder.amount) * 100}%, #1e293b 100%)`

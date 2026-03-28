@@ -268,7 +268,7 @@ const AccountsPage: React.FC = () => {
                 <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-600 bg-dark-lighter px-1.5 py-0.5 rounded">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500 bg-dark-lighter border border-dark-border px-1.5 py-0.5 rounded hover:bg-dark-lighter/80 hover:border-primary/30 transition-all">
                 ⌘K
               </div>
             )}
