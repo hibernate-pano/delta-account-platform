@@ -730,6 +730,11 @@ const AccountsPage: React.FC = () => {
                   {account.verificationStatus === 'VERIFIED' && (
                     <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0" />
                   )}
+                  {account.seller?.createdAt && (
+                    <span className="text-[9px] text-slate-700 flex-shrink-0">
+                      入驻{(Math.floor((Date.now() - new Date(account.seller.createdAt).getTime()) / (86400000 * 30)))}个月
+                    </span>
+                  )}
                 </div>
               )}
             </Link>
@@ -882,6 +887,11 @@ const AccountsPage: React.FC = () => {
                     <span className="text-xs text-slate-500">{account.sellerNickname || account.sellerUsername}</span>
                     {account.verificationStatus === 'VERIFIED' && (
                       <Shield className="w-3 h-3 text-primary flex-shrink-0" />
+                    )}
+                    {account.seller?.createdAt && (
+                      <span className="text-[10px] text-slate-700">
+                        入驻{Math.floor((Date.now() - new Date(account.seller.createdAt).getTime()) / (86400000 * 30))}个月
+                      </span>
                     )}
                   </div>
                 )}
@@ -1082,12 +1092,27 @@ const AccountsPage: React.FC = () => {
               )}
 
               {/* Description */}
-              {quickViewAccount.description && (
-                <div>
-                  <p className="text-xs text-slate-500 mb-2">详细描述</p>
-                  <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">{quickViewAccount.description}</p>
-                </div>
-              )}
+              <div>
+                <p className="text-xs text-slate-500 mb-2">详细描述</p>
+                {quickViewAccount.description ? (
+                  quickViewAccount.description.length > 300 ? (
+                    <details className="group cursor-pointer">
+                      <summary className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed marker:hidden cursor-pointer list-none select-none">
+                        {quickViewAccount.description.slice(0, 300)}
+                        <span className="text-primary ml-1 group-open:hidden">…展开全部</span>
+                      </summary>
+                      <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed mt-1">
+                        {quickViewAccount.description}
+                        <span className="text-primary ml-1 hidden group-open:inline">收起</span>
+                      </p>
+                    </details>
+                  ) : (
+                    <p className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">{quickViewAccount.description}</p>
+                  )
+                ) : (
+                  <p className="text-sm text-slate-600 italic">暂无详细描述</p>
+                )}
+              </div>
 
               {/* Seller info */}
               {quickViewAccount.sellerId && (
@@ -1108,6 +1133,11 @@ const AccountsPage: React.FC = () => {
                     </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <StarRating score={quickViewAccount.sellerCreditScore || 50} size="sm" showScore scoreText={`${quickViewAccount.sellerCreditScore || '—'}`} />
+                      {quickViewAccount.seller?.createdAt && (
+                        <span className="text-[10px] text-slate-600">
+                          · 入驻{Math.floor((Date.now() - new Date(quickViewAccount.seller.createdAt).getTime()) / (86400000 * 30))}个月
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-500">
