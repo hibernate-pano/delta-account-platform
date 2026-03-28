@@ -325,7 +325,7 @@ const HomePage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setKeyword('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/20 hover:scale-110 transition-all"
                     aria-label="清除搜索"
                   >
                     <X className="w-5 h-5" />
