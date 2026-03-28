@@ -231,10 +231,10 @@ const ProfilePage: React.FC = () => {
                 <img
                   src={profile?.avatar || user?.avatar}
                   alt=""
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-primary/30"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-primary/30 shadow-lg shadow-primary/20"
                 />
               ) : (
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center border-2 border-primary/30 bg-gradient-to-br from-primary to-purple-500 text-white font-bold text-xl md:text-2xl">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center border-2 border-primary/30 bg-gradient-to-br from-primary to-purple-500 text-white font-bold text-xl md:text-2xl shadow-lg shadow-primary/20">
                   {(profile?.nickname || user?.nickname || user?.username || 'U').charAt(0).toUpperCase()}
                 </div>
               )}

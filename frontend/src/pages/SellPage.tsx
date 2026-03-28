@@ -588,7 +588,7 @@ const SellPage: React.FC = () => {
                       onBlur={(e) => validateField('price', e.target.value)}
                       id="sell-price"
                       disabled={isSubmitting}
-                      className={`input pl-10 text-xl font-bold !text-white disabled:opacity-50 disabled:cursor-not-allowed ${fieldErrors.price ? '!border-red-500 focus:!border-red-500' : ''}`} placeholder="0.00" step="0.01" min="1" required
+                      className={`input pl-10 text-xl font-bold !text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/50 ${fieldErrors.price ? '!border-red-500 focus:!border-red-500' : ''}`} placeholder="0.00" step="0.01" min="1" required
                     />
                   </div>
                   {fieldErrors.price ? (

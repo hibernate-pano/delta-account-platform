@@ -319,7 +319,7 @@ const HomePage: React.FC = () => {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="搜索账号标题、段位..."
-                  className="input w-full pl-14 pr-14 py-4 text-lg bg-dark-card border-dark-border"
+                  className="input w-full pl-14 pr-14 py-4 text-lg bg-dark-card border-dark-border focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
                 />
                 {keyword && (
                   <button
