@@ -131,6 +131,24 @@ const RegisterPage: React.FC = () => {
             <p className="text-slate-400 mt-1">加入 DeltaHub 交易平台</p>
           </div>
 
+          {/* Social proof bar */}
+          <div className="flex items-center justify-center gap-6 mb-6 py-3 px-4 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 border border-primary/20 rounded-xl">
+            <div className="text-center">
+              <p className="text-base font-bold text-primary">2,847</p>
+              <p className="text-[10px] text-slate-500">活跃用户</p>
+            </div>
+            <div className="w-px h-8 bg-dark-border" />
+            <div className="text-center">
+              <p className="text-base font-bold text-green-400">1,203</p>
+              <p className="text-[10px] text-slate-500">已完成交易</p>
+            </div>
+            <div className="w-px h-8 bg-dark-border" />
+            <div className="text-center">
+              <p className="text-base font-bold text-yellow-400">98.5%</p>
+              <p className="text-[10px] text-slate-500">好评率</p>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 animate-fade-in">

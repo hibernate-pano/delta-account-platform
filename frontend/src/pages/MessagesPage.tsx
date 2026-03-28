@@ -414,6 +414,12 @@ const MessagesPage: React.FC = () => {
           <div className="flex items-center gap-1 text-slate-500 text-xs">
             <Wifi className="w-3.5 h-3.5" />
             <span>私信</span>
+            {messages.length > 0 && (
+              <>
+                <span className="text-slate-600 mx-1">·</span>
+                <span>{messages.length} 条消息</span>
+              </>
+            )}
           </div>
         </div>
 
