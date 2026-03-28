@@ -1075,6 +1075,60 @@ const OrdersPage: React.FC = () => {
         ))}
       </div>
 
+      {/* Order status distribution bar */}
+      {stats.total > 0 && (
+        <div className="mb-6 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-slate-400 font-medium">订单状态分布</span>
+            <span className="text-xs text-slate-600">{stats.total} 笔订单</span>
+          </div>
+          <div className="w-full h-2 bg-dark-lighter rounded-full overflow-hidden flex gap-0.5">
+            {stats.pending > 0 && (
+              <div
+                className="h-full bg-yellow-500 rounded-full transition-all hover:brightness-110"
+                style={{ width: `${(stats.pending / stats.total) * 100}%` }}
+                title={`待支付: ${stats.pending} 笔`}
+              />
+            )}
+            {stats.processing > 0 && (
+              <div
+                className="h-full bg-blue-500 rounded-full transition-all hover:brightness-110"
+                style={{ width: `${(stats.processing / stats.total) * 100}%` }}
+                title={`进行中: ${stats.processing} 笔`}
+              />
+            )}
+            {stats.completed > 0 && (
+              <div
+                className="h-full bg-green-500 rounded-full transition-all hover:brightness-110"
+                style={{ width: `${(stats.completed / stats.total) * 100}%` }}
+                title={`已完成: ${stats.completed} 笔`}
+              />
+            )}
+            {stats.total - stats.pending - stats.processing - stats.completed > 0 && (
+              <div
+                className="h-full bg-slate-600 rounded-full transition-all"
+                style={{ width: `${((stats.total - stats.pending - stats.processing - stats.completed) / stats.total) * 100}%` }}
+                title={`其他: ${stats.total - stats.pending - stats.processing - stats.completed} 笔`}
+              />
+            )}
+          </div>
+          <div className="flex items-center gap-4 mt-2">
+            <span className="flex items-center gap-1 text-[10px] text-yellow-400">
+              <span className="w-2 h-2 rounded-full bg-yellow-500" />待支付 {stats.pending}
+            </span>
+            <span className="flex items-center gap-1 text-[10px] text-blue-400">
+              <span className="w-2 h-2 rounded-full bg-blue-500" />进行中 {stats.processing}
+            </span>
+            <span className="flex items-center gap-1 text-[10px] text-green-400">
+              <span className="w-2 h-2 rounded-full bg-green-500" />已完成 {stats.completed}
+            </span>
+            {stats.totalSpent > 0 && (
+              <span className="ml-auto text-[10px] text-slate-500">总消费 ¥{stats.totalSpent.toFixed(0)}</span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Spending Overview */}
       {stats.total > 0 && (
         <div className="mb-6 space-y-3">

@@ -124,6 +124,24 @@ const LoginPage: React.FC = () => {
           </Link>
         </div>
 
+        {/* Platform trust bar */}
+        <div className="flex items-center justify-center gap-6 mb-6 py-3 px-4 bg-gradient-to-r from-green-500/10 via-primary/10 to-green-500/10 border border-green-500/20 rounded-xl animate-fade-in">
+          <div className="text-center">
+            <p className="text-sm font-bold text-green-400">2,847+</p>
+            <p className="text-[10px] text-slate-500">活跃用户</p>
+          </div>
+          <div className="w-px h-8 bg-dark-border" />
+          <div className="text-center">
+            <p className="text-sm font-bold text-primary">1,203+</p>
+            <p className="text-[10px] text-slate-500">已完成交易</p>
+          </div>
+          <div className="w-px h-8 bg-dark-border" />
+          <div className="text-center">
+            <p className="text-sm font-bold text-yellow-400">98.5%</p>
+            <p className="text-[10px] text-slate-500">好评率</p>
+          </div>
+        </div>
+
         <div className={`card-static p-8 animate-slide-up ${shake ? 'animate-shake' : ''}`}>
           <h1 className="text-2xl font-bold text-center mb-1">欢迎回来</h1>
           <p className="text-slate-400 text-center mb-6">登录您的账号</p>
