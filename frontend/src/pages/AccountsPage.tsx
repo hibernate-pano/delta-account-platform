@@ -1054,6 +1054,12 @@ const AccountsPage: React.FC = () => {
                   ...(quickViewAccount.updatedAt && quickViewAccount.updatedAt !== quickViewAccount.createdAt
                     ? [{ label: '最后更新', value: formatRelativeTime(quickViewAccount.updatedAt) }]
                     : []),
+                  ...(quickViewAccount.deposit && quickViewAccount.deposit > 0
+                    ? [{ label: '押金', value: `¥${quickViewAccount.deposit}` }]
+                    : []),
+                  ...(quickViewAccount.createdAt
+                    ? [{ label: '在售天数', value: `${Math.floor((Date.now() - new Date(quickViewAccount.createdAt).getTime()) / 86400000)} 天` }]
+                    : []),
                 ].map((item) => (
                   <div key={item.label} className="bg-dark rounded-lg px-3 py-2.5">
                     <p className="text-[10px] text-slate-500 mb-0.5">{item.label}</p>

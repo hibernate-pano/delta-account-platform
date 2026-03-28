@@ -304,6 +304,26 @@ const ProfilePage: React.FC = () => {
                 )}
               </div>
               <p className="text-slate-500">@{profile?.username || user?.username}</p>
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
+                {profile?.email || user?.email ? (
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <Mail className="w-3 h-3" />
+                    {(() => { const e = profile?.email || user?.email || ''; const [u, d] = e.split('@'); return d ? `${u.slice(0, 2)}***@${d}` : e; })()}
+                  </span>
+                ) : null}
+                {profile?.phone || user?.phone ? (
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <Smartphone className="w-3 h-3" />
+                    {(profile?.phone || user?.phone || '').replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}
+                  </span>
+                ) : null}
+                {user?.createdAt && (
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    注册{Math.floor((Date.now() - new Date(user.createdAt).getTime()) / 86400000)}天前
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
