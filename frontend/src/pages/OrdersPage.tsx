@@ -892,7 +892,7 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
                   negTags.forEach(nt => { cleaned = cleaned.replace(nt + '，', '').replace(nt, ''); });
                   return cleaned.includes(tag) ? cleaned.replace(tag + '，', '').replace(tag, '') : cleaned + (cleaned ? '，' : '') + tag + '，';
                 })}
-                className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+                className={`px-3 py-1.5 rounded-full text-xs transition-all border hover:scale-105 active:scale-95 ${
                   content.includes(tag)
                     ? 'bg-green-500/20 border-green-500/50 text-green-400'
                     : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
@@ -914,7 +914,7 @@ const ReviewModal: React.FC<{ order: Order; onClose: () => void }> = ({ order, o
                   posTags.forEach(pt => { cleaned = cleaned.replace(pt + '，', '').replace(pt, ''); });
                   return cleaned.includes(tag) ? cleaned.replace(tag + '，', '').replace(tag, '') : cleaned + (cleaned ? '，' : '') + tag + '，';
                 })}
-                className={`px-3 py-1.5 rounded-full text-xs transition-all border ${
+                className={`px-3 py-1.5 rounded-full text-xs transition-all border hover:scale-105 active:scale-95 ${
                   content.includes(tag)
                     ? 'bg-red-500/20 border-red-500/50 text-red-400'
                     : 'bg-dark border-dark-border text-slate-500 hover:text-slate-300 hover:border-slate-600'
