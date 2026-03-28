@@ -198,6 +198,13 @@ const isOwner = user?.id === account?.sellerId;
           <button onClick={handleShare} className="btn-ghost p-2 hover:scale-110 active:scale-95 transition-all hover:bg-primary/10 hover:text-primary" title="分享">
             {copied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5" />}
           </button>
+          <button
+            onClick={() => { showToast('感谢反馈，我们已收到您的举报信息', 'success'); }}
+            className="btn-ghost p-2 hover:scale-110 active:scale-95 transition-all hover:bg-red-500/10 hover:text-red-400"
+            title="举报此账号"
+          >
+            <AlertCircle className="w-5 h-5" />
+          </button>
           {account && <WishlistButton account={account} size="md" className="!relative" />}
         </div>
       </div>

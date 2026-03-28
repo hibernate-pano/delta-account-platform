@@ -353,6 +353,13 @@ const WishlistPage: React.FC = () => {
                           <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0" />
                         )}
                       </div>
+                      {/* Escrow protection badge */}
+                      {account.verificationStatus === 'VERIFIED' && (account.sellerCreditScore ?? 0) >= 70 && (
+                        <div className="mt-1 px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded flex items-center gap-1">
+                          <ShieldCheck className="w-2.5 h-2.5 text-green-400" />
+                          <span className="text-[9px] text-green-400">资金托管</span>
+                        </div>
+                      )}
                     )}
                     {/* Engagement stats */}
                     <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-600">
