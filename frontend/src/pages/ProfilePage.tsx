@@ -966,18 +966,18 @@ const ProfilePage: React.FC = () => {
                         const count = reviews.filter((r: any) => r.rating === star).length;
                         const pct = reviews.length > 0 ? (count / reviews.length * 100) : 0;
                         return (
-                          <div key={star} className="flex items-center gap-2 text-xs">
+                          <div key={star} className="flex items-center gap-2 text-xs group cursor-default">
                             <div className="flex items-center gap-0.5 w-8">
                               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                               <span className="text-slate-400">{star}</span>
                             </div>
-                            <div className="flex-1 h-2 bg-dark rounded-full overflow-hidden">
+                            <div className="flex-1 h-2 bg-dark rounded-full overflow-hidden group-hover:h-2.5 transition-all">
                               <div
-                                className="h-full bg-yellow-400 rounded-full transition-all"
+                                className="h-full bg-yellow-400/70 group-hover:bg-yellow-400 rounded-full transition-all"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
-                            <span className="text-slate-600 w-5 text-right">{count}</span>
+                            <span className="text-slate-600 w-5 text-right group-hover:text-slate-400 transition-colors">{count}</span>
                           </div>
                         );
                       })}

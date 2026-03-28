@@ -317,7 +317,7 @@ const AccountsPage: React.FC = () => {
               <button
                 key={chip}
                 onClick={() => setKeyword(chip)}
-                className="px-2 py-0.5 bg-dark-lighter hover:bg-dark border border-dark-border hover:border-primary/40 rounded-full text-xs text-slate-500 hover:text-slate-300 transition-all"
+                className="px-2 py-0.5 bg-dark-lighter hover:bg-dark border border-dark-border hover:border-primary/40 rounded-full text-xs text-slate-500 hover:text-slate-300 transition-all hover:scale-105"
               >
                 {chip}
               </button>
