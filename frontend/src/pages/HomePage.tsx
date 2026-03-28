@@ -7,12 +7,13 @@ import { WishlistButton } from '../components/ui/WishlistButton';
 import { PullToRefresh } from '../components/ui/PullToRefresh';
 import { useAuthStore } from '../store/auth';
 import { useRecentStore } from '../store/recent';
-import { useAccounts, useMyOrders } from '../hooks/useQueries';
+import { useWishlistStore } from '../store/wishlist';
+import { useAccounts, useMyOrders, useUnreadCount } from '../hooks/useQueries';
 import { usePageTitle } from '../hooks/usePageTitle';
 import {
   Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock, Zap,
   Sparkles, CheckCircle, Star, Crown, ChevronRight, TrendingUp as TrendingUpIcon, Eye,
-  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History, X, User,
+  ChevronDown, MessageSquare, ThumbsUp, AlertCircle, History, X, User, Bell, Heart, ShoppingBag, Package,
 } from 'lucide-react';
 
 // Featured completed orders as testimonials
@@ -194,6 +195,11 @@ const HomePage: React.FC = () => {
   const { data, isLoading, isError } = useAccounts({ size: 8 });
   const accounts: Account[] = data?.data?.data?.records || [];
   const { items: recentItems } = useRecentStore();
+  const { items: wishlistItems } = useWishlistStore();
+  const { data: ordersData } = useMyOrders();
+  const { data: unreadData } = useUnreadCount();
+  const pendingOrders = (ordersData?.data?.data?.records || []).filter((o: any) => ['PENDING', 'PROCESSING'].includes(o.status)).length;
+  const unreadCount = unreadData?.data?.data ?? 0;
   const [hydrated, setHydrated] = useState(false);
   const [faqExpanded, setFaqExpanded] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
@@ -269,6 +275,74 @@ const HomePage: React.FC = () => {
     <PullToRefresh onRefresh={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}>
     <div>
       {token && <TransactionToast />}
+
+      {/* Personalized quick-access for logged-in users */}
+      {token && (unreadCount > 0 || pendingOrders > 0 || recentItems.length > 0 || wishlistItems.length > 0) && (
+        <div className="max-w-6xl mx-auto px-6 pt-6">
+          <div className="flex items-center gap-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl mb-4">
+            <span className="text-sm text-slate-500 font-medium">快速访问</span>
+            <div className="w-px h-4 bg-dark-border" />
+            {unreadCount > 0 && (
+              <button
+                onClick={() => navigate('/notifications')}
+                className="flex items-center gap-1.5 text-sm hover:text-red-400 transition-colors group"
+              >
+                <Bell className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
+                <span className="text-slate-400">消息</span>
+                <span className="font-semibold text-red-400">{unreadCount}</span>
+              </button>
+            )}
+            {pendingOrders > 0 && (
+              <>
+                <div className="w-px h-4 bg-dark-border" />
+                <button
+                  onClick={() => navigate('/orders')}
+                  className="flex items-center gap-1.5 text-sm hover:text-blue-400 transition-colors group"
+                >
+                  <Package className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-slate-400">进行中</span>
+                  <span className="font-semibold text-blue-400">{pendingOrders}</span>
+                </button>
+              </>
+            )}
+            {recentItems.length > 0 && (
+              <>
+                <div className="w-px h-4 bg-dark-border" />
+                <button
+                  onClick={() => navigate('/recent')}
+                  className="flex items-center gap-1.5 text-sm hover:text-purple-400 transition-colors group"
+                >
+                  <History className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-slate-400">最近</span>
+                  <span className="font-semibold text-purple-400">{recentItems.length}</span>
+                </button>
+              </>
+            )}
+            {wishlistItems.length > 0 && (
+              <>
+                <div className="w-px h-4 bg-dark-border" />
+                <button
+                  onClick={() => navigate('/wishlist')}
+                  className="flex items-center gap-1.5 text-sm hover:text-red-400 transition-colors group"
+                >
+                  <Heart className="w-4 h-4 text-red-400 fill-red-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-slate-400">收藏</span>
+                  <span className="font-semibold text-red-400">{wishlistItems.length}</span>
+                </button>
+              </>
+            )}
+            <div className="ml-auto">
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-primary transition-colors"
+              >
+                <span>个人中心</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
