@@ -652,6 +652,11 @@ const AccountsPage: React.FC = () => {
                     {account.viewCount != null && (
                       <span className="flex items-center gap-0.5 text-slate-600">
                         <Eye className="w-3 h-3" />{formatCompact(account.viewCount)}
+                        {account.createdAt && (
+                          <span className="text-[9px] text-amber-600/60">
+                            ·{account.viewCount / Math.max(Math.floor((Date.now() - new Date(account.createdAt).getTime()) / 86400000), 1)}次/天
+                          </span>
+                        )}
                       </span>
                     )}
                     {account.orderCount != null && account.orderCount > 0 && (

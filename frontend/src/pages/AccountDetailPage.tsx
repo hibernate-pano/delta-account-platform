@@ -385,6 +385,9 @@ const isOwner = user?.id === account?.sellerId;
                   { label: '皮肤数量', value: `${account.skinCount} 个` },
                   { label: '装备描述', value: account.weapons || '未填写' },
                   { label: '发布时间', value: account.createdAt ? `${formatDate(account.createdAt)} (${freshnessLabel(account.createdAt)})` : '未知' },
+                  ...(account.updatedAt && account.updatedAt !== account.createdAt
+                    ? [{ label: '最近编辑', value: `${formatDate(account.updatedAt)} (${freshnessLabel(account.updatedAt)})` }]
+                    : []),
                   ...(account.viewCount != null || account.orderCount != null
                     ? [{
                         label: '热度数据',
