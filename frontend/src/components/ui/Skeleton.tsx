@@ -8,20 +8,21 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className = '' }) => {
   return <div className={`skeleton ${className}`} />;
 };
 
-export const AccountCardSkeleton: React.FC = () => {
+export const AccountCardSkeleton: React.FC<{ delay?: number }> = ({ delay = 0 }) => {
+  const d = (ms: number) => ({ style: { animationDelay: `${delay + ms}ms` } } as React.HTMLAttributes<HTMLDivElement>);
   return (
     <div className="card-static">
       <div className="aspect-video bg-dark rounded-lg mb-3 overflow-hidden">
-        <Skeleton className="w-full h-full rounded-lg" />
+        <Skeleton className="w-full h-full rounded-lg" {...d(0)} />
       </div>
-      <Skeleton className="h-5 w-3/4 mb-2 rounded" />
+      <Skeleton className="h-5 w-3/4 mb-2 rounded" {...d(60)} />
       <div className="flex items-center justify-between mb-2">
-        <Skeleton className="h-6 w-16 rounded" />
-        <Skeleton className="h-4 w-20 rounded" />
+        <Skeleton className="h-6 w-16 rounded" {...d(120)} />
+        <Skeleton className="h-4 w-20 rounded" {...d(150)} />
       </div>
       <div className="flex items-center justify-between">
-        <Skeleton className="h-6 w-20 rounded" />
-        <Skeleton className="h-4 w-16 rounded" />
+        <Skeleton className="h-6 w-20 rounded" {...d(180)} />
+        <Skeleton className="h-4 w-16 rounded" {...d(210)} />
       </div>
     </div>
   );
@@ -75,25 +76,28 @@ export const WalletSkeleton: React.FC = () => {
   );
 };
 
-export const CardSkeleton: React.FC = () => (
-  <div className="card">
-    <Skeleton className="aspect-video mb-3 rounded-lg" />
-    <Skeleton className="h-5 w-3/4 mb-2 rounded" />
-    <div className="flex justify-between mb-2">
-      <Skeleton className="h-4 w-16 rounded" />
-      <Skeleton className="h-4 w-12 rounded" />
+export const CardSkeleton: React.FC<{ delay?: number }> = ({ delay = 0 }) => {
+  const d = (ms: number) => ({ style: { animationDelay: `${delay + ms}ms` } } as React.HTMLAttributes<HTMLDivElement>);
+  return (
+    <div className="card">
+      <Skeleton className="aspect-video mb-3 rounded-lg" {...d(0)} />
+      <Skeleton className="h-5 w-3/4 mb-2 rounded" {...d(60)} />
+      <div className="flex justify-between mb-2">
+        <Skeleton className="h-4 w-16 rounded" {...d(120)} />
+        <Skeleton className="h-4 w-12 rounded" {...d(150)} />
+      </div>
+      <div className="flex justify-between">
+        <Skeleton className="h-6 w-20 rounded" {...d(180)} />
+        <Skeleton className="h-4 w-16 rounded" {...d(210)} />
+      </div>
     </div>
-    <div className="flex justify-between">
-      <Skeleton className="h-6 w-20 rounded" />
-      <Skeleton className="h-4 w-16 rounded" />
-    </div>
-  </div>
-);
+  );
+};
 
-export const GridSkeleton: React.FC<{ count?: number }> = ({ count = 8 }) => (
+export const GridSkeleton: React.FC<{ count?: number; stagger?: boolean }> = ({ count = 8, stagger = false }) => (
   <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     {Array.from({ length: count }).map((_, i) => (
-      <CardSkeleton key={i} />
+      <CardSkeleton key={i} delay={stagger ? i * 60 : 0} />
     ))}
   </div>
 );

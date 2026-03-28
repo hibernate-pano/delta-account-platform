@@ -374,7 +374,7 @@ const AccountsPage: React.FC = () => {
                     className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
                       selectedPriceRange === range.key
                         ? 'bg-primary text-white'
-                        : 'bg-dark-lighter text-slate-400 hover:text-white'
+                        : 'bg-dark-lighter text-slate-400 hover:text-white active:scale-95'
                     }`}
                   >
                     {range.label}
@@ -395,7 +395,7 @@ const AccountsPage: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
                 sort === option.key
                   ? 'bg-primary text-white'
-                  : 'bg-dark-lighter text-slate-400 hover:text-white'
+                  : 'bg-dark-lighter text-slate-400 hover:text-white active:scale-95'
               }`}
             >
               <span className="mr-1">{React.createElement(option.icon, { className: 'w-3.5 h-3.5' })}</span>
