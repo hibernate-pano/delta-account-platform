@@ -597,6 +597,20 @@ const AccountsPage: React.FC = () => {
                     <ShieldCheck className="w-3 h-3" /> 已认证
                   </span>
                 )}
+                {/* Status badge — non-ON_SALE accounts */}
+                {account.status && account.status !== 'ON_SALE' && (
+                  <span className={`absolute right-16 bottom-2 px-1.5 py-0.5 text-[10px] rounded flex items-center gap-0.5 ${
+                    account.status === 'SOLD' ? 'bg-slate-500/90 text-white' :
+                    account.status === 'LOCKED' ? 'bg-yellow-500/90 text-black' :
+                    account.status === 'RENTED' ? 'bg-purple-500/90 text-white' :
+                    'bg-dark/70 text-slate-400'
+                  }`}>
+                    {account.status === 'SOLD' ? '已售' :
+                     account.status === 'LOCKED' ? '已锁定' :
+                     account.status === 'RENTED' ? '已出租' :
+                     account.status === 'OFFLINE' ? '已下架' : '待审核'}
+                  </span>
+                )}
                 {/* Rental badge */}
                 {account.rentalPrice && (
                   <span className="absolute left-2 bottom-2 px-1.5 py-0.5 bg-purple-500/90 text-white text-[10px] rounded flex items-center gap-0.5 ml-auto mr-2">
@@ -753,6 +767,20 @@ const AccountsPage: React.FC = () => {
                       <ShieldCheck className="w-3 h-3" /> 已认证
                     </span>
                   )}
+                  {/* Status badge — non-ON_SALE */}
+                  {account.status && account.status !== 'ON_SALE' && (
+                    <span className={`px-1.5 py-0.5 text-[10px] rounded flex items-center gap-0.5 ${
+                      account.status === 'SOLD' ? 'bg-slate-500/20 text-slate-400' :
+                      account.status === 'LOCKED' ? 'bg-yellow-500/20 text-yellow-400' :
+                      account.status === 'RENTED' ? 'bg-purple-500/20 text-purple-400' :
+                      'bg-dark-border text-slate-500'
+                    }`}>
+                      {account.status === 'SOLD' ? '已售' :
+                       account.status === 'LOCKED' ? '已锁定' :
+                       account.status === 'RENTED' ? '已出租' :
+                       account.status === 'OFFLINE' ? '已下架' : '待审核'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-3 text-sm text-slate-500 mb-2">
                   <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs">{account.gameType}</span>
@@ -771,7 +799,7 @@ const AccountsPage: React.FC = () => {
                     </span>
                   )}
                   {account.rentalPrice && (
-                    <span className="text-sm text-slate-500">租 ¥{account.rentalPrice}/时</span>
+                    <span className="text-sm text-slate-500">租 ¥{account.rentalPrice}/时{account.deposit != null && account.deposit > 0 && <span className="text-slate-600 text-[10px] ml-0.5">(+¥{account.deposit}押金)</span>}</span>
                   )}
                 </div>
                 {/* Engagement stats */}
