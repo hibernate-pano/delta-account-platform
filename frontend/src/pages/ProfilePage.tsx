@@ -62,6 +62,11 @@ const ReviewCard: React.FC<{
                 {review.reviewer.creditScore}分
               </span>
             )}
+            {review.reviewer?.role === 'ADMIN' && (
+              <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary rounded-full flex items-center gap-0.5">
+                <Shield className="w-2.5 h-2.5" /> 管理员
+              </span>
+            )}
             <div className="flex items-center gap-0.5">
               {Array.from({ length: 5 }, (_, i) => (
                 <Star
