@@ -175,7 +175,7 @@ const RecentlyViewedPage: React.FC = () => {
 
               <Link to={`/accounts/${item.account.id}`} className={`block ${item.account.status && item.account.status !== 'ON_SALE' && item.account.status !== 'PENDING' ? 'opacity-70' : ''}`}>
                 {/* Image */}
-                <div className="aspect-video bg-dark rounded-lg mb-4 overflow-hidden relative">
+                <div className="aspect-video bg-dark rounded-lg mb-4 overflow-hidden relative border border-dark-border">
                   {item.account.images?.[0] ? (
                     <img
                       src={item.account.images[0]}
