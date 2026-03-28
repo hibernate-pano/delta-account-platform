@@ -27,9 +27,10 @@ export const CompareBar: React.FC<CompareBarProps> = ({
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Compute overall winner across all items (reuses comparison metrics)
+  const accounts = items.map((i) => i.account);
+  const recoveryHours = accounts.map((a) => a.rentalPrice && a.price > 0 ? a.price / a.rentalPrice : Infinity);
   const winnerIndices = (() => {
     if (items.length < 2) return [];
-    const accounts = items.map((i) => i.account);
     const prices = accounts.map((a) => a.price);
     const skins = accounts.map((a) => a.skinCount ?? 0);
     const credits = accounts.map((a) => a.sellerCreditScore ?? 0);
@@ -45,7 +46,8 @@ export const CompareBar: React.FC<CompareBarProps> = ({
     const viewBest = viewCounts.map((v, i) => v > 0 && v === Math.max(...viewCounts, -Infinity) && viewCounts.filter(x => x === v).length === 1 ? i : -1);
     const orderBest = orderCounts.map((v, i) => v > 0 && v === Math.max(...orderCounts, -Infinity) && orderCounts.filter(x => x === v).length === 1 ? i : -1);
     const valueBest = valueScores.map((v, i) => v > 0 && v === Math.max(...valueScores, -Infinity) && valueScores.filter(x => x === v).length === 1 ? i : -1);
-    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest];
+    const recoveryBest = recoveryHours.map((v, i) => v < Infinity && v === Math.min(...recoveryHours, Infinity) && recoveryHours.filter(x => x === v).length === 1 ? i : -1);
+    const allBest = [priceBest, skinBest, creditBest, valueBest, viewBest, orderBest, recoveryBest];
     const counts = accounts.map((_, idx) => allBest.filter(best => best.includes(idx)).length);
     const maxCount = Math.max(...counts);
     if (maxCount === 0) return [];
@@ -238,6 +240,12 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
     { label: '认证状态', values: accounts.map((a) => a.verificationStatus === 'VERIFIED' ? '已认证' : '待认证') },
     { label: '时租价', values: accounts.map((a) => a.rentalPrice ? `¥${a.rentalPrice}/时` : '不支持') },
     {
+      label: '租售回本',
+      values: accounts.map((a, i) => recoveryHours[i] < Infinity ? `${Math.round(recoveryHours[i])}小时` : '—'),
+      bestIdx: recoveryBest,
+      subLabel: '租赁回本时长',
+    },
+    {
       label: '性价比',
       values: accounts.map((a, i) => a.price > 0 ? `${((a.skinCount || 0) / a.price * 1000).toFixed(1)} 皮肤/千元` : '—'),
       bestIdx: valueBest,
@@ -410,12 +418,14 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
                 const bestValueIdx = valueScores.indexOf(Math.max(...valueScores, -Infinity));
                 const bestCreditIdx = credits.indexOf(Math.max(...credits, -Infinity));
                 const mostViewedIdx = views.indexOf(Math.max(...views, -Infinity));
+                const fastRecoveryIdx = recoveryHours.indexOf(Math.min(...recoveryHours, Infinity));
                 const recommendations = [];
                 if (lowestPriceIdx >= 0) recommendations.push({ idx: lowestPriceIdx, label: '价格最优', color: 'text-primary' });
                 if (bestValueIdx >= 0 && valueScores[bestValueIdx] > 0) recommendations.push({ idx: bestValueIdx, label: '性价比最高', color: 'text-yellow-400' });
                 if (bestCreditIdx >= 0 && credits[bestCreditIdx] > 0) recommendations.push({ idx: bestCreditIdx, label: '卖家信用最佳', color: 'text-blue-400' });
                 if (mostSkinsIdx >= 0 && skins[mostSkinsIdx] > 0) recommendations.push({ idx: mostSkinsIdx, label: '皮肤最多', color: 'text-purple-400' });
                 if (mostViewedIdx >= 0 && views[mostViewedIdx] > 0) recommendations.push({ idx: mostViewedIdx, label: '最热门', color: 'text-red-400' });
+                if (fastRecoveryIdx >= 0 && recoveryHours[fastRecoveryIdx] < Infinity) recommendations.push({ idx: fastRecoveryIdx, label: '最快回本', color: 'text-amber-400' });
 
                 if (recommendations.length === 0) return null;
                 return (

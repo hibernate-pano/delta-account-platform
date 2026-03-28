@@ -62,7 +62,9 @@ const ReviewCard: React.FC<{
             </div>
             <span className="text-[10px] text-slate-600">{new Date(review.createdAt).toLocaleDateString('zh-CN')}</span>
             {review.accountTitle && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-dark rounded text-slate-500">账号: {review.accountTitle}</span>
+              <Link to={`/accounts/${review.accountId}`} className="text-[10px] px-1.5 py-0.5 bg-dark rounded text-slate-500 hover:text-primary transition-colors flex items-center gap-0.5">
+                账号: {review.accountTitle} →
+              </Link>
             )}
             {review.reply && (
               <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded flex items-center gap-0.5">
