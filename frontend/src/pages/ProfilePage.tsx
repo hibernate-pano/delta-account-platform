@@ -40,7 +40,7 @@ const ReviewCard: React.FC<{
   };
 
   return (
-    <div className="card p-4">
+    <div className="card p-4 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
       <div className="flex gap-3">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
           <User className="w-4 h-4 text-primary" />

@@ -925,7 +925,7 @@ const WalletPage: React.FC = () => {
                   type="text"
                   value={accountNo}
                   onChange={(e) => setAccountNo(e.target.value)}
-                  className="input w-full"
+                  className="input w-full focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                   placeholder="请输入支付宝账号"
                   required
                 />
@@ -936,7 +936,7 @@ const WalletPage: React.FC = () => {
                   type="text"
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
-                  className="input w-full"
+                  className="input w-full focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                   placeholder="请输入真实姓名"
                   required
                 />
