@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlistStore } from '../store/wishlist';
+import { useRecentStore } from '../store/recent';
 import { useAuthStore } from '../store/auth';
 import { useToast } from '../components/ui/Toast';
 import { WishlistButton } from '../components/ui/WishlistButton';
@@ -23,6 +24,7 @@ const WishlistPage: React.FC = () => {
   const { token } = useAuthStore();
   const { showToast } = useToast();
   const { items: wishlistItems, removeItem, clearAll, getVerifiedCount, getPriceRange } = useWishlistStore();
+  const { items: recentItems } = useRecentStore();
   const verifiedCount = getVerifiedCount();
   const priceRange = getPriceRange();
 
@@ -385,6 +387,12 @@ const WishlistPage: React.FC = () => {
                         <span className="flex items-center gap-0.5">
                           <ShoppingCart className="w-3 h-3" />
                           {account.orderCount}笔交易
+                        </span>
+                      )}
+                      {recentItems.some((r: any) => r.account.id === account.id) && (
+                        <span className="text-primary/60 flex items-center gap-0.5">
+                          <Eye className="w-3 h-3" />
+                          已浏览
                         </span>
                       )}
                       <span className="ml-auto opacity-60">{formatRelativeTime(account.createdAt)}</span>

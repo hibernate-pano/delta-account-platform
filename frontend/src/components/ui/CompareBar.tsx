@@ -156,21 +156,26 @@ const CompareRow: React.FC<{ label: string; values: string[]; isWinner?: boolean
     <td className={`py-3 px-4 text-sm w-28 border-r border-dark-border align-top transition-colors ${highlight ? 'text-primary font-medium' : 'text-slate-500'}`}>
       {label}
     </td>
-    {values.map((val, i) => (
-      <td
-        key={i}
-        className={`py-3 px-4 text-sm text-center align-top transition-colors duration-150 ${
-          isWinner?.[i] ? 'bg-green-500/5' : ''
-        } ${highlight ? (isWinner?.[i] ? 'text-green-400 font-semibold' : 'text-slate-300') : 'hover:bg-dark-lighter/30'}`}
-      >
-        <span className={isWinner?.[i] && !highlight ? 'text-green-400 font-semibold' : ''}>
-          {val}
-        </span>
-        {isWinner?.[i] && (
-          <span className="ml-1 text-green-400 text-xs flex items-center gap-0.5"><Check className="w-3 h-3" /> 最优</span>
-        )}
-      </td>
-    ))}
+    {values.map((val, i) => {
+      const isBelow = val.includes('低于') || val.includes('≈均价');
+      const isAbove = val.includes('高于') && !val.includes('低于');
+      const valueColor = isBelow ? 'text-green-400' : isAbove ? 'text-red-400' : '';
+      return (
+        <td
+          key={i}
+          className={`py-3 px-4 text-sm text-center align-top transition-colors duration-150 ${
+            isWinner?.[i] ? 'bg-green-500/5' : ''
+          } ${highlight ? (isWinner?.[i] ? 'text-green-400 font-semibold' : 'text-slate-300') : 'hover:bg-dark-lighter/30'}`}
+        >
+          <span className={`${valueColor} ${isWinner?.[i] && !highlight ? 'text-green-400 font-semibold' : ''}`}>
+            {val}
+          </span>
+          {isWinner?.[i] && (
+            <span className="ml-1 text-green-400 text-xs flex items-center gap-0.5"><Check className="w-3 h-3" /> 最优</span>
+          )}
+        </td>
+      );
+    })}
     {values.length < 4 && Array.from({ length: 4 - values.length }).map((_, i) => (
       <td key={`empty-${i}`} className="py-3 px-4 text-slate-700 text-center">—</td>
     ))}
@@ -236,6 +241,20 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
       label: '性价比',
       values: accounts.map((a, i) => a.price > 0 ? `${((a.skinCount || 0) / a.price * 1000).toFixed(1)} 皮肤/千元` : '—'),
       bestIdx: valueBest,
+      highlight: true,
+    },
+    {
+      label: '价格对比',
+      values: (() => {
+        const avg = prices.reduce((s, p) => s + p, 0) / prices.length;
+        return accounts.map((a) => {
+          if (avg === 0) return '—';
+          const delta = ((a.price - avg) / avg) * 100;
+          if (Math.abs(delta) < 0.5) return '≈均价';
+          if (delta < 0) return `${Math.abs(delta).toFixed(0)}% 低于均价`;
+          return `+${delta.toFixed(0)}% 高于均价`;
+        });
+      })(),
       highlight: true,
     },
     {
