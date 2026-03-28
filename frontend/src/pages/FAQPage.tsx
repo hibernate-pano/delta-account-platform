@@ -214,7 +214,7 @@ const FAQPage: React.FC = () => {
                 <span className={`flex-1 text-sm font-medium ${isOpen ? 'text-primary' : 'text-slate-300'}`}>
                   {faq.question}
                 </span>
-                <ChevronDown className={`w-4 h-4 text-slate-500 flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-slate-500 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
               </button>
               {isOpen && (
                 <div className="px-4 pb-4 animate-fade-in">

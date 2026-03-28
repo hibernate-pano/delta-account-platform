@@ -166,7 +166,17 @@ export const NotificationBell: React.FC = () => {
                     }}
                   >
                     <div className="flex items-start space-x-2">
-                      <div className="mt-0.5 flex-shrink-0">{getIcon(n.type)}</div>
+                      <div className="mt-0.5 flex-shrink-0">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                          n.type.includes('ORDER') ? 'bg-green-500/20 text-green-400' :
+                          n.type.includes('CANCELLED') || n.type.includes('REJECTED') ? 'bg-red-500/20 text-red-400' :
+                          n.type.includes('REVIEW') || n.type.includes('MESSAGE') ? 'bg-yellow-500/20 text-yellow-400' :
+                          n.type.includes('EXPIRING') ? 'bg-orange-500/20 text-orange-400' :
+                          'bg-primary/20 text-primary'
+                        }`}>
+                          {getIcon(n.type)}
+                        </div>
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-medium truncate">{n.title}</p>
