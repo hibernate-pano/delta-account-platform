@@ -302,7 +302,11 @@ const HomePage: React.FC = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-slate-400 mb-10 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            买卖租赁 · 官方担保 · 快速交付
+            <span>买卖租赁</span>
+            <span className="text-slate-600 mx-2 select-none">·</span>
+            <span>官方担保</span>
+            <span className="text-slate-600 mx-2 select-none">·</span>
+            <span>快速交付</span>
           </p>
 
           {/* Quick Search Bar */}
