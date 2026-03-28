@@ -70,7 +70,7 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
                   aria-label="发布账号"
                   className="flex-1 flex flex-col items-center justify-center relative -mt-4"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/40 ring-4 ring-primary/20 hover:scale-105 active:scale-95 transition-transform">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/40 ring-4 ring-primary/20 hover:scale-105 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-dark">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <span className="text-[10px] mt-1 text-primary font-medium">{tab.label}</span>

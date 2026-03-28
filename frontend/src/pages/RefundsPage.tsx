@@ -67,7 +67,7 @@ const RefundDetailModal: React.FC<{ refund: Refund; onClose: () => void }> = ({ 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
       <div
-        className="relative w-full max-w-md max-h-[85vh] overflow-y-auto bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-slide-up"
+        className="relative w-full max-w-md max-h-[85vh] overflow-y-auto bg-dark-card border border-dark-border rounded-2xl shadow-2xl animate-slide-up hover:shadow-primary/10 transition-shadow duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -386,7 +386,7 @@ const RefundsPage: React.FC = () => {
             </p>
           )}
         </div>
-        <button onClick={() => handleOpenApply()} className="btn-primary flex items-center gap-2">
+        <button onClick={() => handleOpenApply()} className="btn-primary flex items-center gap-2 active:scale-95 transition-transform">
           <Plus className="w-5 h-5" />
           申请退款
         </button>
@@ -486,7 +486,7 @@ const RefundsPage: React.FC = () => {
               <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto leading-relaxed">
                 您的退款记录将显示在这里<br />如有退款申请会第一时间通知您
               </p>
-              <button onClick={() => setActiveTab('apply')} className="btn-primary inline-flex items-center gap-2">
+              <button onClick={() => setActiveTab('apply')} className="btn-primary inline-flex items-center gap-2 active:scale-95 transition-transform">
                 <DollarSign className="w-4 h-4" />
                 申请退款
               </button>
