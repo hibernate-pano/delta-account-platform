@@ -117,6 +117,7 @@ const SellPage: React.FC = () => {
   const [publishedAccountId, setPublishedAccountId] = useState<number | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [descPreview, setDescPreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'buyer' | 'seller'>('seller');
 
   // Inline field validation
   const validateField = (field: string, value: string) => {
@@ -1027,7 +1028,24 @@ const SellPage: React.FC = () => {
               <div className="flex items-center gap-2 mb-4">
                 <Eye className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-slate-300">发布预览</span>
-                <span className="text-xs text-slate-600 ml-auto">买家将看到的效果</span>
+                <div className="ml-auto flex gap-1 bg-dark-lighter rounded-lg p-0.5">
+                  <button
+                    onClick={() => setPreviewMode('buyer')}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-all ${
+                      previewMode === 'buyer' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    买家视角
+                  </button>
+                  <button
+                    onClick={() => setPreviewMode('seller')}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-all ${
+                      previewMode === 'seller' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    我的视角
+                  </button>
+                </div>
               </div>
 
               {/* Mini account card */}
@@ -1077,26 +1095,34 @@ const SellPage: React.FC = () => {
                       <span className="text-xs text-slate-500">租 ¥{formData.rentalPrice}/时</span>
                     )}
                   </div>
-                  {/* Seller info row */}
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dark-border">
-                    {user?.avatar ? (
-                      <img src={user.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
-                        <User className="w-2.5 h-2.5 text-primary" />
-                      </div>
-                    )}
-                    <span className="text-[11px] text-slate-400">
-                      {user?.nickname || user?.username || '用户'}
-                      {user?.creditScore != null && (
-                        <span className="ml-1 text-yellow-400/70">· {user.creditScore}分</span>
+                  {/* Seller info row — hidden in buyer preview */}
+                  {previewMode === 'seller' && (
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-dark-border">
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
+                          <User className="w-2.5 h-2.5 text-primary" />
+                        </div>
                       )}
-                    </span>
-                    <div className="ml-auto flex items-center gap-0.5">
-                      <Shield className="w-3 h-3 text-green-400" />
-                      <span className="text-[10px] text-green-400">平台托管</span>
+                      <span className="text-[11px] text-slate-400">
+                        {user?.nickname || user?.username || '用户'}
+                        {user?.creditScore != null && (
+                          <span className="ml-1 text-yellow-400/70">· {user.creditScore}分</span>
+                        )}
+                      </span>
+                      <div className="ml-auto flex items-center gap-0.5">
+                        <Shield className="w-3 h-3 text-green-400" />
+                        <span className="text-[10px] text-green-400">平台托管</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  {previewMode === 'buyer' && (
+                    <div className="mt-2 pt-2 border-t border-dark-border flex items-center gap-1.5">
+                      <Shield className="w-3 h-3 text-green-400" />
+                      <span className="text-[10px] text-green-400">平台保障 · 资金托管 · 快速交付</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

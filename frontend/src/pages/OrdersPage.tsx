@@ -613,6 +613,26 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
                 <span className="text-[10px] text-slate-600">({formatRelativeTime(order.createdAt)})</span>
               </div>
             </div>
+            {(order.status === 'PENDING' || order.status === 'PAID' || order.status === 'PROCESSING') && (
+              <div className="col-span-2 mt-3 pt-3 border-t border-dark-border flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-slate-500" />
+                  <span className="text-xs text-slate-400">
+                    {isBuyer ? '卖家' : '买家'}: {order.account?.sellerNickname || order.account?.sellerUsername || '未知'}
+                  </span>
+                  {order.account?.sellerCreditScore != null && (
+                    <span className="text-xs text-yellow-400/70">({order.account.sellerCreditScore}分)</span>
+                  )}
+                </div>
+                <button
+                  onClick={handleContact}
+                  className="text-xs px-2.5 py-1 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-primary flex items-center gap-1 transition-colors"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  联系
+                </button>
+              </div>
+            )}
             {order.type === 'RENT' && order.rentHours && (
               <div className="bg-dark rounded-lg px-3 py-2 col-span-2">
                 <p className="text-[10px] text-slate-500 mb-0.5">租期</p>
