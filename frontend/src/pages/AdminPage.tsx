@@ -666,7 +666,7 @@ const AdminPage: React.FC = () => {
                         };
                         const st = statusMap[order.status] || statusMap.PENDING;
                         return (
-                          <tr key={order.id} className="hover:bg-dark-lighter/40 transition-all cursor-pointer border-l-2 border-l-transparent hover:border-l-primary"
+                          <tr key={order.id} className="hover:bg-dark-lighter/40 active:bg-dark-lighter/60 active:scale-[0.995] transition-all cursor-pointer border-l-2 border-l-transparent hover:border-l-primary"
                             onClick={() => navigate(`/orders`)}>
                             <td className="px-4 py-3 font-mono text-xs text-slate-400">#{order.id}</td>
                             <td className="px-4 py-3">
@@ -785,7 +785,7 @@ const AdminPage: React.FC = () => {
                         const roleBadge = roleMap[user.role] || { label: user.role as string, color: 'text-slate-400', bg: 'bg-slate-500/20' };
                         const statusBadge = statusMap[user.status] || { label: (user.status as string) || '正常', color: 'text-slate-400', bg: 'bg-slate-500/20' };
                         return (
-                          <tr key={user.id} className="hover:bg-dark-lighter/40 transition-all border-l-2 border-l-transparent hover:border-l-primary">
+                          <tr key={user.id} className="hover:bg-dark-lighter/40 active:bg-dark-lighter/60 active:scale-[0.995] transition-all border-l-2 border-l-transparent hover:border-l-primary">
                             <td className="px-4 py-3 font-mono text-xs text-slate-400">#{user.id}</td>
                             <td className="px-4 py-3 font-medium">{user.username}</td>
                             <td className="px-4 py-3 text-slate-400">{user.nickname || '-'}</td>

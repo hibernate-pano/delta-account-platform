@@ -87,14 +87,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" role="presentation" onClick={onClose} />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70 backdrop-blur-md" role="presentation" onClick={onClose} />
 
       {/* Modal */}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="payment-modal-title"
-        className="relative bg-dark-card rounded-2xl w-full max-w-md border border-dark-border shadow-2xl animate-slide-up"
+        className="relative bg-dark-card rounded-2xl w-full max-w-md border border-dark-border shadow-2xl animate-slide-up hover:shadow-primary/10 transition-shadow duration-300"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-dark-border">
