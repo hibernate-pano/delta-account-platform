@@ -542,7 +542,7 @@ const AccountsPage: React.FC = () => {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <span className="text-sm font-medium">查看详情 →</span>
+                  <span className="text-sm font-medium flex items-center gap-1">查看详情 <ChevronRight className="w-3 h-3" /></span>
                 </div>
                 <div className="absolute top-2 right-2">
                   <WishlistButton account={account} size="sm" />

@@ -680,7 +680,7 @@ const RefundsPage: React.FC = () => {
                           className="text-sm text-primary hover:text-primary-light transition-colors mt-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                         >
                           {applyMutation.isPending && <RefreshCw className="w-3 h-3 animate-spin" />}
-                          申请退款 →
+                          申请退款 <ChevronRight className="w-3 h-3" />
                         </button>
                       )}
                     </div>

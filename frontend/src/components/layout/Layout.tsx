@@ -529,9 +529,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {/* Payment icons placeholder */}
               <div className="flex items-center gap-2 text-xs text-slate-600">
                 <span>支付方式:</span>
-                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500">微信</span>
-                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500">支付宝</span>
-                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500">平台余额</span>
+                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500 hover:bg-dark-lighter hover:text-slate-400 transition-all hover:scale-105 active:scale-95">微信</span>
+                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500 hover:bg-dark-lighter hover:text-slate-400 transition-all hover:scale-105 active:scale-95">支付宝</span>
+                <span className="px-1.5 py-0.5 bg-dark rounded text-slate-500 hover:bg-dark-lighter hover:text-slate-400 transition-all hover:scale-105 active:scale-95">平台余额</span>
               </div>
             </div>
           </div>

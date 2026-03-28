@@ -599,7 +599,7 @@ const isOwner = user?.id === account?.sellerId;
                       to={`/accounts?seller=${account?.sellerId}`}
                       className="text-xs text-slate-500 hover:text-primary transition-colors"
                     >
-                      查看该卖家其他 {sellerAccounts.length} 个账号 →
+                      查看该卖家其他 {sellerAccounts.length} 个账号 <ChevronRight className="w-3 h-3 inline-block" />
                     </Link>
                   )}
                 </div>
