@@ -470,7 +470,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   ] : []),
                 ].map((link) => (
                   <Link key={link.to} to={link.to}
-                    className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
+                    className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 hover:scale-[1.02] -mx-2 px-2 py-1 rounded-lg transition-all">
                     {link.label}
                   </Link>
                 ))}
@@ -487,7 +487,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   { to: '/refunds', label: '退款申请' },
                 ].map((link) => (
                   <Link key={link.to} to={link.to}
-                    className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
+                    className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 hover:scale-[1.02] -mx-2 px-2 py-1 rounded-lg transition-all">
                     {link.label}
                   </Link>
                 ))}
@@ -549,7 +549,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <button
               onClick={() => { navigate('/sell'); setQuickActionsOpen(false); }}
               aria-label="发布账号"
-              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 hover:scale-[1.02] rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
             >
               <Plus className="w-4 h-4 text-green-400" />
               <span className="text-sm text-slate-300 group-hover:text-white">发布账号</span>
@@ -557,7 +557,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <button
               onClick={() => { navigate('/wallet'); setQuickActionsOpen(false); }}
               aria-label="钱包充值"
-              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 hover:scale-[1.02] rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap"
             >
               <Wallet className="w-4 h-4 text-primary" />
               <span className="text-sm text-slate-300 group-hover:text-white">钱包充值</span>
@@ -565,7 +565,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <button
               onClick={() => { navigate('/messages'); setQuickActionsOpen(false); }}
               aria-label="消息中心"
-              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 hover:scale-[1.02] rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
             >
               <MessageCircle className="w-4 h-4 text-blue-400" />
               <span className="text-sm text-slate-300 group-hover:text-white">消息中心</span>
@@ -578,7 +578,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <button
               onClick={() => { navigate('/notifications'); setQuickActionsOpen(false); }}
               aria-label="通知中心"
-              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
+              className="flex items-center gap-2 bg-dark-card border border-dark-border hover:border-primary/50 hover:scale-[1.02] rounded-xl pl-4 pr-5 py-2.5 shadow-xl transition-all group whitespace-nowrap relative"
             >
               <Bell className="w-4 h-4 text-yellow-400" />
               <span className="text-sm text-slate-300 group-hover:text-white">通知中心</span>
