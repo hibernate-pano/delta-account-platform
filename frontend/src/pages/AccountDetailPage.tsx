@@ -702,7 +702,7 @@ const isOwner = user?.id === account?.sellerId;
                 <button
                   onClick={handleBuy}
                   disabled={isPending}
-                  className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98] transition-transform"
                 >
                   {buyMutation.isPending ? (
                     <RefreshCw className="w-5 h-5 animate-spin" />
@@ -739,7 +739,7 @@ const isOwner = user?.id === account?.sellerId;
                     <button
                       onClick={handleRent}
                       disabled={isPending}
-                      className="btn-secondary flex-1 py-3 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="btn-secondary flex-1 py-3 font-medium disabled:opacity-50 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform"
                     >
                       {rentMutation.isPending ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />

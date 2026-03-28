@@ -367,14 +367,14 @@ const HomePage: React.FC = () => {
           <div className="flex gap-3 justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <Link
               to="/accounts"
-              className="btn-primary flex items-center gap-2 px-6 py-2.5"
+              className="btn-primary flex items-center gap-2 px-6 py-2.5 hover:scale-105 active:scale-95 transition-transform"
             >
               <Gamepad2 className="w-4 h-4" />
               逛市场
             </Link>
             <Link
               to="/sell"
-              className="btn-secondary flex items-center gap-2 px-6 py-2.5"
+              className="btn-secondary flex items-center gap-2 px-6 py-2.5 hover:scale-105 active:scale-95 transition-transform"
             >
               <TrendingUp className="w-4 h-4" />
               立即发布
