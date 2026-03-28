@@ -499,8 +499,8 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             </div>
           )}
           {/* Type badge */}
-          <div className={`absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
-            order.type === 'BUY' ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
+          <div className={`absolute -top-1 -left-1 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center justify-center shadow-lg ${
+            order.type === 'BUY' ? 'bg-blue-500 text-white shadow-blue-500/30' : 'bg-purple-500 text-white shadow-purple-500/30'
           }`}>
             {order.type === 'BUY' ? '买' : '租'}
           </div>

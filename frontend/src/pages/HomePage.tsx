@@ -572,7 +572,12 @@ const HomePage: React.FC = () => {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {featuredAccounts.map((account) => (
-                <div key={account.id} className="card group relative">
+                <div key={account.id} className="card group relative overflow-hidden">
+                  <div className="absolute top-0 left-0 z-20">
+                    <div className="bg-gradient-to-r from-primary to-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded-br-lg shadow-lg shadow-primary/30">
+                      精选
+                    </div>
+                  </div>
                   <div className="absolute top-2 right-2 z-10">
                     <WishlistButton account={account} size="sm" />
                   </div>
