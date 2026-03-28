@@ -210,7 +210,15 @@ const MessagesPage: React.FC = () => {
             </p>
           )}
           <p className={`text-xs truncate ${session.unreadCount ? 'text-slate-300 font-medium' : 'text-slate-500'}`}>
-            {session.lastMessage || '暂无消息'}
+            {session.unreadCount && session.lastMessage
+              ? (() => {
+                  const isPartnerMsg = session.otherUser?.id != null && user?.id != null
+                    ? (user.id === session.buyerId ? session.otherUser.id === session.sellerId : session.otherUser.id === session.buyerId)
+                    : null;
+                  const prefix = isPartnerMsg === true ? '对方: ' : isPartnerMsg === false ? '我: ' : '';
+                  return `${prefix}${session.lastMessage}`;
+                })()
+              : (session.lastMessage || '暂无消息')}
           </p>
         </div>
         {!session.unreadCount && (

@@ -537,6 +537,19 @@ const AccountsPage: React.FC = () => {
               to={`/accounts/${account.id}`}
               className="card hover:border-primary transition-all duration-200 group"
             >
+              {/* Velocity heat bar — visual urgency indicator */}
+              {(() => {
+                if (!account.createdAt || account.viewCount == null) return null;
+                const days = Math.max(1, Math.floor((Date.now() - new Date(account.createdAt).getTime()) / 86400000));
+                const velocity = account.viewCount / days;
+                const pct = Math.min(100, Math.round((velocity / 20) * 100));
+                const color = pct >= 75 ? 'bg-rose-500' : pct >= 40 ? 'bg-orange-500' : 'bg-blue-500';
+                return pct > 5 ? (
+                  <div className="absolute top-0 left-0 right-0 h-0.5 z-10" title={`热度: ${velocity.toFixed(1)}次/天`}>
+                    <div className={`h-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                  </div>
+                ) : null;
+              })()}
               <div className={`aspect-video bg-dark rounded-lg mb-3 overflow-hidden relative ${isCompareSelected(account.id) ? 'ring-2 ring-yellow-400/60 shadow-lg shadow-yellow-400/20' : ''}`}>
                 {account.images && account.images.length > 0 ? (
                   <img
@@ -683,6 +696,19 @@ const AccountsPage: React.FC = () => {
               to={`/accounts/${account.id}`}
               className="card flex gap-4 hover:border-primary transition-all group"
             >
+              {/* Velocity heat bar — list view */}
+              {(() => {
+                if (!account.createdAt || account.viewCount == null) return null;
+                const days = Math.max(1, Math.floor((Date.now() - new Date(account.createdAt).getTime()) / 86400000));
+                const velocity = account.viewCount / days;
+                const pct = Math.min(100, Math.round((velocity / 20) * 100));
+                const color = pct >= 75 ? 'bg-rose-500' : pct >= 40 ? 'bg-orange-500' : 'bg-blue-500';
+                return pct > 5 ? (
+                  <div className="absolute top-0 left-0 w-0.5 h-full z-10 rounded-l-lg overflow-hidden" title={`热度: ${velocity.toFixed(1)}次/天`}>
+                    <div className={`h-full ${color} transition-all duration-500`} style={{ height: `${pct}%`, marginTop: `${100 - pct}%` }} />
+                  </div>
+                ) : null;
+              })()}
               <div className={`w-40 h-28 bg-dark rounded-lg overflow-hidden flex-shrink-0 relative ${isCompareSelected(account.id) ? 'ring-2 ring-yellow-400/60 shadow-lg shadow-yellow-400/20' : ''}`}>
                 {account.images && account.images.length > 0 ? (
                   <img
