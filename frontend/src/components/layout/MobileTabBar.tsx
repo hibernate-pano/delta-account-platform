@@ -85,7 +85,7 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
                 role="tab"
                 aria-selected={active}
                 aria-current={active ? 'page' : undefined}
-                className={`flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
+                className={`flex-1 flex flex-col items-center justify-center transition-all duration-200 active:bg-primary/10 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset rounded-lg ${
                   active ? 'text-primary' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >

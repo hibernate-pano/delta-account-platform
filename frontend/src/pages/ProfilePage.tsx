@@ -1124,7 +1124,7 @@ const EditProfileModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <button
                 key={i}
                 onClick={() => setAvatar(url)}
-                className={`w-11 h-11 rounded-full overflow-hidden border-2 transition-all duration-200 hover:scale-105 active:scale-95 ${
+                className={`w-11 h-11 rounded-full overflow-hidden border-2 transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:scale-105 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-card ${
                   avatar === url
                     ? 'border-primary ring-2 ring-primary/30 ring-offset-2 ring-offset-dark-card scale-105'
                     : 'border-dark-border hover:border-slate-500 hover:bg-dark-lighter'
