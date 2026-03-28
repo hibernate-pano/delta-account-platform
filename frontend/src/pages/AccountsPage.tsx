@@ -659,6 +659,17 @@ const AccountsPage: React.FC = () => {
                         <ShoppingCart className="w-3 h-3" />{account.orderCount}笔
                       </span>
                     )}
+                    {(() => {
+                      const recent = recentItems.find((r: any) => r.account.id === account.id);
+                      if (!recent || !recent.viewedAt) return null;
+                      const mins = Math.floor((Date.now() - recent.viewedAt) / 60000);
+                      const label = mins < 1 ? '刚看过' : mins < 60 ? `${mins}分钟前` : mins < 1440 ? `${Math.floor(mins / 60)}小时前` : '今天';
+                      return (
+                        <span className="flex items-center gap-0.5 text-[10px] text-slate-600">
+                          <Eye className="w-3 h-3" />{label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -671,6 +682,9 @@ const AccountsPage: React.FC = () => {
                     if (ratio >= 1.0) return <span className="px-1.5 py-0.5 bg-yellow-400/15 text-yellow-300/80 text-[10px] rounded flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" /> 性价优</span>;
                     return null;
                   })()}
+                  {account.skinCount > 0 && account.price > 0 && (
+                    <span className="text-[10px] text-amber-400/60">¥{(account.price / account.skinCount).toFixed(1)}/皮</span>
+                  )}
                   <span className="text-[10px] text-slate-600 flex items-center gap-0.5">
                     <Clock className="w-3 h-3" />{freshnessLabel(account.createdAt)}
                   </span>
@@ -819,7 +833,7 @@ const AccountsPage: React.FC = () => {
                   )}
                 </div>
                 {/* Engagement stats */}
-                {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0)) && (
+                {(account.viewCount != null || (account.orderCount != null && account.orderCount > 0) || recentItems.some((r: any) => r.account.id === account.id) ? (
                   <div className="flex items-center gap-3 text-xs text-slate-600 mt-1.5">
                     {account.viewCount != null && (
                       <span className="flex items-center gap-0.5">
@@ -831,8 +845,19 @@ const AccountsPage: React.FC = () => {
                         <ShoppingCart className="w-3 h-3" />{account.orderCount}笔交易
                       </span>
                     )}
+                    {(() => {
+                      const recent = recentItems.find((r: any) => r.account.id === account.id);
+                      if (!recent || !recent.viewedAt) return null;
+                      const mins = Math.floor((Date.now() - recent.viewedAt) / 60000);
+                      const label = mins < 1 ? '刚看过' : mins < 60 ? `${mins}分钟前` : mins < 1440 ? `${Math.floor(mins / 60)}小时前` : '今天';
+                      return (
+                        <span className="flex items-center gap-0.5">
+                          <Eye className="w-3 h-3" />{label}
+                        </span>
+                      );
+                    })()}
                   </div>
-                )}
+                ) : null}
                 {/* Seller info */}
                 {(account.sellerNickname || account.sellerUsername) && (
                   <div className="flex items-center gap-2 mt-2">
