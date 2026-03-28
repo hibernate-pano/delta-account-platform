@@ -736,12 +736,16 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               </Link>
             )}
             {order.status === 'COMPLETED' && (
-              <button
-                onClick={handleReview}
-                className="btn-secondary !py-2 !px-2.5 text-xs flex items-center justify-center gap-1.5"
-              >
-                <Star className="w-3.5 h-3.5 text-yellow-400" />
-              </button>
+              <div className="p-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-2 mb-2">
+                <Star className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                <span className="text-xs text-yellow-400/90 flex-1">评价可获得积分奖励，帮助其他买家</span>
+                <button
+                  onClick={handleReview}
+                  className="flex-shrink-0 text-xs px-2.5 py-1 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 transition-colors font-medium"
+                >
+                  去评价
+                </button>
+              </div>
             )}
             {order.status === 'COMPLETED' && order.type === 'BUY' && (
               <button

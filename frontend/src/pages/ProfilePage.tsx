@@ -126,6 +126,7 @@ const ProfilePage: React.FC = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
   const [accountSort, setAccountSort] = useState<'newest' | 'oldest' | 'price-high' | 'price-low' | 'views'>('newest');
+  const [accountStatusFilter, setAccountStatusFilter] = useState<'all' | 'ON_SALE' | 'SOLD'>('all');
   const [reviewRatingFilter, setReviewRatingFilter] = useState<number | null>(null);
 
   const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useAuthProfile();
@@ -141,6 +142,9 @@ const ProfilePage: React.FC = () => {
   const replyMutation = useReplyReview();
 
   const accounts = sellerAccounts || [];
+  const filteredAccounts = accountStatusFilter === 'all'
+    ? accounts
+    : accounts.filter((a: any) => a.status === accountStatusFilter);
   const orders = ordersData?.data?.data?.records || [];
   const reviews = reviewsData?.data?.data || [];
 
@@ -407,6 +411,32 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Status filter chips */}
+              {accounts.length > 0 && (
+                <div className="flex gap-2 mb-4">
+                  {[
+                    { label: '全部', value: 'all' as const, count: accounts.length },
+                    { label: '出售中', value: 'ON_SALE' as const, count: accounts.filter((a: any) => a.status === 'ON_SALE').length },
+                    { label: '已售出', value: 'SOLD' as const, count: accounts.filter((a: any) => a.status === 'SOLD').length },
+                  ].map((filter) => (
+                    filter.count > 0 && (
+                      <button
+                        key={filter.label}
+                        onClick={() => setAccountStatusFilter(filter.value)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          accountStatusFilter === filter.value
+                            ? 'bg-primary text-white'
+                            : 'bg-dark-lighter text-slate-400 hover:text-white border border-dark-border'
+                        }`}
+                      >
+                        {filter.label}
+                        <span className="ml-1 opacity-60">({filter.count})</span>
+                      </button>
+                    )
+                  ))}
+                </div>
+              )}
+
               {/* Seller accounts aggregate stats */}
               {accounts.length > 0 && (
                 <div className="flex items-center gap-4 mb-4 px-4 py-3 bg-dark-card border border-dark-border hover:border-slate-600 transition-all rounded-xl">
@@ -470,7 +500,7 @@ const ProfilePage: React.FC = () => {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {useMemo(() => {
-                    const sorted = [...accounts].sort((a, b) => {
+                    const sorted = [...filteredAccounts].sort((a, b) => {
                       if (accountSort === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
                       if (accountSort === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
                       if (accountSort === 'price-high') return (b.price || 0) - (a.price || 0);
