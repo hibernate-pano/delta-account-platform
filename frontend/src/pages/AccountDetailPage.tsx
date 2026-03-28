@@ -795,7 +795,7 @@ const isOwner = user?.id === account?.sellerId;
                   ))}
                   {sellerReviews.length > 5 && (
                     <button
-                      onClick={() => {}}
+                      onClick={() => navigate(`/profile?tab=reviews&sellerId=${account.sellerId}`)}
                       className="flex items-center justify-center gap-1 w-full py-3 bg-dark hover:bg-dark-lighter rounded-lg text-sm text-slate-400 hover:text-primary transition-colors"
                     >
                       <ChevronRight className="w-4 h-4" />

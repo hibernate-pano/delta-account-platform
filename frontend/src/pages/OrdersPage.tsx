@@ -627,6 +627,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               {countdown}
             </div>
           )}
+          {order.type === 'RENT' && order.rentHours && order.status !== 'PROCESSING' && (
+            <div className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400">
+              <Clock className="w-2.5 h-2.5" />
+              租{order.rentHours}小时
+            </div>
+          )}
         </div>
 
         {/* Expand chevron */}
@@ -668,6 +674,12 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               <p className="text-[10px] text-slate-500 mb-0.5">订单类型</p>
               <p className="text-xs font-medium text-slate-300">{order.type === 'BUY' ? '购买账号' : '租赁使用'}</p>
             </div>
+            {order.type === 'RENT' && order.rentHours && (
+              <div className="bg-dark rounded-lg px-3 py-2">
+                <p className="text-[10px] text-slate-500 mb-0.5">租期</p>
+                <p className="text-xs font-medium text-purple-400">{order.rentHours} 小时</p>
+              </div>
+            )}
             <div className="bg-dark rounded-lg px-3 py-2">
               <p className="text-[10px] text-slate-500 mb-0.5">下单时间</p>
               <div className="flex items-center gap-1.5">
