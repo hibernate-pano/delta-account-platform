@@ -461,6 +461,12 @@ const MessagesPage: React.FC = () => {
                 <span className="text-xs text-slate-500">{account.gameRank || '暂无段位'}</span>
                 <span className="text-xs text-slate-600">·</span>
                 <span className="text-xs text-slate-500 flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400/70" /> {account.skinCount}皮肤</span>
+                {account.createdAt && (
+                  <>
+                    <span className="text-xs text-slate-600">·</span>
+                    <span className="text-xs text-slate-600">{formatRelativeTime(account.createdAt)}</span>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex-shrink-0 flex flex-col items-end gap-1">

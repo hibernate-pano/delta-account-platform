@@ -82,6 +82,18 @@ const formatMonth = (dateStr: string) => {
   return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
 };
 
+const formatRelativeTime = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return '刚刚';
+  if (mins < 60) return `${mins}分钟前`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}小时前`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}天前`;
+  return `${Math.floor(days / 30)}个月前`;
+};
+
 // Order Progress Stepper
 const OrderStepper: React.FC<{ status: string; type: 'BUY' | 'RENT' }> = ({ status, type }) => {
   const steps = type === 'RENT' ? RENT_STEPS : BUY_STEPS;
@@ -596,7 +608,10 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             </div>
             <div className="bg-dark rounded-lg px-3 py-2">
               <p className="text-[10px] text-slate-500 mb-0.5">下单时间</p>
-              <p className="text-xs font-medium text-slate-300">{formatDate(order.createdAt)}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-medium text-slate-300">{formatDate(order.createdAt)}</p>
+                <span className="text-[10px] text-slate-600">({formatRelativeTime(order.createdAt)})</span>
+              </div>
             </div>
             {order.type === 'RENT' && order.rentHours && (
               <div className="bg-dark rounded-lg px-3 py-2 col-span-2">
