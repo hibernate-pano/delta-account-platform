@@ -588,7 +588,7 @@ const NotificationsPage: React.FC = () => {
           return (
             <div
               key={tab.key}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all hover:scale-105 active:scale-95 cursor-pointer ${
                 activeTypeFilter === tab.key
                   ? 'bg-primary/20 text-primary border border-primary/40'
                   : 'bg-dark-lighter text-slate-400 hover:text-white border border-transparent'

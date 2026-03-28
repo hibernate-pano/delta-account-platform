@@ -230,13 +230,13 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
         <div className="grid gap-4 p-4 border-b border-dark-border" style={{ gridTemplateColumns: `200px repeat(${accounts.length}, 1fr)` }}>
           <div /> {/* Spacer for label column */}
           {accounts.map((account, idx) => (
-            <div key={account.id} className="text-center relative">
+            <div key={account.id} className="text-center relative group">
               {idx === overallWinnerIdx && maxWins > 0 && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-yellow-500 text-black text-[10px] rounded-full font-bold whitespace-nowrap z-10 flex items-center gap-0.5">
                   <Crown className="w-2.5 h-2.5" /> 推荐
                 </div>
               )}
-              <div className="w-full aspect-video bg-dark rounded-xl overflow-hidden mb-2 relative">
+              <div className="w-full aspect-video bg-dark rounded-xl overflow-hidden mb-2 relative group-hover:scale-105 transition-transform duration-200">
                 {account.images?.[0] && !errorIds.has(account.id) ? (
                   <>
                     {!loadedIds.has(account.id) && (
