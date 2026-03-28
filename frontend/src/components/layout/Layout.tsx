@@ -470,7 +470,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   ] : []),
                 ].map((link) => (
                   <Link key={link.to} to={link.to}
-                    className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                    className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                     {link.label}
                   </Link>
                 ))}
@@ -487,14 +487,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   { to: '/refunds', label: '退款申请' },
                 ].map((link) => (
                   <Link key={link.to} to={link.to}
-                    className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                    className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                     {link.label}
                   </Link>
                 ))}
-                <Link to="/faq" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/faq" className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                   常见问题 FAQ
                 </Link>
-                <Link to="/faq" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/faq" className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                   交易指南
                 </Link>
               </div>
@@ -504,16 +504,16 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div>
               <h4 className="font-medium text-sm text-slate-300 mb-4">法律信息</h4>
               <div className="space-y-2.5">
-                <Link to="/terms" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/terms" className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                   服务条款
                 </Link>
-                <Link to="/privacy" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/privacy" className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                   隐私政策
                 </Link>
-                <Link to="/refunds" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/refunds" className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                   退款政策
                 </Link>
-                <Link to="/messages" className="block text-sm text-slate-500 hover:text-primary transition-colors">
+                <Link to="/messages" className="block text-sm text-slate-500 hover:text-primary hover:bg-primary/5 -mx-2 px-2 py-1 rounded-lg transition-all">
                   联系我们
                 </Link>
               </div>

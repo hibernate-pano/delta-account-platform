@@ -86,11 +86,11 @@ const MobileTabBar: React.FC<{ msgUnreadCount?: number; notifUnreadCount?: numbe
                 aria-selected={active}
                 aria-current={active ? 'page' : undefined}
                 className={`flex-1 flex flex-col items-center justify-center transition-all duration-200 ${
-                  active ? 'text-primary' : 'text-slate-500'
+                  active ? 'text-primary' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
                 <div className="relative">
-                  <Icon className={`w-5 h-5 transition-all ${active ? 'scale-110' : ''}`} />
+                  <Icon className={`w-5 h-5 transition-all ${active ? 'scale-110' : 'hover:scale-110'}`} />
                   {tab.badge !== undefined && tab.badge > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none">
                       {tab.badge > 9 ? '9+' : tab.badge}
