@@ -162,6 +162,18 @@ const WishlistPage: React.FC = () => {
               ¥{wishlistItems.reduce((sum: number, a: any) => sum + a.price, 0).toLocaleString()}
             </span>
           </div>
+          {Object.keys(priceAlerts).length > 0 && (
+            <>
+              <div className="w-px h-4 bg-dark-border" />
+              <div className="flex items-center gap-1.5 text-sm">
+                <Bell className="w-4 h-4 text-green-400" />
+                <span className="text-slate-400">已到提醒</span>
+                <span className={`font-semibold ${wishlistItems.filter((a: any) => priceAlerts[a.id] && a.price <= priceAlerts[a.id]).length > 0 ? 'text-green-400 animate-pulse' : 'text-slate-400'}`}>
+                  {wishlistItems.filter((a: any) => priceAlerts[a.id] && a.price <= priceAlerts[a.id]).length}
+                </span>
+              </div>
+            </>
+          )}
         </div>
       )}
 

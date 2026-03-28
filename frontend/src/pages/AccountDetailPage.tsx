@@ -422,24 +422,34 @@ const isOwner = user?.id === account?.sellerId;
                     </div>
                   )}
                   {/* Seller stats summary */}
-                  {reviewStats && reviewStats.totalCount > 0 && (
-                    <div className="flex items-center gap-4 mt-2 text-[10px] text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <Star className="w-3 h-3" />
-                        累计 {reviewStats.totalCount} 条评价
-                      </span>
-                      {(() => {
-                        const positive = (reviewStats.fiveStar || 0) + (reviewStats.fourStar || 0);
-                        const rate = reviewStats.totalCount > 0
-                          ? Math.round(positive / reviewStats.totalCount * 100)
-                          : 0;
-                        return (
-                          <span className={`flex items-center gap-1 ${rate >= 90 ? 'text-green-400' : rate >= 70 ? 'text-yellow-400' : 'text-red-400'}`}>
-                            <Check className="w-3 h-3" />
-                            好评率 {rate}%
+                  {((reviewStats && reviewStats.totalCount > 0) || (account.orderCount != null && account.orderCount > 0)) && (
+                    <div className="flex items-center gap-4 mt-2 text-[10px] text-slate-500 flex-wrap">
+                      {account.orderCount != null && account.orderCount > 0 && (
+                        <span className="flex items-center gap-1">
+                          <ShoppingCart className="w-3 h-3 text-blue-400" />
+                          已售 {account.orderCount} 单
+                        </span>
+                      )}
+                      {reviewStats && reviewStats.totalCount > 0 && (
+                        <>
+                          <span className="flex items-center gap-1">
+                            <Star className="w-3 h-3" />
+                            累计 {reviewStats.totalCount} 条评价
                           </span>
-                        );
-                      })()}
+                          {(() => {
+                            const positive = (reviewStats.fiveStar || 0) + (reviewStats.fourStar || 0);
+                            const rate = reviewStats.totalCount > 0
+                              ? Math.round(positive / reviewStats.totalCount * 100)
+                              : 0;
+                            return (
+                              <span className={`flex items-center gap-1 ${rate >= 90 ? 'text-green-400' : rate >= 70 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                <Check className="w-3 h-3" />
+                                好评率 {rate}%
+                              </span>
+                            );
+                          })()}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
