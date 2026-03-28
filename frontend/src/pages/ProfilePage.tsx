@@ -126,6 +126,7 @@ const ProfilePage: React.FC = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showClearWishlistConfirm, setShowClearWishlistConfirm] = useState(false);
   const [accountSort, setAccountSort] = useState<'newest' | 'oldest' | 'price-high' | 'price-low' | 'views'>('newest');
+  const [reviewRatingFilter, setReviewRatingFilter] = useState<number | null>(null);
 
   const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useAuthProfile();
   const { data: ordersData, isLoading: ordersLoading, isError: ordersError } = useMyOrders();
@@ -142,6 +143,8 @@ const ProfilePage: React.FC = () => {
   const accounts = sellerAccounts || [];
   const orders = ordersData?.data?.data?.records || [];
   const reviews = reviewsData?.data?.data || [];
+
+  useEffect(() => { setReviewRatingFilter(null); }, [activeTab]);
 
   const { items: wishlistItems, removeItem, addItem } = useWishlistStore();
   const wishlistCount = wishlistItems.length;
@@ -1061,6 +1064,32 @@ const ProfilePage: React.FC = () => {
                       ))}
                     </div>
                   )}
+                  {/* Rating filter chips */}
+                  <div className="flex gap-2 mb-4">
+                    {[
+                      { label: '全部', value: null, count: reviews.length },
+                      { label: '5星', value: 5, count: reviews.filter((r: any) => r.rating === 5).length },
+                      { label: '4星+', value: 4, count: reviews.filter((r: any) => r.rating >= 4).length },
+                      { label: '3星+', value: 3, count: reviews.filter((r: any) => r.rating >= 3).length },
+                    ].map((chip) => (
+                      chip.count > 0 && (
+                        <button
+                          key={chip.label}
+                          onClick={() => setReviewRatingFilter(chip.value)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                            reviewRatingFilter === chip.value
+                              ? 'bg-primary text-white'
+                              : 'bg-dark-lighter text-slate-400 hover:text-white hover:scale-105 active:scale-95'
+                          }`}
+                        >
+                          {chip.label}
+                          <span className={`ml-1 text-[10px] ${reviewRatingFilter === chip.value ? 'opacity-70' : 'opacity-50'}`}>
+                            {chip.count}
+                          </span>
+                        </button>
+                      )
+                    ))}
+                  </div>
                   {/* Rating distribution */}
                   <div className="card mb-4 p-4">
                     <div className="flex items-center gap-1 mb-3">
@@ -1096,7 +1125,10 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    {reviews.map((review) => (
+                    {(reviewRatingFilter !== null
+                      ? reviews.filter((r: any) => r.rating >= reviewRatingFilter)
+                      : reviews
+                    ).map((review) => (
                       <ReviewCard key={review.id} review={review} replyMutation={replyMutation} showToast={showToast} />
                     ))}
                   </div>

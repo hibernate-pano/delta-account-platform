@@ -65,39 +65,54 @@ export const CompareBar: React.FC<CompareBarProps> = ({
           <span className="text-xs text-slate-500">/ 最多 {maxItems} 个</span>
         </div>
 
-        {/* Mini thumbnails */}
-        <div className="flex items-center -space-x-2">
-          {items.slice(0, maxItems).map((item, idx) => (
-            <div
-              key={item.account.id}
-              className="w-8 h-8 rounded-lg overflow-hidden border-2 border-dark ring-1 ring-primary/30 relative group"
-            >
-              {item.account.images?.[0] ? (
-                <img src={item.account.images[0]} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-dark flex items-center justify-center">
-                  <Gamepad2 className="w-3 h-3 text-slate-600" />
-                </div>
-              )}
-              {winnerIndices.includes(idx) && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg z-10">
-                  <Crown className="w-2.5 h-2.5 text-black" />
-                </span>
-              )}
-              <button
-                onClick={() => onRemove(item.account.id)}
-                aria-label="从对比中移除"
-                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1 focus-visible:ring-offset-dark transition-opacity"
+        {/* Mini thumbnails + prices */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center -space-x-2">
+            {items.slice(0, maxItems).map((item, idx) => (
+              <div
+                key={item.account.id}
+                className="w-8 h-8 rounded-lg overflow-hidden border-2 border-dark ring-1 ring-primary/30 relative group"
               >
-                <X className="w-2.5 h-2.5 text-white" />
-              </button>
-            </div>
-          ))}
-          {items.length > maxItems && (
-            <div className="w-8 h-8 rounded-lg bg-dark border-2 border-dark-border flex items-center justify-center">
-              <span className="text-[10px] text-slate-500">+{items.length - maxItems}</span>
-            </div>
-          )}
+                {item.account.images?.[0] ? (
+                  <img src={item.account.images[0]} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-dark flex items-center justify-center">
+                    <Gamepad2 className="w-3 h-3 text-slate-600" />
+                  </div>
+                )}
+                {winnerIndices.includes(idx) && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <Crown className="w-2.5 h-2.5 text-black" />
+                  </span>
+                )}
+                <button
+                  onClick={() => onRemove(item.account.id)}
+                  aria-label="从对比中移除"
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1 focus-visible:ring-offset-dark transition-opacity"
+                >
+                  <X className="w-2.5 h-2.5 text-white" />
+                </button>
+              </div>
+            ))}
+            {items.length > maxItems && (
+              <div className="w-8 h-8 rounded-lg bg-dark border-2 border-dark-border flex items-center justify-center">
+                <span className="text-[10px] text-slate-500">+{items.length - maxItems}</span>
+              </div>
+            )}
+          </div>
+          {/* Price row */}
+          <div className="flex items-center -space-x-2">
+            {items.slice(0, maxItems).map((item, idx) => (
+              <div
+                key={`price-${item.account.id}`}
+                className={`w-8 text-center text-[9px] font-semibold leading-none ${
+                  winnerIndices.includes(idx) ? 'text-yellow-400' : 'text-primary'
+                }`}
+              >
+                ¥{item.account.price}
+              </div>
+            ))}
+          </div>
         </div>
 
         <button
