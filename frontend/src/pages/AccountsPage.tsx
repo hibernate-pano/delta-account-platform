@@ -977,6 +977,19 @@ const AccountsPage: React.FC = () => {
                   {quickViewAccount.status === 'ON_SALE' && (
                     <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium inline-flex items-center gap-1.5"><Flame className="w-3.5 h-3.5" /> 出售中</span>
                   )}
+                  {quickViewAccount.status && quickViewAccount.status !== 'ON_SALE' && (
+                    <span className={`px-2.5 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1 ${
+                      quickViewAccount.status === 'SOLD' ? 'bg-slate-500/20 text-slate-400' :
+                      quickViewAccount.status === 'LOCKED' ? 'bg-yellow-500/20 text-yellow-400' :
+                      quickViewAccount.status === 'RENTED' ? 'bg-purple-500/20 text-purple-400' :
+                      'bg-dark-lighter text-slate-500'
+                    }`}>
+                      {quickViewAccount.status === 'SOLD' ? '已售出' :
+                       quickViewAccount.status === 'LOCKED' ? '已锁定' :
+                       quickViewAccount.status === 'RENTED' ? '已出租' :
+                       quickViewAccount.status === 'OFFLINE' ? '已下架' : '待审核'}
+                    </span>
+                  )}
                 </div>
               </div>
 

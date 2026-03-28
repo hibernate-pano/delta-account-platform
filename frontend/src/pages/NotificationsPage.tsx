@@ -576,7 +576,12 @@ const NotificationsPage: React.FC = () => {
           <div className="w-px h-4 bg-dark-border" />
           <div className="flex items-center gap-1.5 text-sm">
             <span className="text-slate-400">已读率</span>
-            <span className="font-semibold text-green-400">{readRate}%</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-16 h-1.5 bg-dark-lighter rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${readRate >= 80 ? 'bg-green-400' : readRate >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`} style={{ width: `${readRate}%` }} />
+              </div>
+              <span className="font-semibold text-green-400">{readRate}%</span>
+            </div>
           </div>
           {typeStats.length > 0 && (
             <>
