@@ -114,7 +114,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <Link
       to={to}
       onClick={() => setMobileMenuOpen(false)}
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all relative ${
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all relative focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dark ${
         isActive(to)
           ? 'text-primary bg-primary/10 border-l-2 border-primary/70'
           : 'text-slate-400 hover:text-white hover:bg-slate-800/50'

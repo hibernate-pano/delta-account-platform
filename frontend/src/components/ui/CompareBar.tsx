@@ -202,8 +202,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({ items, onClose, onVi
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
       onClick={onClose}
     >
       <div
