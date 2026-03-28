@@ -482,7 +482,7 @@ const isOwner = user?.id === account?.sellerId;
                         { label: '信誉分', value: account.sellerCreditScore != null ? `${account.sellerCreditScore}` : '—', color: 'text-purple-400' },
                       ];
                     })().map((stat) => (
-                      <div key={stat.label} className="bg-dark/40 rounded-lg p-2 text-center">
+                      <div key={stat.label} className="bg-dark/40 rounded-lg p-2 text-center hover:bg-dark-lighter/60 transition-colors cursor-default">
                         <div className={`text-base font-bold ${stat.color}`}>{stat.value}</div>
                         <div className="text-[10px] text-slate-600 mt-0.5">{stat.label}</div>
                       </div>

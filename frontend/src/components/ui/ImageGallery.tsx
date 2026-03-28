@@ -255,7 +255,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               {/* Zoom controls */}
               <button
                 onClick={(e) => { e.stopPropagation(); setZoomLevel((z) => Math.max(z - 0.5, 0.5)); }}
-                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all active:scale-90"
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90"
                 title="缩小 (-)"
               >
                 <ZoomOut className="w-4 h-4" />
@@ -265,7 +265,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, title }) => 
               </span>
               <button
                 onClick={(e) => { e.stopPropagation(); setZoomLevel((z) => Math.min(z + 0.5, 4)); }}
-                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all active:scale-90"
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 hover:scale-110 flex items-center justify-center text-white transition-all active:scale-90"
                 title="放大 (+)"
               >
                 <ZoomIn className="w-4 h-4" />
