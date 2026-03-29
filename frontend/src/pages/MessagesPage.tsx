@@ -489,12 +489,24 @@ const MessagesPage: React.FC = () => {
               />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base font-bold truncate flex items-center gap-1.5">
+              <h1 className="text-base font-bold truncate flex items-center gap-1.5 flex-wrap">
                 {currentSession?.otherUser?.nickname ||
                   currentSession?.otherUser?.username || '聊天'}
                 {currentSession?.otherUser?.creditScore != null && currentSession!.otherUser!.creditScore >= 80 && (
                   <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 drop-shadow-[0_0_4px_rgba(52,211,153,0.5)]" />
                 )}
+                {(() => {
+                  const isBuyer = user?.id === currentSession?.buyerId;
+                  const isSeller = user?.id === currentSession?.sellerId;
+                  if (isBuyer || isSeller) return (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ml-1 ${
+                      isBuyer ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                    }`}>
+                      {isBuyer ? '我是买家' : '我是卖家'}
+                    </span>
+                  );
+                  return null;
+                })()}
               </h1>
               <p className="text-[11px] mt-0.5">
                 {partnerOnline ? (
