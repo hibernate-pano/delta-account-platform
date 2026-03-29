@@ -594,6 +594,11 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
               <span className="px-1 py-0.5 bg-amber-500/15 rounded">押金¥{order.deposit}（归还后退）</span>
             </p>
           )}
+          {order.type === 'RENT' && order.deposit && order.deposit > 0 && (
+            <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-0.5 justify-end">
+              <span className="px-1 py-0.5 bg-slate-500/10 rounded">押金¥{order.deposit}（归还后退）</span>
+            </p>
+          )}
         </div>
 
         {/* Amount + Status */}

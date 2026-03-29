@@ -13,7 +13,7 @@ import { MessageSkeleton } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import {
   MessageCircle, Send, User, ArrowLeft, RefreshCw, MessageSquare,
-  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles, HelpCircle, ShieldCheck
+  Check, CheckCheck, Clock, Wifi, WifiOff, Circle, Search, X, Gamepad2, ArrowRight, Star, AlertCircle, Copy, Sparkles, HelpCircle, ShieldCheck, ShoppingBag
 } from 'lucide-react';
 
 interface Session {
@@ -643,21 +643,28 @@ const MessagesPage: React.FC = () => {
                               className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm group/bubble ${
                                 isMe
                                   ? 'bg-gradient-to-br from-primary to-purple-600 text-white rounded-br-sm'
-                                  : msg.type === 'SYSTEM' || msg.type === 'ORDER_UPDATE'
+                                  : msg.type === 'SYSTEM'
                                   ? 'bg-amber-500/10 border border-amber-500/20 text-amber-300/90 rounded-bl-sm italic'
+                                  : msg.type === 'ORDER_UPDATE'
+                                  ? 'bg-blue-500/10 border border-blue-500/20 text-blue-300/90 rounded-bl-sm'
                                   : 'bg-dark-lighter text-white rounded-bl-sm'
                               }`}
                             >
-                              {msg.type === 'SYSTEM' || msg.type === 'ORDER_UPDATE' ? (
-                                <p className="whitespace-pre-wrap break-words text-xs not-italic">
-                                  <Sparkles className="w-3 h-3 inline mr-1 opacity-60" />
+                              {msg.type === 'SYSTEM' ? (
+                                <p className="whitespace-pre-wrap break-words text-xs not-italic flex items-start gap-1">
+                                  <Sparkles className="w-3 h-3 mt-0.5 flex-shrink-0 opacity-60" />
+                                  {msg.content}
+                                </p>
+                              ) : msg.type === 'ORDER_UPDATE' ? (
+                                <p className="whitespace-pre-wrap break-words text-xs flex items-start gap-1">
+                                  <ShoppingBag className="w-3 h-3 mt-0.5 flex-shrink-0 opacity-70" />
                                   {msg.content}
                                 </p>
                               ) : (
                                 <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                               )}
                               {/* Copy button - visible on hover, hidden for system messages */}
-                              {!(msg.type === 'SYSTEM' || msg.type === 'ORDER_UPDATE') && (
+                              {msg.type !== 'SYSTEM' && (
                                 <button
                                   type="button"
                                   onClick={() => { navigator.clipboard.writeText(msg.content); showToast('已复制', 'success'); }}
