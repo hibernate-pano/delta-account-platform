@@ -589,6 +589,16 @@ const OrderCard: React.FC<{ order: Order; onViewDetail: (order: Order) => void; 
             #{order.orderNo.slice(-8)}
             <Copy className="w-2.5 h-2.5 opacity-50 hover:opacity-100" />
           </button>
+          {order.createdAt && (() => {
+            const diff = Date.now() - new Date(order.createdAt).getTime();
+            const days = Math.floor(diff / 86400000);
+            return days > 0 ? (
+              <span className="text-[10px] text-slate-700 flex items-center gap-0.5 mt-0.5">
+                <Clock className="w-2.5 h-2.5" />
+                {days < 7 ? `${days}天前下单` : `${Math.floor(days / 30)}月前下单`}
+              </span>
+            ) : null;
+          })()}
           {order.type === 'BUY' && order.deposit && order.deposit > 0 && (
             <p className="text-[10px] text-amber-400/80 mt-0.5 flex items-center gap-0.5">
               <span className="px-1 py-0.5 bg-amber-500/15 rounded">押金¥{order.deposit}（归还后退）</span>

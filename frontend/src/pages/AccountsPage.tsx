@@ -1053,6 +1053,12 @@ const AccountsPage: React.FC = () => {
                           </p>
                         );
                       })()}
+                      {quickViewAccount.skinCount && quickViewAccount.skinCount > 0 && (
+                        <p className="text-[10px] text-amber-400/60 flex items-center gap-0.5 mt-0.5">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          ¥{(quickViewAccount.rentalPrice / quickViewAccount.skinCount).toFixed(2)}/时/皮
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
