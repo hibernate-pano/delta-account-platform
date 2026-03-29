@@ -258,9 +258,14 @@ const NotificationItem: React.FC<{
             <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
               {notification.content}
             </p>
-            <p className="text-[11px] text-slate-600 mt-1.5 flex items-center gap-1 hover:text-slate-500 transition-colors">
-              <Clock className="w-3 h-3" />
+            <p className="text-[11px] text-slate-600 mt-1.5 flex items-center gap-1 flex-wrap">
+              <Clock className="w-3 h-3 flex-shrink-0" />
               {formatRelativeTime(notification.createdAt)}
+              {notification.relatedId && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-dark-lighter text-slate-600 rounded ml-1 flex items-center gap-0.5">
+                  <span className="opacity-60">#</span>{notification.relatedId}
+                </span>
+              )}
             </p>
           </div>
 

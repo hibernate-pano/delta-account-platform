@@ -769,17 +769,32 @@ const isOwner = user?.id === account?.sellerId;
                     <div key={review.id} className="card p-4">
                       <div className="flex items-start gap-3">
                         {review.reviewer?.avatar ? (
-                          <img src={review.reviewer.avatar} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                          <img src={review.reviewer.avatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-dark-border" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-dark-lighter flex items-center justify-center flex-shrink-0">
-                            <User className="w-4 h-4 text-slate-600" />
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-primary" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1.5">
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                             <span className="text-sm text-slate-300 font-medium truncate">
                               {review.reviewer?.nickname || review.reviewer?.username || '匿名用户'}
                             </span>
+                            {review.reviewer?.creditScore != null && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 flex-shrink-0 ${
+                                review.reviewer.creditScore >= 80
+                                  ? 'bg-emerald-500/15 text-emerald-400'
+                                  : 'bg-yellow-500/10 text-yellow-400/80'
+                              }`}>
+                                <Shield className="w-2.5 h-2.5" />
+                                {review.reviewer.creditScore}分
+                              </span>
+                            )}
+                            {review.reviewer?.role === 'ADMIN' && (
+                              <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary rounded-full flex items-center gap-0.5 flex-shrink-0">
+                                <Shield className="w-2.5 h-2.5" /> 管理员
+                              </span>
+                            )}
                             <div className="flex items-center gap-0.5 flex-shrink-0">
                               {Array.from({ length: 5 }, (_, i) => (
                                 i < review.rating
