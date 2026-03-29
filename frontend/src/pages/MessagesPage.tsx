@@ -268,6 +268,15 @@ const MessagesPage: React.FC = () => {
               </p>
             ) : null;
           })()}
+          {!session.unreadCount && session.lastMessageAt && (() => {
+            const minsAgo = Math.floor((Date.now() - new Date(session.lastMessageAt).getTime()) / 60000);
+            return minsAgo < 10 ? (
+              <p className="text-[10px] text-green-500/60 mt-0.5 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-green-500/60 rounded-full animate-pulse" />
+                刚刚活跃
+              </p>
+            ) : null;
+          })()}
         </div>
         {!session.unreadCount && (
           <div className="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0 animate-pulse opacity-60" />
@@ -671,6 +680,11 @@ const MessagesPage: React.FC = () => {
                                 {formatTime(msg.createdAt)}
                               </span>
                               {isMe && <StatusIcon status={msg.status} isMe={isMe} />}
+                              {!isMe && msg.isRead && (
+                                <span title="已读" className="text-slate-600/50">
+                                  <CheckCheck className="w-3 h-3" />
+                                </span>
+                              )}
                             </div>
                           </div>
                           {isMe && (
