@@ -216,15 +216,21 @@ const MessagesPage: React.FC = () => {
             </p>
             <div className="flex items-center gap-2 flex-shrink-0 ml-2">
               {session.otherUser?.creditScore != null && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                  session.otherUser!.creditScore >= 80
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : session.otherUser!.creditScore >= 60
-                    ? 'bg-yellow-500/20 text-yellow-400'
-                    : 'bg-slate-500/20 text-slate-500'
-                }`}>
-                  {session.otherUser!.creditScore}分
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                    session.otherUser!.creditScore >= 80 ? 'bg-emerald-400' :
+                    session.otherUser!.creditScore >= 60 ? 'bg-yellow-400' : 'bg-slate-500'
+                  }`} />
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                    session.otherUser!.creditScore >= 80
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : session.otherUser!.creditScore >= 60
+                      ? 'bg-yellow-500/20 text-yellow-400'
+                      : 'bg-slate-500/20 text-slate-500'
+                  }`}>
+                    {session.otherUser!.creditScore}分
+                  </span>
+                </div>
               )}
               <span
                 className="text-xs text-slate-600 cursor-help hover:text-slate-400 transition-colors"

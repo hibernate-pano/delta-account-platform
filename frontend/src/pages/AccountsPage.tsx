@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Account } from '../types';
-import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette, AlertTriangle, Sword, Image } from 'lucide-react';
+import { Search, Gamepad2, LayoutGrid, List, SlidersHorizontal, X, Clock, Scale, Check, ShieldCheck, Zap, Eye, User, Star, Shield, CheckCircle, ShoppingCart, ArrowRight, ExternalLink, RefreshCw, MessageCircle, AlertCircle, Keyboard, Flame, Sparkles, Crown, ArrowUpDown, Palette, AlertTriangle, Sword, Image, TrendingUp } from 'lucide-react';
 import { AccountCardSkeleton } from '../components/ui/Skeleton';
 import { WishlistButton } from '../components/ui/WishlistButton';
 import { CompareBar, CompareModal } from '../components/ui/CompareBar';
@@ -681,6 +681,12 @@ const AccountsPage: React.FC = () => {
                         </span>
                       );
                     })()}
+                    {account.viewCount != null && account.viewCount > 0 && account.orderCount != null && account.orderCount > 0 && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400/80 rounded-full flex items-center gap-0.5">
+                        <TrendingUp className="w-2.5 h-2.5" />
+                        {((account.orderCount / account.viewCount) * 100).toFixed(1)}%转化
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -885,6 +891,12 @@ const AccountsPage: React.FC = () => {
                     })()}
                     {account.updatedAt && account.updatedAt !== account.createdAt && (
                       <span className="text-[10px] text-yellow-400/60">已编辑</span>
+                    )}
+                    {account.viewCount != null && account.viewCount > 0 && account.orderCount != null && account.orderCount > 0 && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400/80 rounded-full flex items-center gap-0.5">
+                        <TrendingUp className="w-2.5 h-2.5" />
+                        {((account.orderCount / account.viewCount) * 100).toFixed(1)}%转化
+                      </span>
                     )}
                   </div>
                 ) : null}
