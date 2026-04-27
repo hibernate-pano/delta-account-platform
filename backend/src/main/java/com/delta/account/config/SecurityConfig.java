@@ -51,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/accounts", "/api/accounts/{id}").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/reviews/user/{userId}").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/market/config").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/analytics/events").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

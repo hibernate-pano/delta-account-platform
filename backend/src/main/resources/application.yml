@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: delta-account-platform
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 20MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:delta_account}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -114,6 +119,17 @@ membership:
       priority-support: true
       free-withdrawal: true
 
+server:
+  port: 8080
+  servlet:
+    static-path-pattern: /uploads/**
+
+# 文件上传配置
+upload:
+  path: ${UPLOAD_PATH:./uploads}
+  base-url: ${UPLOAD_BASE_URL:http://localhost:8080/uploads}
+  max-size: 5242880
+
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
 
@@ -132,3 +148,9 @@ security:
 logging:
   level:
     com.delta.account: ${LOG_LEVEL:info}
+
+market:
+  launch-mode: ${MARKET_LAUNCH_MODE:GUARANTEED_ONLY}
+  commission-rate: ${MARKET_COMMISSION_RATE:0.05}
+  commission-description: ${MARKET_COMMISSION_DESCRIPTION:仅在交易成功后收取佣金，未成交不收费}
+  guarantee-highlights: ${MARKET_GUARANTEE_HIGHLIGHTS:平台担保交易,卖家资质审核,订单全程可追踪,争议仲裁支持}

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/auth';
+import type { FunnelEvent } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -89,6 +90,23 @@ export const accountApi = {
     api.put(`/api/accounts/${id}/toggle`, null, { params: { status } }),
 };
 
+// Dispute API
+export const disputeApi = {
+  create: (data: { orderId: number; reason: string; description: string; evidenceImages?: string[] }) =>
+    api.post('/api/disputes', data),
+  getMy: (params?: { page?: number; size?: number }) =>
+    api.get('/api/disputes/my', { params }),
+  getById: (id: number) => api.get(`/api/disputes/${id}`),
+  getByOrderId: (orderId: number) => api.get(`/api/disputes/order/${orderId}`),
+  cancel: (id: number) => api.put(`/api/disputes/${id}/cancel`),
+  // Admin
+  getAll: (params?: { page?: number; size?: number; status?: string }) =>
+    api.get('/api/disputes/admin/all', { params }),
+  resolve: (id: number, data: { resolution: string; adminRemark?: string }) =>
+    api.put(`/api/disputes/${id}/resolve`, null, { params: data }),
+  getPendingCount: () => api.get('/api/disputes/admin/pending-count'),
+};
+
 // Order API
 export const orderApi = {
   create: (data: { accountId: number; type: string; rentHours?: number }) =>
@@ -97,6 +115,7 @@ export const orderApi = {
     api.get('/api/orders/my', { params }),
   getById: (id: number) => api.get(`/api/orders/${id}`),
   pay: (id: number) => api.put(`/api/orders/${id}/pay`),
+  confirm: (id: number) => api.put(`/api/orders/${id}/confirm`),
   complete: (id: number) => api.put(`/api/orders/${id}/complete`),
   cancel: (id: number) => api.put(`/api/orders/${id}/cancel`),
   getMyOrders: () => api.get('/api/orders/my'),
@@ -152,14 +171,10 @@ export const reviewApi = {
     api.post('/api/reviews', data),
   getByAccount: (accountId: number) => api.get(`/api/reviews/account/${accountId}`),
   getByUser: (userId: number) => api.get(`/api/reviews/user/${userId}`),
-};
-
-// Notification API
-export const notificationApi = {
-  getList: () => api.get('/api/notifications'),
-  getUnreadCount: () => api.get('/api/notifications/unread-count'),
-  markAsRead: (id: number) => api.put(`/api/notifications/${id}/read`),
-  markAllAsRead: () => api.put('/api/notifications/read-all'),
+  getUserReviews: (userId: number) => api.get(`/api/reviews/user/${userId}`),
+  getUserStats: (userId: number) => api.get(`/api/reviews/user/${userId}/stats`),
+  reply: (id: number, reply: string) =>
+    api.post(`/api/reviews/${id}/reply`, null, { params: { reply } }),
 };
 
 // Admin API
@@ -195,14 +210,33 @@ export const paymentApi = {
     api.post(`/api/payments/${id}/refund`, null, { params: { reason } }),
 };
 
-// Review API
-export const reviewApi = {
-  getUserReviews: (userId: number) => api.get(`/api/reviews/user/${userId}`),
-  getUserStats: (userId: number) => api.get(`/api/reviews/user/${userId}/stats`),
-  create: (data: { orderId: number; rating: number; content?: string }) =>
-    api.post('/api/reviews', null, { params: data }),
-  reply: (id: number, reply: string) =>
-    api.post(`/api/reviews/${id}/reply`, null, { params: { reply } }),
+// Market API
+export const marketApi = {
+  getConfig: () => api.get('/api/market/config'),
+};
+
+// File Upload API
+export const uploadApi = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  uploadImages: (files: File[]) => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    return api.post('/api/upload/images', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteImage: (url: string) => api.delete('/api/upload/image', { params: { url } }),
+};
+
+// Analytics API
+export const analyticsApi = {
+  trackEvent: (data: FunnelEvent) => api.post('/api/analytics/events', data),
 };
 
 export default api;

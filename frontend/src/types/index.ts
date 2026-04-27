@@ -44,10 +44,38 @@ export interface Order {
   rentStart?: string;
   rentEnd?: string;
   createdAt: string;
+  // 托管相关字段
+  escrowStatus?: 'PENDING_RECEIVE' | 'IN_ESCROW' | 'RELEASED' | 'DISPUTED' | 'REFUNDED';
+  escrowAmount?: number;
+  receivedAt?: string;
+  escrowReleaseAt?: string;
+  disputeId?: number;
+  // 关联对象
   accountTitle?: string;
   account?: Account;
   buyer?: User;
   seller?: User;
+}
+
+export interface Dispute {
+  id: number;
+  disputeNo: string;
+  orderId: number;
+  initiatorId: number;
+  respondentId: number;
+  reason: 'ACCOUNT_NOT_AS_DESCRIBED' | 'ACCOUNT_RECOVERY' | 'NOT_RECEIVED' | 'FRAUD' | 'OTHER';
+  description: string;
+  evidenceImages?: string[];
+  status: 'OPEN' | 'UNDER_REVIEW' | 'MEDIATING' | 'RESOLVED' | 'REJECTED';
+  resolution?: 'FULL_REFUND' | 'PARTIAL_REFUND' | 'RELEASE_TO_SELLER' | 'CANCELLED';
+  adminRemark?: string;
+  resolvedAt?: string;
+  createdAt: string;
+  // 关联对象
+  order?: Order;
+  initiator?: User;
+  respondent?: User;
+  orderTitle?: string;
 }
 
 export interface AuthResponse {
@@ -75,4 +103,18 @@ export interface Review {
   content?: string;
   createdAt: string;
   reviewer?: User;
+}
+
+export interface MarketConfig {
+  launchMode: 'GUARANTEED_ONLY' | 'FULL';
+  commissionRate: number;
+  commissionDescription: string;
+  guaranteeHighlights: string[];
+  orderStatusLabels: Record<string, string>;
+}
+
+export interface FunnelEvent {
+  eventName: string;
+  page: string;
+  metadata?: Record<string, unknown>;
 }

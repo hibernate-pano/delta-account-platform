@@ -9,20 +9,17 @@ import java.time.LocalDateTime;
 public class AuditLog {
     @TableId(type = IdType.AUTO)
     private Long id;
-
-    private Long userId;
-    private String username;
-    private String action;         // 操作类型: CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
-    private String resource;      // 资源类型: Account, Order, User, etc.
-    private Long resourceId;      // 资源ID
-    private String method;         // HTTP方法
-    private String ip;
-    private String userAgent;
-    private String requestUri;
-    private String requestBody;    // 请求体（脱敏）
-    private String responseStatus;
-    private String errorMessage;
-
+    
+    private Long userId;           // 操作用户ID
+    private String action;         // 操作类型: CREATE_ORDER, PAY_ORDER, CONFIRM_RECEIVED, CREATE_DISPUTE, etc.
+    private String entityType;     // 实体类型: ORDER, ACCOUNT, USER, DISPUTE
+    private Long entityId;         // 实体ID
+    private String description;    // 操作描述
+    private String ipAddress;      // IP地址
+    private String userAgent;      // 用户代理
+    private String requestParams;  // 请求参数(JSON)
+    private String responseResult; // 响应结果(JSON)
+    
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 }

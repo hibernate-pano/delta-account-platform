@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { accountApi, orderApi, reviewApi } from '../api';
+import { accountApi, orderApi, reviewApi, messageApi } from '../api';
 import { Account, Review } from '../types';
 import { useAuthStore } from '../store/auth';
 import { FavoriteButton } from '../components/ui/FavoriteButton';
-import { Gamepad2, User, AlertCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Gamepad2, User, AlertCircle, X, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { formatPrice } from '../utils/format';
@@ -50,7 +50,7 @@ const ConfirmModal: React.FC<{
 const AccountDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { toast } = useToast();
   const [account, setAccount] = useState<Account | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -120,6 +120,22 @@ const AccountDetailPage: React.FC = () => {
       amount: account.price,
       type: 'BUY',
     });
+  };
+
+  const handleContactSeller = async () => {
+    if (!token) { navigate('/login'); return; }
+    if (!account) return;
+    
+    try {
+      const res = await messageApi.createSession({ 
+        accountId: account.id,
+        sellerId: account.sellerId 
+      });
+      // 跳转到聊天页面
+      navigate(`/messages/${res.data.data.id}`);
+    } catch (error: any) {
+      toast('error', error.response?.data?.message || '无法发起对话');
+    }
   };
 
   const openRentConfirm = () => {
@@ -312,6 +328,16 @@ const AccountDetailPage: React.FC = () => {
                   </div>
                 )}
               </div>
+              {/* 联系卖家按钮 */}
+              {account.sellerId !== user?.id && (
+                <button
+                  onClick={handleContactSeller}
+                  className="mt-4 w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  联系卖家
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -9,6 +9,8 @@ import RegisterPage from './pages/RegisterPage';
 import SellPage from './pages/SellPage';
 import ProfilePage from './pages/ProfilePage';
 import OrdersPage from './pages/OrdersPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import DisputesPage from './pages/DisputesPage';
 import WalletPage from './pages/WalletPage';
 import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -27,6 +29,8 @@ const App: React.FC = () => {
           <Route path="/sell" element={<SellPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/user/orders/:id" element={<OrderDetailPage />} />
+          <Route path="/disputes" element={<DisputesPage />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/messages/:sessionId" element={<MessagesPage />} />

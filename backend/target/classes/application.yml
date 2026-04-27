@@ -4,11 +4,16 @@ server:
 spring:
   application:
     name: delta-account-platform
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 20MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/delta_account?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:delta_account}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
@@ -16,7 +21,7 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       id-type: auto
@@ -26,10 +31,107 @@ mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
 
 jwt:
-  secret: delta-account-platform-jwt-secret-key-2026
-  expiration: 86400000
+  secret: ${JWT_SECRET:delta-account-platform-jwt-secret-key-2026-dev-only}
+  expiration: ${JWT_EXPIRATION:86400000}
   header: Authorization
   prefix: Bearer
+
+membership:
+  levels:
+    - level: 1
+      name: newbie
+      title: 新手
+      min-experience: 0
+      discount: 1.0
+      points-rate: 1
+      priority-support: false
+      free-withdrawal: false
+    - level: 2
+      name: member
+      title: 会员
+      min-experience: 100
+      discount: 0.98
+      points-rate: 1
+      priority-support: false
+      free-withdrawal: false
+    - level: 3
+      name: silver
+      title: 白银
+      min-experience: 500
+      discount: 0.95
+      points-rate: 2
+      priority-support: false
+      free-withdrawal: false
+    - level: 4
+      name: gold
+      title: 黄金
+      min-experience: 2000
+      discount: 0.92
+      points-rate: 2
+      priority-support: true
+      free-withdrawal: false
+    - level: 5
+      name: platinum
+      title: 铂金
+      min-experience: 5000
+      discount: 0.90
+      points-rate: 3
+      priority-support: true
+      free-withdrawal: true
+    - level: 6
+      name: diamond
+      title: 钻石
+      min-experience: 10000
+      discount: 0.88
+      points-rate: 3
+      priority-support: true
+      free-withdrawal: true
+    - level: 7
+      name: crown
+      title: 王者
+      min-experience: 25000
+      discount: 0.85
+      points-rate: 4
+      priority-support: true
+      free-withdrawal: true
+    - level: 8
+      name: legend
+      title: 传奇
+      min-experience: 50000
+      discount: 0.80
+      points-rate: 5
+      priority-support: true
+      free-withdrawal: true
+    - level: 9
+      name: supreme
+      title: 至尊
+      min-experience: 100000
+      discount: 0.75
+      points-rate: 5
+      priority-support: true
+      free-withdrawal: true
+    - level: 10
+      name: grandmaster
+      title: 大师
+      min-experience: 200000
+      discount: 0.70
+      points-rate: 6
+      priority-support: true
+      free-withdrawal: true
+
+server:
+  port: 8080
+  servlet:
+    static-path-pattern: /uploads/**
+
+# 文件上传配置
+upload:
+  path: ${UPLOAD_PATH:./uploads}
+  base-url: ${UPLOAD_BASE_URL:http://localhost:8080/uploads}
+  max-size: 5242880
+
+cors:
+  allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
 
 springdoc:
   api-docs:
@@ -37,6 +139,18 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+security:
+  ip-whitelist: ${IP_WHITELIST:}
+  ip-blacklist: ${IP_BLACKLIST:}
+  login-max-failures: 5
+  login-lock-minutes: 30
+
 logging:
   level:
-    com.delta.account: debug
+    com.delta.account: ${LOG_LEVEL:info}
+
+market:
+  launch-mode: ${MARKET_LAUNCH_MODE:GUARANTEED_ONLY}
+  commission-rate: ${MARKET_COMMISSION_RATE:0.05}
+  commission-description: ${MARKET_COMMISSION_DESCRIPTION:仅在交易成功后收取佣金，未成交不收费}
+  guarantee-highlights: ${MARKET_GUARANTEE_HIGHLIGHTS:平台担保交易,卖家资质审核,订单全程可追踪,争议仲裁支持}

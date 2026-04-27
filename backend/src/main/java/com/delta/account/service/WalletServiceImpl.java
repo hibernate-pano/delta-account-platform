@@ -45,7 +45,12 @@ public class WalletServiceImpl implements WalletService {
         if (request.getAmount().compareTo(new BigDecimal("10000")) > 0) {
             throw new BusinessException("单次充值金额不能超过10000元");
         }
-        
+
+        Recharge recharge = new Recharge();
+        recharge.setUserId(user.getId());
+        recharge.setAmount(request.getAmount());
+        recharge.setPaymentMethod(request.getPaymentMethod());
+        recharge.setStatus("COMPLETED");
         rechargeMapper.insert(recharge);
         
         User dbUser = userMapper.selectById(user.getId());

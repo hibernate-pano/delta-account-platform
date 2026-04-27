@@ -22,6 +22,13 @@ public class Order {
     private LocalDateTime rentStart;
     private LocalDateTime rentEnd;
     
+    // 托管相关字段
+    private String escrowStatus;           // 托管状态: PENDING_RECEIVE, IN_ESCROW, RELEASED, DISPUTED, REFUNDED
+    private BigDecimal escrowAmount;       // 托管金额
+    private LocalDateTime receivedAt;      // 确认收货时间
+    private LocalDateTime escrowReleaseAt; // 托管释放时间(冻结期)
+    private Long disputeId;                // 关联纠纷ID
+    
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
     
