@@ -48,9 +48,9 @@ public class NotificationService {
                 "您的订单 #" + orderId + " 已取消" + (reason != null ? "，原因：" + reason : ""), String.valueOf(orderId));
     }
 
-    public void notifyNewOrder(Long userId, Long orderId, String accountTitle) {
+    public void notifyNewOrder(Long userId, Long orderId) {
         sendNotification(userId, "NEW_ORDER", "新订单通知",
-                "您发布的账号 [" + accountTitle + "] 有新订单 #" + orderId, String.valueOf(orderId));
+                "您有新订单 #" + orderId + "，请及时处理", String.valueOf(orderId));
     }
 
     public void notifyOrderExpiring(Long userId, Long orderId, int hoursLeft) {
@@ -74,6 +74,39 @@ public class NotificationService {
         String ratingText = rating >= 5 ? "好评" : rating >= 3 ? "中评" : "差评";
         sendNotification(userId, "NEW_REVIEW", "新评价",
                 "您收到了一个" + ratingText + "，订单 #" + orderId, String.valueOf(orderId));
+    }
+
+    // Dispute notifications
+    public void sendDisputeNotification(Long userId, Long disputeId, String initiatorName) {
+        sendNotification(userId, "DISPUTE_OPENED", "纠纷已发起",
+                "买家 " + initiatorName + " 对您的订单发起了纠纷，请及时处理", String.valueOf(disputeId));
+    }
+
+    public void notifyDisputeResolved(Long userId, Long disputeId, String resolution) {
+        String resultText;
+        switch (resolution) {
+            case "FULL_REFUND":
+            case "PARTIAL_REFUND":
+                resultText = "已退款";
+                break;
+            case "RELEASE_TO_SELLER":
+                resultText = "已打款给卖家";
+                break;
+            default:
+                resultText = "已处理";
+        }
+        sendNotification(userId, "DISPUTE_RESOLVED", "纠纷已处理",
+                "您的纠纷 #" + disputeId + " 已处理，结果：" + resultText, String.valueOf(disputeId));
+    }
+
+    public void notifyOrderConfirmed(Long userId, Long orderId) {
+        sendNotification(userId, "ORDER_CONFIRMED", "买家已确认收货",
+                "买家已确认收货，订单 #" + orderId + " 冻结期结束后将自动打款", String.valueOf(orderId));
+    }
+
+    public void notifyEscrowReleasing(Long userId, Long orderId, int hoursLeft) {
+        sendNotification(userId, "ESCROW_RELEASING", "资金即将释放",
+                "订单 #" + orderId + " 的托管资金将在 " + hoursLeft + " 小时后释放给卖家", String.valueOf(orderId));
     }
 
     // System notifications

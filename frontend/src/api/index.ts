@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/auth';
+import type { FunnelEvent } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -20,35 +21,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-  // 401 软跳转：清除 store 状态，用 React Router 跳转而非硬刷新
+// 401 软跳转：清除 store 状态，用 React Router 跳转而非硬刷新
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status = error.response?.status;
-
+    // 网络错误处理
     if (!error.response) {
-      // 网络错误：超时、离线等
-      window.dispatchEvent(new CustomEvent('delta:api-error', {
-        detail: { status: 0, message: '网络连接失败，请检查网络' },
-      }));
-    } else if (status === 401) {
+      console.error('网络错误:', error.message);
+    }
+
+    if (error.response?.status === 401) {
       const { logout } = useAuthStore.getState();
       logout();
+      // 软跳转而非 window.location.href 硬刷新
       const currentPath = window.location.pathname;
       if (currentPath !== '/login' && currentPath !== '/register') {
         window.history.replaceState(null, '', '/login');
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
-    } else if (status === 403) {
-      window.dispatchEvent(new CustomEvent('delta:api-error', {
-        detail: { status: 403, message: '无权限执行此操作' },
-      }));
-    } else if (status >= 500) {
-      window.dispatchEvent(new CustomEvent('delta:api-error', {
-        detail: { status, message: '服务器异常，请稍后重试' },
-      }));
     }
-
     return Promise.reject(error);
   }
 );
@@ -99,6 +90,23 @@ export const accountApi = {
     api.put(`/api/accounts/${id}/toggle`, null, { params: { status } }),
 };
 
+// Dispute API
+export const disputeApi = {
+  create: (data: { orderId: number; reason: string; description: string; evidenceImages?: string[] }) =>
+    api.post('/api/disputes', data),
+  getMy: (params?: { page?: number; size?: number }) =>
+    api.get('/api/disputes/my', { params }),
+  getById: (id: number) => api.get(`/api/disputes/${id}`),
+  getByOrderId: (orderId: number) => api.get(`/api/disputes/order/${orderId}`),
+  cancel: (id: number) => api.put(`/api/disputes/${id}/cancel`),
+  // Admin
+  getAll: (params?: { page?: number; size?: number; status?: string }) =>
+    api.get('/api/disputes/admin/all', { params }),
+  resolve: (id: number, data: { resolution: string; adminRemark?: string }) =>
+    api.put(`/api/disputes/${id}/resolve`, null, { params: data }),
+  getPendingCount: () => api.get('/api/disputes/admin/pending-count'),
+};
+
 // Order API
 export const orderApi = {
   create: (data: { accountId: number; type: string; rentHours?: number }) =>
@@ -107,6 +115,7 @@ export const orderApi = {
     api.get('/api/orders/my', { params }),
   getById: (id: number) => api.get(`/api/orders/${id}`),
   pay: (id: number) => api.put(`/api/orders/${id}/pay`),
+  confirm: (id: number) => api.put(`/api/orders/${id}/confirm`),
   complete: (id: number) => api.put(`/api/orders/${id}/complete`),
   cancel: (id: number) => api.put(`/api/orders/${id}/cancel`),
   getMyOrders: () => api.get('/api/orders/my'),
@@ -154,25 +163,6 @@ export const notificationApi = {
   markAsRead: (id: number) => api.put(`/api/notifications/${id}/read`),
   markAllAsRead: () => api.put('/api/notifications/read-all'),
   getUnreadCount: () => api.get('/api/notifications/unread-count'),
-  delete: (id: number) => api.delete(`/api/notifications/${id}`),
-};
-
-// Admin API
-export const adminApi = {
-  getStats: () => api.get('/api/admin/stats'),
-  getAccounts: (params?: { page?: number; size?: number; status?: string }) =>
-    api.get('/api/admin/accounts', { params }),
-  getUsers: (params?: { page?: number; size?: number }) =>
-    api.get('/api/admin/users', { params }),
-  getOrders: (params?: { page?: number; size?: number }) =>
-    api.get('/api/admin/orders', { params }),
-  verifyAccount: (id: number, approved: boolean) =>
-    api.put(`/api/admin/accounts/${id}/verify`, { approved }),
-  banUser: (id: number, banned: boolean) =>
-    api.put(`/api/admin/users/${id}/ban`, { banned }),
-  unbanUser: (id: number) => api.put(`/api/admin/users/${id}/unban`),
-  getPendingAccounts: (params?: { page?: number; size?: number }) =>
-    api.get('/api/admin/accounts/pending', { params }),
 };
 
 // Review API
@@ -185,6 +175,21 @@ export const reviewApi = {
   getUserStats: (userId: number) => api.get(`/api/reviews/user/${userId}/stats`),
   reply: (id: number, reply: string) =>
     api.post(`/api/reviews/${id}/reply`, null, { params: { reply } }),
+};
+
+// Admin API
+export const adminApi = {
+  getStats: () => api.get('/api/admin/stats'),
+  getUsers: (params?: { page?: number; size?: number }) =>
+    api.get('/api/admin/users', { params }),
+  banUser: (id: number) => api.put(`/api/admin/users/${id}/ban`),
+  unbanUser: (id: number) => api.put(`/api/admin/users/${id}/unban`),
+  getPendingAccounts: (params?: { page?: number; size?: number }) =>
+    api.get('/api/admin/accounts/pending', { params }),
+  verifyAccount: (id: number, action: string) =>
+    api.put(`/api/admin/accounts/${id}/verify`, null, { params: { action } }),
+  getOrders: (params?: { page?: number; size?: number; status?: string }) =>
+    api.get('/api/admin/orders', { params }),
 };
 
 // Favorite API
@@ -203,6 +208,35 @@ export const paymentApi = {
   getMy: () => api.get('/api/payments/my'),
   refund: (id: number, reason?: string) =>
     api.post(`/api/payments/${id}/refund`, null, { params: { reason } }),
+};
+
+// Market API
+export const marketApi = {
+  getConfig: () => api.get('/api/market/config'),
+};
+
+// File Upload API
+export const uploadApi = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  uploadImages: (files: File[]) => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    return api.post('/api/upload/images', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteImage: (url: string) => api.delete('/api/upload/image', { params: { url } }),
+};
+
+// Analytics API
+export const analyticsApi = {
+  trackEvent: (data: FunnelEvent) => api.post('/api/analytics/events', data),
 };
 
 export default api;

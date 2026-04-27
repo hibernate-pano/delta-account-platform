@@ -1,879 +1,610 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { adminApi, disputeApi, accountApi } from '../api';
 import { useToast } from '../components/ui/Toast';
-import { usePageTitle } from '../hooks/usePageTitle';
-import { ConfirmInline } from '../components/ui/ConfirmInline';
-import { useAdminStats, useAdminAccounts, useAdminOrders, useAdminUsers, useVerifyAccount, useBanUser } from '../hooks/useQueries';
+import AdminDashboard from '../components/admin/AdminDashboard';
 import {
-  Users, Package, FileText, Shield, RefreshCw, Star,
-  CheckCircle, XCircle, Clock, BarChart3, ArrowRight, Eye,
-  TrendingDown, AlertTriangle, Ban, ChevronDown,
-  Activity, Zap, ArrowUpRight, Search, X
+  Users, Package, FileText, Shield, RefreshCw, DollarSign,
+  AlertTriangle, CheckCircle, XCircle, Eye, MessageSquare,
+  ChevronLeft, ChevronRight, Filter, Search, ShieldCheck, Clock
 } from 'lucide-react';
+import type { Dispute } from '../types';
 
-interface PendingAccount {
-  id: number; title: string; price: number; createdAt: string;
-  gameType?: string;
-  seller?: { username: string; nickname?: string };
-}
-
-// Donut chart component
-const DonutChart: React.FC<{ segments: { label: string; value: number; color: string }[]; size?: number }> = ({
-  segments, size = 160,
-}) => {
-  const total = segments.reduce((s, seg) => s + seg.value, 0);
-  if (total === 0) return <div className="w-40 h-40 rounded-full bg-dark-lighter flex items-center justify-center text-slate-600 text-sm">暂无数据</div>;
-
-  const cx = size / 2, cy = size / 2, r = size / 2 - 12;
-  const circumference = 2 * Math.PI * r;
-  let cumulativeOffset = 0;
-
-  const paths = segments.map((seg, i) => {
-    const pct = seg.value / total;
-    const dash = pct * circumference;
-    const gap = circumference - dash;
-    const offset = cumulativeOffset;
-    cumulativeOffset += dash;
-    return (
-      <circle
-        key={i}
-        cx={cx} cy={cy} r={r}
-        fill="none"
-        stroke={seg.color}
-        strokeWidth={20}
-        strokeDasharray={`${dash} ${gap}`}
-        strokeDashoffset={-offset}
-        className="transition-all duration-700 hover:opacity-80"
-        strokeLinecap="round"
-      />
-    );
-  });
-
-  return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg width={size} height={size} className="-rotate-90">
-        {paths}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-white">{total}</span>
-        <span className="text-xs text-slate-500">总计</span>
-      </div>
-    </div>
-  );
-};
-
-// Platform health indicator
-const HealthCard: React.FC<{ stats: any }> = ({ stats }) => {
-  const issues = [];
-  if ((stats?.pendingAccounts ?? 0) > 5) issues.push({ icon: Clock, label: '待审核积压', color: 'text-yellow-400', bg: 'bg-yellow-500/20' });
-  if ((stats?.alertAccounts ?? 0) > 0) issues.push({ icon: AlertTriangle, label: '异常账号', color: 'text-red-400', bg: 'bg-red-500/20' });
-
-  return (
-    <div className="card">
-      <div className="flex items-center gap-2 mb-4">
-        <Activity className="w-5 h-5 text-green-400" />
-        <span className="font-medium text-sm text-slate-300">平台健康</span>
-        <span className="ml-auto text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-          运行正常
-        </span>
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: '系统可用性', value: '99.9%', color: 'text-green-400' },
-          { label: '平均响应', value: '<200ms', color: 'text-blue-400' },
-          { label: '在线用户', value: stats?.onlineUsers ?? '-', color: 'text-primary' },
-        ].map((item) => (
-          <div key={item.label} className="text-center bg-dark rounded-lg p-2.5">
-            <p className={`text-lg font-bold ${item.color}`}>{item.value}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">{item.label}</p>
-          </div>
-        ))}
-      </div>
-      {issues.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-dark-border space-y-1.5">
-          {issues.map((issue, i) => (
-            <div key={i} className={`flex items-center gap-2 text-xs ${issue.color}`}>
-              <issue.icon className="w-3.5 h-3.5" />
-              <span>{issue.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Quick stats card
-const TrendCard: React.FC<{
-  label: string; value: number | string; change?: number; icon: React.ElementType; color: string;
-}> = ({ label, value, change, icon: Icon, color }) => (
-  <div className="card hover:border-primary/20 transition-all group">
-    <div className="flex items-start justify-between mb-3">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      {change !== undefined && (
-        <div className={`text-xs flex items-center gap-0.5 px-1.5 py-0.5 rounded-full ${
-          change >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-        }`}>
-          {change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {Math.abs(change)}%
-        </div>
-      )}
-    </div>
-    <div className="text-2xl font-bold text-white mb-0.5">{value}</div>
-    <div className="text-sm text-slate-500">{label}</div>
-  </div>
-);
+type TabType = 'dashboard' | 'accounts' | 'orders' | 'disputes' | 'users' | 'verification';
 
 const AdminPage: React.FC = () => {
-  usePageTitle('管理后台');
   const navigate = useNavigate();
   const { token, user } = useAuthStore();
-  const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'overview' | 'accounts' | 'orders' | 'users'>('overview');
-  const [accountFilter, setAccountFilter] = useState<'PENDING' | 'VERIFIED' | 'BANNED' | 'ALL'>('PENDING');
-  const [selectedAccounts, setSelectedAccounts] = useState<Set<number>>(new Set());
-  const [accountSearch, setAccountSearch] = useState('');
-  const [orderSearch, setOrderSearch] = useState('');
-  const [userSearch, setUserSearch] = useState('');
-  const [orderPage, setOrderPage] = useState(1);
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  
+  // 数据状态
+  const [pendingAccounts, setPendingAccounts] = useState<any[]>([]);
+  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  
+  // 分页状态
+  const [disputePage, setDisputePage] = useState(1);
   const [userPage, setUserPage] = useState(1);
-  const [pendingBanId, setPendingBanId] = useState<number | null>(null);
-  const [pendingUserBan, setPendingUserBan] = useState<{ id: number; banned: boolean; username: string } | null>(null);
-  const [pendingBulkApprove, setPendingBulkApprove] = useState(false);
-  const [pendingBulkReject, setPendingBulkReject] = useState(false);
+  
+  // 搜索/筛选状态
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
-  const { data: statsData, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminStats();
-  const { data: accountsData, isLoading: accountsLoading, isError: accountsError, refetch: refetchAccounts } = useAdminAccounts({ status: accountFilter, size: 50 });
-  const { data: ordersData, isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useAdminOrders({ page: orderPage, size: 20 });
-  const { data: usersData, isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useAdminUsers({ page: userPage, size: 20 });
-  const verifyMutation = useVerifyAccount();
-  const banMutation = useBanUser();
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    if (user?.role !== 'ADMIN') {
+      navigate('/');
+      return;
+    }
+    loadData();
+  }, [token, user]);
 
-  const stats = statsData?.data?.data;
-  const allAccounts: PendingAccount[] = accountsData?.data?.data?.records || [];
-  const filteredAccounts = useMemo(() =>
-    allAccounts.filter((a) => !accountSearch || a.title.toLowerCase().includes(accountSearch.toLowerCase())),
-    [allAccounts, accountSearch]
-  );
-
-  const allOrders: any[] = ordersData?.data?.data?.records || [];
-  const filteredOrders = useMemo(() =>
-    allOrders.filter((o: any) => {
-      if (!orderSearch) return true;
-      const q = orderSearch.toLowerCase();
-      return o.orderNo?.toLowerCase().includes(q)
-        || o.accountTitle?.toLowerCase().includes(q)
-        || o.buyer?.username?.toLowerCase().includes(q)
-        || o.seller?.username?.toLowerCase().includes(q);
-    }),
-    [allOrders, orderSearch]
-  );
-
-  const allUsers: any[] = usersData?.data?.data?.records || [];
-  const filteredUsers = useMemo(() =>
-    allUsers.filter((u: any) => {
-      if (!userSearch) return true;
-      const q = userSearch.toLowerCase();
-      return u.username?.toLowerCase().includes(q)
-        || u.email?.toLowerCase().includes(q)
-        || u.nickname?.toLowerCase().includes(q);
-    }),
-    [allUsers, userSearch]
-  );
-
-  const handleVerify = async (id: number, approved: boolean, label: string) => {
+  const loadData = async () => {
+    setLoading(true);
     try {
-      await verifyMutation.mutateAsync({ id, approved });
-      showToast(label, approved ? 'success' : 'warning');
-      refetchAccounts();
-      refetchStats();
-    } catch {
-      showToast('操作失败', 'error');
+      await Promise.all([
+        loadPendingAccounts(),
+        loadDisputes(),
+        loadUsers(),
+        loadAccounts()
+      ]);
+    } catch (error) {
+      console.error('Failed to load admin data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBan = (id: number) => {
-    setPendingBanId(id);
-  };
-
-  const handleBulkVerify = async (approved: boolean) => {
-    const ids = [...selectedAccounts];
-    const results = await Promise.allSettled(ids.map((id) => verifyMutation.mutateAsync({ id, approved })));
-    const failed = results.filter((r) => r.status === 'rejected').length;
-    const passed = ids.length - failed;
-    if (failed === 0) {
-      showToast(approved ? `已通过 ${passed} 个账号` : `已拒绝 ${passed} 个账号`, 'success');
-    } else {
-      showToast(`操作完成：${passed} 个成功，${failed} 个失败`, failed > passed ? 'error' : 'warning');
+  const loadPendingAccounts = async () => {
+    try {
+      const res = await adminApi.getPendingAccounts({ size: 20 });
+      setPendingAccounts(res.data.data?.records || []);
+    } catch (error) {
+      console.error('Failed to load pending accounts:', error);
     }
-    setSelectedAccounts(new Set());
-    refetchAccounts();
-    refetchStats();
   };
 
-  if (!token || user?.role !== 'ADMIN') {
+  const loadDisputes = async () => {
+    try {
+      const res = await disputeApi.getAll({ page: disputePage, size: 10, status: filterStatus || undefined });
+      setDisputes(res.data.data?.records || []);
+    } catch (error) {
+      console.error('Failed to load disputes:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const res = await adminApi.getUsers({ page: userPage, size: 20 });
+      setUsers(res.data.data?.records || []);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+      setUsers([]);
+    }
+  };
+
+  const loadAccounts = async () => {
+    try {
+      const res = await accountApi.getList({ size: 20 });
+      setAccounts(res.data.data?.records || []);
+    } catch (error) {
+      console.error('Failed to load accounts:', error);
+    }
+  };
+
+  // 账号审核
+  const handleVerifyAccount = async (accountId: number, approved: boolean, reason?: string) => {
+    setActionLoading(accountId);
+    try {
+      await adminApi.verifyAccount(accountId, approved ? 'approve' : 'reject');
+      toast('success', approved ? '账号已通过审核' : '账号已拒绝');
+      setPendingAccounts(prev => prev.filter(a => a.id !== accountId));
+    } catch (error) {
+      toast('error', '操作失败');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // 纠纷处理
+  const handleResolveDispute = async (disputeId: number, resolution: string) => {
+    const reason = prompt('请输入处理备注（可选）：');
+    
+    setActionLoading(disputeId);
+    try {
+      await disputeApi.resolve(disputeId, { resolution, adminRemark: reason || '' });
+      toast('success', '纠纷已处理');
+      loadDisputes();
+    } catch (error) {
+      toast('error', '处理失败');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // 用户管理
+  const handleBanUser = async (userId: number) => {
+    if (!confirm('确定要封禁该用户吗？')) return;
+    
+    try {
+      await adminApi.banUser(userId);
+      toast('success', '用户已封禁');
+      loadUsers();
+    } catch (error) {
+      toast('error', '操作失败');
+    }
+  };
+
+  const handleUnbanUser = async (userId: number) => {
+    try {
+      await adminApi.unbanUser(userId);
+      toast('success', '用户已解封');
+      loadUsers();
+    } catch (error) {
+      toast('error', '操作失败');
+    }
+  };
+
+  // 工具方法
+  const getReasonText = (reason: string) => {
+    const reasons: Record<string, string> = {
+      'ACCOUNT_NOT_AS_DESCRIBED': '账号与描述不符',
+      'ACCOUNT_RECOVERY': '账号找回',
+      'NOT_RECEIVED': '未收到账号',
+      'FRAUD': '欺诈',
+      'OTHER': '其他',
+    };
+    return reasons[reason] || reason;
+  };
+
+  const getStatusBadge = (status: string, type?: string) => {
+    if (type === 'dispute') {
+      const config: Record<string, { bg: string; text: string }> = {
+        'OPEN': { bg: 'bg-yellow-500/20 text-yellow-500', text: '待处理' },
+        'UNDER_REVIEW': { bg: 'bg-blue-500/20 text-blue-500', text: '审核中' },
+        'MEDIATING': { bg: 'bg-purple-500/20 text-purple-500', text: '调解中' },
+        'RESOLVED': { bg: 'bg-green-500/20 text-green-500', text: '已解决' },
+        'REJECTED': { bg: 'bg-slate-500/20 text-slate-500', text: '已撤销' },
+      };
+      const item = config[status] || { bg: 'bg-slate-500/20', text: status };
+      return <span className={`px-2 py-1 rounded text-xs ${item.bg}`}>{item.text}</span>;
+    }
+    if (type === 'user') {
+      return status === 'ACTIVE' 
+        ? <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">正常</span>
+        : <span className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-500">已封禁</span>;
+    }
+    return <span className="px-2 py-1 rounded text-xs bg-slate-500/20 text-slate-500">{status}</span>;
+  };
+
+  const getVerificationBadge = (level: number) => {
+    if (level === 0) return <span className="text-slate-500 text-xs">未验证</span>;
+    if (level === 1) return <span className="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">基础验证</span>;
+    if (level === 2) return <span className="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">高级验证</span>;
+    if (level >= 3) return <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">深度验证</span>;
+    return null;
+  };
+
+  if (loading) {
     return (
       <div className="text-center py-20">
-        <Shield className="w-16 h-16 mx-auto mb-4 text-red-500" />
-        <h2 className="text-xl font-bold mb-2">权限不足</h2>
-        <p className="text-slate-500 mb-6">您没有权限访问管理后台</p>
-        <button onClick={() => navigate('/')} className="btn-primary">返回首页</button>
+        <RefreshCw className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
+        <p className="text-slate-500">加载中...</p>
       </div>
     );
   }
 
-  const orderSegments = [
-    { label: '已完成', value: stats?.completedOrders ?? 0, color: '#22c55e' },
-    { label: '进行中', value: Math.max(0, (stats?.totalOrders ?? 0) - (stats?.completedOrders ?? 0) - (stats?.cancelledOrders ?? 0)), color: '#8b5cf6' },
-    { label: '已取消', value: stats?.cancelledOrders ?? 0, color: '#64748b' },
-  ];
-
-  const orderTypeSegments = [
-    { label: '购买', value: stats?.ordersByType?.BUY ?? 0, color: '#3b82f6' },
-    { label: '租赁', value: stats?.ordersByType?.RENT ?? 0, color: '#8b5cf6' },
-  ];
-
-  const accountSegments = [
-    { label: '已认证', value: stats?.verifiedAccounts ?? 0, color: '#22c55e' },
-    { label: '待审核', value: stats?.pendingAccounts ?? 0, color: '#eab308' },
-    { label: '已售出', value: stats?.soldAccounts ?? 0, color: '#3b82f6' },
-  ];
+  if (user?.role !== 'ADMIN') {
+    return (
+      <div className="text-center py-20">
+        <Shield className="w-16 h-16 mx-auto mb-4 text-red-500" />
+        <p className="text-slate-500">无权访问管理后台</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Inline confirm: account ban */}
-      {pendingBanId !== null && (
-        <div className="mb-4">
-          <ConfirmInline
-            message="确定要封禁此账号吗？"
-            confirmLabel="封禁"
-            onConfirm={async () => {
-              try {
-                await banMutation.mutateAsync({ id: pendingBanId, banned: true });
-                showToast('账号已被封禁', 'warning');
-                refetchUsers();
-                refetchStats();
-              } catch {
-                showToast('操作失败', 'error');
-              } finally {
-                setPendingBanId(null);
-              }
-            }}
-            onCancel={() => setPendingBanId(null)}
-          />
-        </div>
-      )}
-      {/* Inline confirm: user ban/unban */}
-      {pendingUserBan !== null && (
-        <div className="mb-4">
-          <ConfirmInline
-            message={pendingUserBan.banned ? `确定要封禁用户 ${pendingUserBan.username} 吗？` : `确定要解封用户 ${pendingUserBan.username} 吗？`}
-            confirmLabel={pendingUserBan.banned ? '封禁' : '解封'}
-            onConfirm={async () => {
-              try {
-                await banMutation.mutateAsync({ id: pendingUserBan.id, banned: pendingUserBan.banned });
-                showToast(pendingUserBan.banned ? '用户已封禁' : '用户已解封', pendingUserBan.banned ? 'warning' : 'success');
-                refetchUsers();
-              } catch {
-                showToast('操作失败', 'error');
-              } finally {
-                setPendingUserBan(null);
-              }
-            }}
-            onCancel={() => setPendingUserBan(null)}
-          />
-        </div>
-      )}
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Shield className="w-6 h-6 text-primary" />
-            管理后台
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            欢迎回来，{user?.username} · {new Date().toLocaleDateString('zh-CN', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => { refetchStats(); refetchAccounts(); }} className="btn-ghost p-2" title="刷新">
-            <RefreshCw className="w-5 h-5" />
+        <h1 className="text-2xl font-bold">管理后台</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-500">
+            欢迎，{user?.nickname || user?.username}
+          </span>
+          <button
+            onClick={loadData}
+            className="p-2 text-slate-400 hover:text-white transition-colors"
+            title="刷新数据"
+          >
+            <RefreshCw className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-dark-lighter rounded-lg p-1 w-fit">
+      {/* 标签页切换 */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         {[
-          { key: 'overview', label: '数据概览', icon: BarChart3 },
-          { key: 'accounts', label: '账号审核', icon: Package },
+          { key: 'dashboard', label: '仪表盘', icon: Users },
+          { key: 'accounts', label: '账号管理', icon: Package },
           { key: 'orders', label: '订单管理', icon: FileText },
-          { key: 'users', label: '用户管理', icon: Users },
+          { key: 'disputes', label: '纠纷管理', icon: AlertTriangle },
+          { key: 'users', label: '用户管理', icon: Shield },
+          { key: 'verification', label: '验证审核', icon: ShieldCheck },
         ].map((tab) => (
-          <button key={tab.key} onClick={() => setActiveTab(tab.key as typeof activeTab)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              activeTab === tab.key ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-white'
-            }`}>
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as TabType)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+              activeTab === tab.key
+                ? 'bg-primary text-white'
+                : 'bg-dark-lighter text-slate-400 hover:text-white'
+            }`}
+          >
             <tab.icon className="w-4 h-4" />
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* ===== OVERVIEW ===== */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6 animate-fade-in">
-          {/* KPI Trend Cards */}
-          {statsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => <div key={i} className="card h-28 skeleton" />)}
-            </div>
-          ) : statsError ? (
-            <div className="card p-8 text-center">
-              <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-red-500/60" />
-              <p className="text-slate-400 mb-4">数据加载失败</p>
-              <button onClick={() => refetchStats()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
-                <RefreshCw className="w-4 h-4" /> 重试
-              </button>
-            </div>
-          ) : stats && (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <TrendCard label="用户总数" value={stats.totalUsers ?? 0} icon={Users} color="bg-primary/20 text-primary" />
-                <TrendCard label="账号总数" value={stats.totalAccounts ?? 0} icon={Package} color="bg-blue-500/20 text-blue-400" />
-                <TrendCard label="待处理订单" value={stats.pendingOrders ?? 0} icon={Clock} color="bg-yellow-500/20 text-yellow-400" />
-                <TrendCard label="平均评分" value={(stats.averageRating ?? 0).toFixed(1)} icon={Star} color="bg-amber-500/20 text-amber-400" />
-                <TrendCard label="订单总数" value={stats.totalOrders ?? 0} icon={FileText} color="bg-green-500/20 text-green-400" />
-              </div>
+      {/* 仪表盘 */}
+      {activeTab === 'dashboard' && <AdminDashboard />}
 
-              <div className="grid md:grid-cols-3 gap-4">
-                {/* Account donut */}
-                <div className="card">
-                  <h3 className="font-medium text-sm text-slate-300 mb-4">账号分布</h3>
-                  <div className="flex items-center gap-4">
-                    <DonutChart segments={accountSegments} size={140} />
-                    <div className="space-y-2">
-                      {accountSegments.map((seg, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs">
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: seg.color }} />
-                          <span className="text-slate-400">{seg.label}</span>
-                          <span className="ml-auto text-slate-300 font-medium">{seg.value}</span>
+      {/* 账号管理 */}
+      {activeTab === 'accounts' && (
+        <div className="space-y-4">
+          <div className="card">
+            <h2 className="text-lg font-semibold mb-4">所有账号</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-800">
+                    <th className="text-left py-3 px-4 text-slate-500">账号信息</th>
+                    <th className="text-left py-3 px-4 text-slate-500">卖家</th>
+                    <th className="text-left py-3 px-4 text-slate-500">价格</th>
+                    <th className="text-left py-3 px-4 text-slate-500">状态</th>
+                    <th className="text-left py-3 px-4 text-slate-500">验证</th>
+                    <th className="text-left py-3 px-4 text-slate-500">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {accounts.map((account) => (
+                    <tr key={account.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
+                      <td className="py-3 px-4">
+                        <div>
+                          <p className="font-medium">{account.title}</p>
+                          <p className="text-xs text-slate-500">{account.gameRank} · {account.skinCount}皮肤</p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Order donut */}
-                <div className="card">
-                  <h3 className="font-medium text-sm text-slate-300 mb-4">订单分布</h3>
-                  <div className="flex items-center gap-4">
-                    <DonutChart segments={orderSegments} size={140} />
-                    <div className="space-y-2">
-                      {orderSegments.map((seg, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs">
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: seg.color }} />
-                          <span className="text-slate-400">{seg.label}</span>
-                          <span className="ml-auto text-slate-300 font-medium">{seg.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Health */}
-                <HealthCard stats={stats} />
-              </div>
-
-              {/* Order type donut */}
-              <div className="card">
-                <h3 className="font-medium text-sm text-slate-300 mb-4">订单类型分布</h3>
-                <div className="flex items-center gap-4">
-                  <DonutChart segments={orderTypeSegments} size={140} />
-                  <div className="space-y-2">
-                    {orderTypeSegments.map((seg, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: seg.color }} />
-                        <span className="text-slate-400">{seg.label}</span>
-                        <span className="ml-auto text-slate-300 font-medium">{seg.value}</span>
-                      </div>
-                    ))}
-                    <div className="flex items-center gap-2 text-xs pt-2 border-t border-dark-border">
-                      <span className="text-slate-600">总计</span>
-                      <span className="ml-auto text-slate-400 font-medium">
-                        {orderTypeSegments.reduce((s, seg) => s + seg.value, 0)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent pending alerts */}
-              {(stats.pendingAccounts ?? 0) > 0 && (
-                <div className="card border-l-4 border-l-yellow-500 bg-yellow-500/5">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-yellow-400">有待审核账号</p>
-                      <p className="text-xs text-slate-500 mt-0.5">当前有 {stats.pendingAccounts} 个账号待审核，建议尽快处理</p>
-                    </div>
-                    <button onClick={() => setActiveTab('accounts')}
-                      className="ml-auto btn-secondary !py-1.5 !px-3 text-xs">
-                      去审核 <ChevronDown className="w-3 h-3 rotate-[-90deg]" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+                      </td>
+                      <td className="py-3 px-4 text-slate-400">ID: {account.sellerId}</td>
+                      <td className="py-3 px-4 text-primary font-medium">¥{account.price}</td>
+                      <td className="py-3 px-4">{getStatusBadge(account.status)}</td>
+                      <td className="py-3 px-4">{getVerificationBadge(account.verificationLevel)}</td>
+                      <td className="py-3 px-4">
+                        <button
+                          onClick={() => navigate(`/accounts/${account.id}`)}
+                          className="text-primary hover:underline text-xs"
+                        >
+                          查看
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ===== ACCOUNTS ===== */}
-      {activeTab === 'accounts' && (
-        <div className="space-y-4 animate-fade-in">
-          {/* Filter bar */}
-          <div className="flex items-center justify-between">
-            <div className="flex gap-1 bg-dark-lighter rounded-lg p-1">
-              {(['PENDING', 'VERIFIED', 'BANNED', 'ALL'] as const).map((f) => (
-                <button key={f} onClick={() => setAccountFilter(f)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                    accountFilter === f ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'
-                  }`}>
-                  {f === 'PENDING' ? '待审核' : f === 'VERIFIED' ? '已认证' : f === 'BANNED' ? '已封禁' : '全部'}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+      {/* 订单管理 */}
+      {activeTab === 'orders' && (
+        <div className="card">
+          <h2 className="text-lg font-semibold mb-4">订单管理</h2>
+          <p className="text-slate-500 text-center py-8">
+            订单列表功能开发中... <a href="/orders" className="text-primary hover:underline ml-2">查看用户订单</a>
+          </p>
+        </div>
+      )}
+
+      {/* 纠纷管理 */}
+      {activeTab === 'disputes' && (
+        <div className="space-y-4">
+          {/* 筛选栏 */}
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
-                value={accountSearch}
-                onChange={(e) => setAccountSearch(e.target.value)}
-                placeholder="搜索账号标题..."
-                className="bg-dark border border-dark-border text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary w-40 placeholder:text-slate-600"
+                placeholder="搜索纠纷编号..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-dark border border-slate-700 rounded-lg focus:border-primary outline-none"
               />
             </div>
-            <span className="text-xs text-slate-500">{filteredAccounts.length} 条结果</span>
+            <select
+              value={filterStatus}
+              onChange={(e) => { setFilterStatus(e.target.value); loadDisputes(); }}
+              className="px-4 py-2 bg-dark border border-slate-700 rounded-lg focus:border-primary outline-none"
+            >
+              <option value="">全部状态</option>
+              <option value="OPEN">待处理</option>
+              <option value="UNDER_REVIEW">审核中</option>
+              <option value="MEDIATING">调解中</option>
+              <option value="RESOLVED">已解决</option>
+            </select>
           </div>
 
-          {accountsLoading ? (
-            <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-20 skeleton rounded-xl" />)}</div>
-          ) : accountsError ? (
-            <div className="card p-8 text-center">
-              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500/60" />
-              <p className="text-slate-400 mb-4">加载失败</p>
-              <button onClick={() => refetchAccounts()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
-                <RefreshCw className="w-4 h-4" /> 重试
-              </button>
-            </div>
-          ) : filteredAccounts.length === 0 ? (
-            <div className="card text-center py-16">
-              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500/50" />
-              <h3 className="text-lg font-medium mb-2 text-slate-400">太棒了！</h3>
-              <p className="text-slate-600">暂无{accountFilter === 'PENDING' ? '待审核' : accountFilter === 'VERIFIED' ? '已认证' : '已封禁'}的账号</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {/* Bulk action bar */}
-              {selectedAccounts.size > 0 && (
-                <div className="sticky top-2 z-10 mx-auto max-w-2xl bg-dark-card border border-primary/30 rounded-xl p-3 flex items-center justify-between shadow-xl animate-slide-up">
-                  <span className="text-sm text-slate-300">
-                    已选择 <span className="text-primary font-bold">{selectedAccounts.size}</span> 个账号
-                  </span>
-                  <div className="flex gap-2">
-                    {pendingBulkApprove ? (
-                      <ConfirmInline
-                        message={`确定通过全部 ${selectedAccounts.size} 个账号吗？`}
-                        confirmLabel="确认通过"
-                        onConfirm={async () => { setPendingBulkApprove(false); await handleBulkVerify(true); }}
-                        onCancel={() => setPendingBulkApprove(false)}
-                      />
-                    ) : (
-                      <button
-                        onClick={() => setPendingBulkApprove(true)}
-                        disabled={verifyMutation.isPending}
-                        className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
-                      >
-                        {verifyMutation.isPending ? (
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <CheckCircle className="w-3.5 h-3.5" />
-                        )}
-                        批量通过
-                      </button>
+          <div className="card">
+            <h2 className="text-lg font-semibold mb-4">
+              纠纷列表 
+              <span className="text-sm font-normal text-slate-500 ml-2">
+                共 {disputes.length} 条
+              </span>
+            </h2>
+            {disputes.length === 0 ? (
+              <div className="text-center py-12">
+                <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-500" />
+                <p className="text-slate-500">暂无纠纷记录</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {disputes.map((dispute) => (
+                  <div key={dispute.id} className="p-4 bg-dark-lighter rounded-lg border border-slate-800">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">{dispute.disputeNo}</span>
+                          {getStatusBadge(dispute.status, 'dispute')}
+                        </div>
+                        <p className="text-sm text-slate-500 mt-1">
+                          订单 #{dispute.orderId} · {getReasonText(dispute.reason)}
+                        </p>
+                        <p className="text-xs text-slate-600 mt-1">
+                          发起人: {dispute.initiatorId} · 被投诉: {dispute.respondentId} · {dispute.createdAt}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-dark rounded-lg mb-3">
+                      <p className="text-sm text-slate-400">{dispute.description}</p>
+                    </div>
+
+                    {dispute.adminRemark && (
+                      <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg mb-3">
+                        <p className="text-xs text-blue-400">处理备注: {dispute.adminRemark}</p>
+                      </div>
                     )}
-                    {accountFilter === 'PENDING' && (
-                      pendingBulkReject ? (
-                        <ConfirmInline
-                          message={`确定拒绝全部 ${selectedAccounts.size} 个账号吗？`}
-                          confirmLabel="确认拒绝"
-                          onConfirm={async () => { setPendingBulkReject(false); await handleBulkVerify(false); }}
-                          onCancel={() => setPendingBulkReject(false)}
-                        />
-                      ) : (
+
+                    {/* 操作按钮 */}
+                    {['OPEN', 'UNDER_REVIEW', 'MEDIATING'].includes(dispute.status) && (
+                      <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
                         <button
-                          onClick={() => setPendingBulkReject(true)}
-                          disabled={verifyMutation.isPending}
-                          className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50 flex items-center gap-1"
+                          onClick={() => handleResolveDispute(dispute.id, 'FULL_REFUND')}
+                          disabled={actionLoading === dispute.id}
+                          className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 disabled:opacity-50"
                         >
-                        {verifyMutation.isPending ? (
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5" />
-                        )}
-                        批量拒绝
-                      </button>
-                      )}
+                          全额退款
+                        </button>
+                        <button
+                          onClick={() => handleResolveDispute(dispute.id, 'RELEASE_TO_SELLER')}
+                          disabled={actionLoading === dispute.id}
+                          className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 disabled:opacity-50"
+                        >
+                          打款卖家
+                        </button>
+                        <button
+                          onClick={() => navigate(`/user/orders/${dispute.orderId}`)}
+                          className="px-4 py-2 bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-700"
+                        >
+                          查看订单
+                        </button>
+                      </div>
                     )}
-                    <button
-                      onClick={() => setSelectedAccounts(new Set())}
-                      className="px-3 py-1.5 text-slate-500 hover:text-white text-sm"
-                    >
-                      取消
-                    </button>
                   </div>
-                </div>
-              )}
-              {filteredAccounts.map((account) => (
-                <div key={account.id}
-                  className={`card flex items-center gap-4 p-4 transition-all group hover:scale-[1.01] active:scale-[0.99] ${selectedAccounts.has(account.id) ? 'border-primary/40 bg-primary/5' : 'hover:border-slate-700'}`}>
-                  {/* Bulk select checkbox */}
-                  <input
-                    type="checkbox"
-                    checked={selectedAccounts.has(account.id)}
-                    onChange={() => {
-                      setSelectedAccounts(prev => {
-                        const next = new Set(prev);
-                        if (next.has(account.id)) next.delete(account.id);
-                        else next.add(account.id);
-                        return next;
-                      });
-                    }}
-                    className="w-4 h-4 rounded border-dark-border bg-dark text-primary focus:ring-primary flex-shrink-0 cursor-pointer"
-                  />
-                  <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Package className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{account.title}</p>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                      {account.gameType && (
-                        <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-[10px]">{account.gameType}</span>
-                      )}
-                      <span>卖家: {account.seller?.nickname || account.seller?.username || '-'}</span>
-                      <span className="text-primary font-medium">¥{account.price}</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {account.createdAt ? new Date(account.createdAt).toLocaleDateString('zh-CN') : '-'}
-                      </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 用户管理 */}
+      {activeTab === 'users' && (
+        <div className="space-y-4">
+          <div className="card">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">用户列表</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setUserPage(p => Math.max(1, p - 1))}
+                  className="p-2 text-slate-400 hover:text-white"
+                  disabled={userPage <= 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm text-slate-500">第 {userPage} 页</span>
+                <button
+                  onClick={() => setUserPage(p => p + 1)}
+                  className="p-2 text-slate-400 hover:text-white"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-800">
+                    <th className="text-left py-3 px-4 text-slate-500">用户</th>
+                    <th className="text-left py-3 px-4 text-slate-500">角色</th>
+                    <th className="text-left py-3 px-4 text-slate-500">余额</th>
+                    <th className="text-left py-3 px-4 text-slate-500">信用分</th>
+                    <th className="text-left py-3 px-4 text-slate-500">状态</th>
+                    <th className="text-left py-3 px-4 text-slate-500">注册时间</th>
+                    <th className="text-left py-3 px-4 text-slate-500">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr key={u.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
+                            <span className="text-sm">{u.nickname?.[0] || u.username?.[0] || '?'}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{u.nickname || u.username}</p>
+                            <p className="text-xs text-slate-500">@{u.username}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        {u.role === 'ADMIN' 
+                          ? <span className="text-primary">管理员</span>
+                          : <span className="text-slate-400">用户</span>}
+                      </td>
+                      <td className="py-3 px-4 text-green-400">¥{u.balance || 0}</td>
+                      <td className="py-3 px-4">
+                        <span className={`${u.creditScore >= 80 ? 'text-green-400' : u.creditScore >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          {u.creditScore || 100}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">{getStatusBadge(u.status, 'user')}</td>
+                      <td className="py-3 px-4 text-slate-500 text-xs">{u.createdAt}</td>
+                      <td className="py-3 px-4">
+                        {u.role !== 'ADMIN' && (
+                          u.status === 'BANNED' 
+                            ? <button onClick={() => handleUnbanUser(u.id)} className="text-green-400 hover:underline text-xs">解封</button>
+                            : <button onClick={() => handleBanUser(u.id)} className="text-red-400 hover:underline text-xs">封禁</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 验证审核 */}
+      {activeTab === 'verification' && (
+        <div className="space-y-4">
+          <div className="card">
+            <h2 className="text-lg font-semibold mb-4">
+              待审核账号 ({pendingAccounts.length})
+            </h2>
+            {pendingAccounts.length === 0 ? (
+              <div className="text-center py-12">
+                <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-500" />
+                <p className="text-slate-500">暂无待审核账号</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingAccounts.map((account) => (
+                  <div key={account.id} className="p-4 bg-dark-lighter rounded-lg border border-slate-800">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium mb-2">{account.title}</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-slate-500">售价</p>
+                            <p className="text-primary font-medium">¥{account.price}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">段位</p>
+                            <p className="text-white">{account.gameRank || '-'}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">皮肤数</p>
+                            <p className="text-white">{account.skinCount || 0}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">卖家ID</p>
+                            <p className="text-white">{account.sellerId}</p>
+                          </div>
+                        </div>
+                        {account.description && (
+                          <p className="text-sm text-slate-500 mt-3 line-clamp-2">{account.description}</p>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2 ml-4">
+                        <button
+                          onClick={() => handleVerifyAccount(account.id, true)}
+                          disabled={actionLoading === account.id}
+                          className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 disabled:opacity-50 flex items-center gap-2"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          通过
+                        </button>
+                        <button
+                          onClick={() => {
+                            const reason = prompt('请输入拒绝原因：');
+                            if (reason) handleVerifyAccount(account.id, false, reason);
+                          }}
+                          disabled={actionLoading === account.id}
+                          className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 disabled:opacity-50 flex items-center gap-2"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          拒绝
+                        </button>
+                        <button
+                          onClick={() => navigate(`/accounts/${account.id}`)}
+                          className="px-4 py-2 bg-slate-700/50 text-slate-400 rounded-lg hover:bg-slate-700 flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          详情
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => navigate(`/accounts/${account.id}`)}
-                      className="p-2 text-slate-500 hover:text-white hover:bg-dark rounded-lg transition-colors" title="查看">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    {accountFilter === 'PENDING' && (
-                      <>
-                        <button onClick={() => handleVerify(account.id, true, '账号已通过审核')}
-                          disabled={verifyMutation.isPending}
-                          className="px-3 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs">
-                          <CheckCircle className="w-3.5 h-3.5" />通过
-                        </button>
-                        <button onClick={() => handleVerify(account.id, false, '账号已拒绝')}
-                          disabled={verifyMutation.isPending}
-                          className="px-3 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs">
-                          <XCircle className="w-3.5 h-3.5" />拒绝
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ===== ORDERS ===== */}
-      {activeTab === 'orders' && (
-        <div className="space-y-4 animate-fade-in">
-          {/* Stats row */}
-          {stats && (
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: '总订单', value: stats.totalOrders ?? 0, color: 'text-white' },
-                { label: '已完成', value: stats.completedOrders ?? 0, color: 'text-green-400' },
-                { label: '收入总额', value: `¥${(stats.totalRevenue ?? 0).toFixed(2)}`, color: 'text-primary' },
-              ].map(item => (
-                <div key={item.label} className="card py-4 text-center hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-primary/10 transition-all duration-200">
-                  <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
-                  <p className="text-xs text-slate-500 mt-1">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {ordersLoading ? (
-            <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div>
-          ) : ordersError ? (
-            <div className="card p-8 text-center">
-              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500/60" />
-              <p className="text-slate-400 mb-4">加载失败</p>
-              <button onClick={() => refetchOrders()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
-                <RefreshCw className="w-4 h-4" /> 重试
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Search bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type="text" value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)}
-                  placeholder="搜索订单号 / 买家 / 卖家 / 账号..."
-                  className="input w-full !pl-9 !py-2.5 text-sm"
-                />
-                {orderSearch && (
-                  <button onClick={() => setOrderSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+                ))}
               </div>
-              <div className="card overflow-hidden p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-dark-border text-left">
-                        {['订单号', '类型', '金额', '状态', '买家', '卖家', '时间'].map(h => (
-                          <th key={h} className="px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-dark-border">
-                      {filteredOrders.map((order: any) => {
-                        const statusMap: Record<string, { label: string; color: string; bg: string }> = {
-                          PENDING: { label: '待支付', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-                          PAID: { label: '已支付', color: 'text-blue-400', bg: 'bg-blue-500/20' },
-                          PROCESSING: { label: '处理中', color: 'text-purple-400', bg: 'bg-purple-500/20' },
-                          COMPLETED: { label: '已完成', color: 'text-green-400', bg: 'bg-green-500/20' },
-                          CANCELLED: { label: '已取消', color: 'text-slate-400', bg: 'bg-slate-500/20' },
-                        };
-                        const st = statusMap[order.status] || statusMap.PENDING;
-                        return (
-                          <tr key={order.id} className="hover:bg-dark-lighter/40 active:bg-dark-lighter/60 active:scale-[0.995] transition-all cursor-pointer border-l-2 border-l-transparent hover:border-l-primary"
-                            onClick={() => navigate(`/orders`)}>
-                            <td className="px-4 py-3 font-mono text-xs text-slate-400">#{order.id}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                                order.type === 'BUY' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
-                              }`}>
-                                {order.type === 'BUY' ? '买' : '租'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-primary font-medium">¥{order.amount}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs px-2 py-0.5 rounded ${st.bg} ${st.color}`}>{st.label}</span>
-                            </td>
-                            <td className="px-4 py-3 text-slate-400">{order.buyerUsername || '-'}</td>
-                            <td className="px-4 py-3 text-slate-400">{order.sellerUsername || '-'}</td>
-                            <td className="px-4 py-3 text-slate-500 text-xs">
-                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString('zh-CN') : '-'}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {(ordersData?.data?.data?.records || []).length === 0 && (
-                        <tr><td colSpan={7} className="px-4 py-12 text-center text-slate-500">暂无订单记录</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+            )}
+          </div>
+
+          {/* 验证等级说明 */}
+          <div className="card bg-slate-800/50">
+            <h2 className="text-lg font-semibold mb-4">验证等级说明</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-dark rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center text-slate-500">0</div>
+                  <span className="font-medium">未验证</span>
                 </div>
+                <p className="text-xs text-slate-500">仅有卖家声明，无任何验证</p>
               </div>
-
-              {/* Pagination */}
-              {ordersData?.data?.data && (ordersData.data.data.totalPages > 1 || ordersData.data.data.total > 0) && (
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-slate-500">
-                    共 {ordersData.data.data.total ?? 0} 条，第 {ordersData.data.data.current ?? 1} / {ordersData.data.data.pages ?? 1} 页
-                  </p>
-                  <div className="flex gap-1">
-                    <button onClick={() => setOrderPage(p => Math.max(1, p - 1))}
-                      disabled={orderPage <= 1} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">上一页</button>
-                    <button onClick={() => setOrderPage(p => p + 1)}
-                      disabled={orderPage >= (ordersData.data.data.pages ?? 1)} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">下一页</button>
-                  </div>
+              <div className="p-4 bg-dark rounded-lg border border-blue-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">1</div>
+                  <span className="font-medium text-blue-400">基础验证</span>
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* ===== USERS ===== */}
-      {activeTab === 'users' && (
-        <div className="space-y-4 animate-fade-in">
-          {/* Stats */}
-          {stats && (
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: '总用户', value: stats.totalUsers ?? 0 },
-                { label: '活跃用户', value: stats.activeUsers ?? (stats.totalUsers ?? 0) },
-                { label: '平均积分', value: stats.avgCreditScore ?? '100' },
-              ].map(item => (
-                <div key={item.label} className="card py-4 text-center">
-                  <p className="text-xl font-bold text-white">{item.value}</p>
-                  <p className="text-xs text-slate-500 mt-1">{item.label}</p>
+                <p className="text-xs text-slate-500">手机+实名认证</p>
+              </div>
+              <div className="p-4 bg-dark rounded-lg border border-green-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center text-green-400">2</div>
+                  <span className="font-medium text-green-400">高级验证</span>
                 </div>
-              ))}
+                <p className="text-xs text-slate-500">人工抽检截图</p>
+              </div>
+              <div className="p-4 bg-dark rounded-lg border border-yellow-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center text-yellow-400">3</div>
+                  <span className="font-medium text-yellow-400">深度验证</span>
+                </div>
+                <p className="text-xs text-slate-500">平台托管登录验证</p>
+              </div>
             </div>
-          )}
-
-          {usersLoading ? (
-            <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div>
-          ) : usersError ? (
-            <div className="card p-8 text-center">
-              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500/60" />
-              <p className="text-slate-400 mb-4">加载失败</p>
-              <button onClick={() => refetchUsers()} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2 mx-auto">
-                <RefreshCw className="w-4 h-4" /> 重试
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Search bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type="text" value={userSearch} onChange={(e) => setUserSearch(e.target.value)}
-                  placeholder="搜索用户名 / 邮箱 / 昵称..."
-                  className="input w-full !pl-9 !py-2.5 text-sm"
-                />
-                {userSearch && (
-                  <button onClick={() => setUserSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              <div className="card overflow-hidden p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-dark-border text-left">
-                        {['ID', '用户名', '昵称', '角色', '状态', '积分', '注册时间', '操作'].map(h => (
-                          <th key={h} className="px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-dark-border">
-                      {filteredUsers.map((user: any) => {
-                        const roleMap: Record<string, { label: string; color: string; bg: string }> = {
-                          ADMIN: { label: '管理员', color: 'text-red-400', bg: 'bg-red-500/20' },
-                          SELLER: { label: '卖家', color: 'text-blue-400', bg: 'bg-blue-500/20' },
-                          BUYER: { label: '买家', color: 'text-slate-400', bg: 'bg-slate-500/20' },
-                        };
-                        const statusMap: Record<string, { label: string; color: string; bg: string }> = {
-                          ACTIVE: { label: '正常', color: 'text-green-400', bg: 'bg-green-500/20' },
-                          BANNED: { label: '已封禁', color: 'text-red-400', bg: 'bg-red-500/20' },
-                          INACTIVE: { label: '未激活', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-                        };
-                        const roleBadge = roleMap[user.role] || { label: user.role as string, color: 'text-slate-400', bg: 'bg-slate-500/20' };
-                        const statusBadge = statusMap[user.status] || { label: (user.status as string) || '正常', color: 'text-slate-400', bg: 'bg-slate-500/20' };
-                        return (
-                          <tr key={user.id} className="hover:bg-dark-lighter/40 active:bg-dark-lighter/60 active:scale-[0.995] transition-all border-l-2 border-l-transparent hover:border-l-primary">
-                            <td className="px-4 py-3 font-mono text-xs text-slate-400">#{user.id}</td>
-                            <td className="px-4 py-3 font-medium">{user.username}</td>
-                            <td className="px-4 py-3 text-slate-400">{user.nickname || '-'}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs px-2 py-0.5 rounded ${roleBadge.bg} ${roleBadge.color}`}>{roleBadge.label}</span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs px-2 py-0.5 rounded ${statusBadge.bg} ${statusBadge.color}`}>{statusBadge.label}</span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <span className={`font-medium ${(user.creditScore ?? 100) >= 80 ? 'text-green-400' : (user.creditScore ?? 100) >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                  {user.creditScore ?? 100}
-                                </span>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                  (user.creditScore ?? 100) >= 90 ? 'bg-green-500/20 text-green-400' :
-                                  (user.creditScore ?? 100) >= 80 ? 'bg-emerald-500/20 text-emerald-400' :
-                                  (user.creditScore ?? 100) >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                                  'bg-red-500/20 text-red-400'
-                                }`}>
-                                  {(user.creditScore ?? 100) >= 90 ? '优秀' :
-                                   (user.creditScore ?? 100) >= 80 ? '良好' :
-                                   (user.creditScore ?? 100) >= 60 ? '一般' : '欠佳'}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-slate-500 text-xs">
-                              {user.createdAt ? new Date(user.createdAt).toLocaleDateString('zh-CN') : '-'}
-                            </td>
-                            <td className="px-4 py-3">
-                              {user.role !== 'ADMIN' && (
-                                <div className="flex gap-1">
-                                  <button onClick={() => navigate(`/profile?userId=${user.id}`)}
-                                    className="p-1.5 text-slate-500 hover:text-white hover:bg-dark rounded transition-colors" title="查看">
-                                    <Eye className="w-3.5 h-3.5" />
-                                  </button>
-                                  {user.status === 'BANNED' ? (
-                                    <button onClick={() => setPendingUserBan({ id: user.id, banned: false, username: user.username })}
-                                      disabled={banMutation.isPending}
-                                      className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs hover:bg-green-500/30 disabled:opacity-50 transition-colors flex items-center gap-1">
-                                      {banMutation.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
-                                      {banMutation.isPending ? '解封中' : '解封'}
-                                    </button>
-                                  ) : (
-                                    <button onClick={() => setPendingUserBan({ id: user.id, banned: true, username: user.username })}
-                                      disabled={banMutation.isPending}
-                                      className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30 disabled:opacity-50 transition-colors flex items-center gap-1">
-                                      {banMutation.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
-                                      {banMutation.isPending ? '封禁中' : '封禁'}
-                                    </button>
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {filteredUsers.length === 0 && (
-                        <tr>
-                          <td colSpan={8} className="px-4 py-12 text-center">
-                            <div className="flex flex-col items-center gap-2">
-                              <Users className="w-10 h-10 text-slate-600" />
-                              <p className="text-slate-500">暂无用户记录</p>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Pagination */}
-              {usersData?.data?.data && (usersData.data.data.totalPages > 1 || usersData.data.data.total > 0) && (
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-slate-500">
-                    共 {usersData.data.data.total ?? 0} 条，第 {usersData.data.data.current ?? 1} / {usersData.data.data.pages ?? 1} 页
-                  </p>
-                  <div className="flex gap-1">
-                    <button onClick={() => setUserPage(p => Math.max(1, p - 1))}
-                      disabled={userPage <= 1} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">上一页</button>
-                    <button onClick={() => setUserPage(p => p + 1)}
-                      disabled={userPage >= (usersData.data.data.pages ?? 1)} className="btn-ghost !px-3 !py-1.5 text-xs disabled:opacity-30">下一页</button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+          </div>
         </div>
       )}
     </div>

@@ -15,6 +15,7 @@ public class ChatMessage {
     private String content;
     private String type;
     private Boolean isRead;
+    private Boolean isRecalled;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -37,8 +40,14 @@ public class OrderController {
     
     @GetMapping("/{id}")
     @Operation(summary = "获取订单详情")
-    public Result<Order> getOrderDetail(@PathVariable Long id) {
-        return Result.success(orderService.getOrderDetail(id));
+    public Result<Map<String, Object>> getOrderDetail(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        Order order = orderService.getOrderDetail(id, user);
+        // 附加托管状态描述
+        Map<String, Object> result = new HashMap<>();
+        result.put("order", order);
+        result.put("escrowStatusText", orderService.getEscrowStatusText(order.getEscrowStatus()));
+        result.put("escrowFreezeHours", 24);  // 冻结期24小时
+        return Result.success(result);
     }
     
     @PutMapping("/{id}/pay")
@@ -47,7 +56,20 @@ public class OrderController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         orderService.payOrder(id, user);
-        return Result.success("支付成功", (Void) null);
+        return Result.success("支付成功，资金已进入托管", null);
+    }
+    
+    /**
+     * 买家确认收货
+     * 确认后资金仍处于托管状态，直到冻结期结束
+     */
+    @PutMapping("/{id}/confirm")
+    @Operation(summary = "确认收货")
+    public Result<Void> confirmReceived(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+        orderService.confirmReceived(id, user);
+        return Result.success("已确认收货，冻结期结束后自动打款给卖家", null);
     }
     
     @PutMapping("/{id}/complete")
@@ -56,7 +78,7 @@ public class OrderController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         orderService.completeOrder(id, user);
-        return Result.success("订单已完成", (Void) null);
+        return Result.success("订单已完成", null);
     }
     
     @PutMapping("/{id}/cancel")
@@ -65,6 +87,6 @@ public class OrderController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         orderService.cancelOrder(id, user);
-        return Result.success("订单已取消", (Void) null);
+        return Result.success("订单已取消", null);
     }
 }
