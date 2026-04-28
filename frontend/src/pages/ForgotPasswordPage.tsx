@@ -29,7 +29,6 @@ const ForgotPasswordPage: React.FC = () => {
       // Backend may not implement this endpoint yet; show success anyway for UX
       showToast('密码重置功能正在开发中，请联系客服', 'info');
       setStep('success');
-    }
     } finally {
       setLoading(false);
     }
