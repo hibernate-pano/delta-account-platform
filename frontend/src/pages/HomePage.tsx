@@ -1,59 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { accountApi, analyticsApi, marketApi } from '../api';
-import type { Account, MarketConfig } from '../types';
+import { accountApi } from '../api';
+import { Account } from '../types';
 import { Search, Shield, Clock, TrendingUp, ArrowRight, Gamepad2, Users, Lock } from 'lucide-react';
-import { usePageTitle } from '../hooks/usePageTitle';
-import { useToast } from '../components/ui/Toast';
 
 const HomePage: React.FC = () => {
-  usePageTitle();
-  const { toast } = useToast();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
-  const [totalAccounts, setTotalAccounts] = useState(0);
-  const [marketConfig, setMarketConfig] = useState<MarketConfig | null>(null);
 
   useEffect(() => {
-    const fetchHomeData = async () => {
+    const fetchAccounts = async () => {
       try {
-        const [accountsRes, marketRes] = await Promise.all([
-          accountApi.getList({ size: 6 }),
-          marketApi.getConfig()
-        ]);
-        setAccounts(accountsRes.data.data.records || []);
-        setTotalAccounts(accountsRes.data.data.total || 0);
-        setMarketConfig(marketRes.data.data);
-        void analyticsApi.trackEvent({
-          eventName: 'home_page_view',
-          page: 'home',
-          metadata: { launchMode: marketRes.data.data?.launchMode || 'UNKNOWN' }
-        });
-      } catch (error: unknown) {
-        const message = typeof error === 'object' && error !== null && 'response' in error
-          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
-          : null;
-        toast('error', message || '加载失败，请稍后重试');
+        const res = await accountApi.getList({ size: 6 });
+        setAccounts(res.data.data.records || []);
+      } catch (error) {
+        console.error('Failed to fetch accounts:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchHomeData();
-  }, [toast]);
-
-  const trackClick = (eventName: string, metadata?: Record<string, unknown>) => {
-    void analyticsApi.trackEvent({
-      eventName,
-      page: 'home',
-      metadata
-    });
-  };
+    fetchAccounts();
+  }, []);
 
   const features = [
     {
       icon: Shield,
       title: '安全交易',
-      desc: marketConfig?.guaranteeHighlights?.[0] || '账号信息全程加密，官方担保交易',
+      desc: '账号信息全程加密，官方担保交易',
       color: 'from-emerald-500 to-teal-500'
     },
     {
@@ -65,7 +38,7 @@ const HomePage: React.FC = () => {
     {
       icon: TrendingUp,
       title: '信誉保障',
-      desc: marketConfig?.guaranteeHighlights?.[1] || '完善评价体系，透明交易记录',
+      desc: '完善评价体系，透明交易记录',
       color: 'from-purple-500 to-pink-500'
     },
     {
@@ -113,32 +86,12 @@ const HomePage: React.FC = () => {
             买卖租赁 · 官方担保 · 快速交付
           </p>
 
-          {marketConfig && (
-            <div className="max-w-3xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-700">
-                <span className="text-xs text-slate-400">平台规则</span>
-                <span className="text-sm text-white">
-                  佣金 {(marketConfig.commissionRate * 100).toFixed(1)}%
-                </span>
-                <span className="text-xs text-slate-500">{marketConfig.commissionDescription}</span>
-              </div>
-            </div>
-          )}
-
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{animationDelay: '0.4s'}}>
-            <Link
-              to="/accounts"
-              className="btn-primary text-lg px-10 py-4"
-              onClick={() => trackClick('home_click_browse_accounts')}
-            >
+            <Link to="/accounts" className="btn-primary text-lg px-10 py-4">
               <Search className="w-5 h-5 inline-block mr-2" />
               浏览账号
             </Link>
-            <Link
-              to="/register"
-              className="btn-secondary text-lg px-10 py-4"
-              onClick={() => trackClick('home_click_register')}
-            >
+            <Link to="/register" className="btn-secondary text-lg px-10 py-4">
               立即注册
               <ArrowRight className="w-5 h-5 inline-block ml-2" />
             </Link>
@@ -147,16 +100,16 @@ const HomePage: React.FC = () => {
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-8 mt-16 animate-fade-in" style={{animationDelay: '0.6s'}}>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{totalAccounts}</div>
-              <div className="text-slate-500 text-sm">在售账号</div>
+              <div className="text-3xl font-bold text-white">10,000+</div>
+              <div className="text-slate-500 text-sm">注册用户</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">24/7</div>
-              <div className="text-slate-500 text-sm">全天在线</div>
+              <div className="text-3xl font-bold text-white">5,000+</div>
+              <div className="text-slate-500 text-sm">交易账号</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">100%</div>
-              <div className="text-slate-500 text-sm">官方担保</div>
+              <div className="text-3xl font-bold text-white">99.5%</div>
+              <div className="text-slate-500 text-sm">满意度</div>
             </div>
           </div>
         </div>
@@ -270,21 +223,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Guarantee Highlights */}
-      {marketConfig?.guaranteeHighlights?.length ? (
-        <section className="py-16 border-t border-slate-800">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {marketConfig.guaranteeHighlights.slice(0, 4).map((item, idx) => (
-                <div key={idx} className="rounded-xl border border-slate-800 bg-dark-darker px-4 py-3 text-sm text-slate-300">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
       {/* CTA */}
       <section className="py-24 bg-dark-darker">
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -295,21 +233,29 @@ const HomePage: React.FC = () => {
             <div className="relative z-10">
               <h2 className="text-3xl font-bold mb-4">拥有账号想要出售？</h2>
               <p className="text-slate-400 mb-8 text-lg">快速发布，即刻变现，安全收款</p>
-              <Link
-                to="/sell"
-                className="btn-primary inline-flex items-center gap-2 text-lg px-12 py-4"
-                onClick={() => trackClick('home_click_sell_cta')}
-              >
-                <ArrowRight className="w-4 h-4" />
-                发布账号
+              <Link to="/sell" className="btn-primary inline-flex items-center gap-2 text-lg px-12 py-4">
+                <ArrowRight className="w-5 h-5" />
+                立即发布
               </Link>
-              <p className="text-slate-500 mt-4 text-sm">
-                当前模式：{marketConfig?.launchMode === 'GUARANTEED_ONLY' ? '仅担保交易' : '全量交易模式'}
-              </p>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-slate-800">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-500 rounded-lg flex items-center justify-center">
+                <Gamepad2 className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold text-lg">DeltaHub</span>
+            </div>
+            <p className="text-slate-500 text-sm">© 2026 DeltaHub. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

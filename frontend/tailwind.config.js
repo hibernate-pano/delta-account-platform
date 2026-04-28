@@ -7,22 +7,35 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#6366f1',
-          dark: '#4f46e5',
-          light: '#818cf8',
+        neon: {
+          pink: '#FF10F0',
+          cyan: '#00D9FF',
+          purple: '#BD00FF',
+          yellow: '#FFE600',
+          green: '#00FF88',
+          orange: '#FF6B35',
         },
-        secondary: '#f472b6',
-        dark: {
-          DEFAULT: '#0f172a',
-          card: '#1e293b',
-          lighter: '#334155',
-          darker: '#020617',
-        }
+        bg: {
+          dark: '#0D0221',
+          surface: '#1A0A2E',
+          lighter: '#2D1B4E',
+          darker: '#060113',
+        },
+        text: {
+          primary: '#FFFFFF',
+          secondary: '#B8A5D0',
+          muted: '#6B5B7A',
+        },
+        primary: {
+          DEFAULT: '#FF10F0',
+          dark: '#BD00FF',
+          light: '#FF6BF0',
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
-      }
+        display: ['Orbitron', 'Rajdhani', 'sans-serif'],
+        sans: ['Rajdhani', 'Noto Sans SC', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [],
