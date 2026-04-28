@@ -119,12 +119,6 @@ membership:
       priority-support: true
       free-withdrawal: true
 
-server:
-  port: 8080
-  servlet:
-    static-path-pattern: /uploads/**
-
-# 文件上传配置
 upload:
   path: ${UPLOAD_PATH:./uploads}
   base-url: ${UPLOAD_BASE_URL:http://localhost:8080/uploads}
